@@ -1101,7 +1101,12 @@ class OUGC_Pages
 
 		while($category = $db->fetch_array($query))
 		{
-			$select .= '<option value="'.$category['cid'].'"'.(in_array($category['cid'], $selected) ? ' selected="selected"' : '').'>'.htmlspecialchars_uni($category['name']).'</option>';
+			$s = '';
+			if(in_array($category['cid'], $selected))
+			{
+				$s = ' selected="selected"';
+			}
+			$select .= '<option value="'.$category['cid'].'"'.$s.'>'.htmlspecialchars_uni($category['name']).'</option>';
 		}
 		
 		$select .= '</select>';
