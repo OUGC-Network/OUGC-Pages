@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MyBB PluginLibrary XML-Export :: 2014-08-10T09:01:22+00:00 -->
+<!-- MyBB PluginLibrary XML-Export :: 2014-08-10T21:55:34+00:00 -->
 <array>
   <element>
     <key>name</key>
@@ -7,7 +7,7 @@
   </element>
   <element>
     <key>description</key>
-    <value>Banned List</value>
+    <value>Lists all banned accounts.</value>
   </element>
   <element>
     <key>url</key>
@@ -15,7 +15,7 @@
   </element>
   <element>
     <key>groups</key>
-    <value>3,4,6</value>
+    <value>-1</value>
   </element>
   <element>
     <key>php</key>
@@ -31,7 +31,7 @@
   </element>
   <element>
     <key>wrapper</key>
-    <value>1</value>
+    <value>0</value>
   </element>
   <element>
     <key>init</key>

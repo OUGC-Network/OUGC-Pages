@@ -765,15 +765,6 @@ class OUGC_Pages
 		isset($lang->setting_group_ougc_pages) or $lang->load((defined('IN_ADMINCP') ? 'config_' : '').'ougc_pages');
 	}
 
-	// $PL->is_member(); helper
-	function is_member($gids, $user=false)
-	{
-		global $PL;
-		$PL or require_once PLUGINLIBRARY;
-
-		return (bool)$PL->is_member((string)$gids, $user);
-	}
-
 	// Clean input
 	function clean_ints($val, $implode=false)
 	{
@@ -1360,6 +1351,19 @@ class OUGC_Pages
 
 		return $url;
 	}
+
+	// Create the user session
+	function init_session()
+	{
+		global $session;
+
+		if(!isset($session))
+		{
+			require_once MYBB_ROOT.'inc/class_session.php';
+			$session = new session;
+			$session->init();
+		}
+	}
 }
 
 $GLOBALS['ougc_pages'] = new OUGC_Pages;
@@ -1391,19 +1395,26 @@ function ougc_pages_init()
 
 	$is_page = $mybb->get_input('page') && !empty($mybb->cache->cache['ougc_pages']['pages'][$mybb->get_input('page')]);
 
-	if($mybb->get_input('page') && !empty($mybb->cache->cache['ougc_pages']['pages'][$mybb->get_input('page')]))
+	if($mybb->get_input('page'))
 	{
-		if($pages = $ougc_pages->get_page_by_url($mybb->get_input('page')))
+		if(!empty($mybb->cache->cache['ougc_pages']['pages'][$mybb->get_input('page')]))
 		{
-			$templatelist .= ', ougcpages_page'.$pages['pid'];
-
-			if($category = $ougc_pages->get_category($pages['cid']))
+			if($pages = $ougc_pages->get_page_by_url($mybb->get_input('page')))
 			{
-				#$templatelist .= ', ougcpages_category'.$category['cid'];
+				$templatelist .= ', ougcpages_page'.$pages['pid'];
+
+				if($category = $ougc_pages->get_category($pages['cid']))
+				{
+					#$templatelist .= ', ougcpages_category'.$category['cid'];
+				}
+				else
+				{
+					$ougc_pages->invalid_category = true;
+				}
 			}
 			else
 			{
-				$ougc_pages->invalid_category = true;
+				$ougc_pages->invalid_page = true;
 			}
 		}
 		else
@@ -1432,12 +1443,9 @@ function ougc_pages_init()
 		}
 		elseif($category['groups'] != -1)
 		{
-			// Create the session
-			require_once MYBB_ROOT.'inc/class_session.php';
-			$session = new session;
-			$session->init();
+			$ougc_pages->init_session();
 
-			$ougc_pages->is_member($category['groups']) or $ougc_pages->no_permission = true;
+			is_member($category['groups']) or $ougc_pages->no_permission = true;
 		}
 	}
 
@@ -1457,15 +1465,9 @@ function ougc_pages_init()
 			}
 			elseif($pages['groups'] != -1)
 			{
-				// Create the session
-				if(!isset($session))
-				{
-					require_once MYBB_ROOT.'inc/class_session.php';
-					$session = new session;
-					$session->init();
-				}
+				$ougc_pages->init_session();
 
-				$ougc_pages->is_member($pages['groups']) or $ougc_pages->no_permission = true;
+				is_member($pages['groups']) or $ougc_pages->no_permission = true;
 			}
 		}
 

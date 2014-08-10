@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MyBB PluginLibrary XML-Export :: 2014-08-10T21:54:52+00:00 -->
+<array>
+  <element>
+    <key>name</key>
+    <value>Signature</value>
+  </element>
+  <element>
+    <key>description</key>
+    <value>Forum stats signature.</value>
+  </element>
+  <element>
+    <key>url</key>
+    <value></value>
+  </element>
+  <element>
+    <key>groups</key>
+    <value>-1</value>
+  </element>
+  <element>
+    <key>php</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>wol</key>
+    <value>0</value>
+  </element>
+  <element>
+    <key>visible</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>wrapper</key>
+    <value>0</value>
+  </element>
+  <element>
+    <key>init</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>template</key>
+    <value><![CDATA[<?php
+
+$sign_settings = array(
+	'title'	=> 'Members: {1} | Threads: {2} | Posts: {3}',
+	'image'	=> 'stats.png',
+	'bburl'	=> $mybb->settings['bburl'],
+);
+
+if(!file_exists(MYBB_ROOT.'cache/'.$sign_settings['image']))
+{
+	return;
+}
+
+$permissions = $mybb->usergroup = usergroup_permissions(1);
+
+$where = array('active!=\'0\'');
+if($unviewable = get_unviewable_forums(true))
+{
+	$where[] = 'fid NOT IN ('.$unviewable.')';
+}
+if($inactive = get_inactive_forums())
+{
+	$where[] = 'fid NOT IN ('.$inactive.')';
+}
+
+$query = $db->simple_select('forums', 'SUM(threads) AS threads, SUM(posts) as posts', implode(' AND ', $where));
+$stats = $db->fetch_array($query);
+
+$query = $db->simple_select('users', 'COUNT(uid) AS users', 'usergroup NOT IN (\'1\',\'5\')');
+$stats['users'] = $db->fetch_field($query, 'users');
+
+foreach($stats as $k => &$v)
+{
+	$v = my_number_format((int)$v);
+}
+unset($k, $v);
+
+// This is the title
+$title = $lang->sprintf($sign_settings['title'], $stats['users'], $stats['threads'], $stats['posts']);
+if(my_strlen($title) > 40)
+{
+	$title = my_substr($title, 0, 40-1).'..';
+}
+
+if(!$title)
+{
+	return;
+}
+
+//_dump($title);
+
+header('Content-type: image/png');
+header('Content-disposition: inline; filename="'.$mybb->settings['bbname'].'.png"');
+
+$image = imageCreateFromPNG(MYBB_ROOT.'cache/'.$sign_settings['image']);
+imagestring($image, 2, 180, 10, $title, ImageColorAllocate($image, 0, 0, 0));
+
+if($sign_settings['bburl'])
+{
+	imagestring($image, 1, 300, 28, $sign_settings['bburl'], ImageColorAllocate($image, 255, 255, 255));
+}
+
+imagepng($image);
+imagedestroy($image);]]></value>
+  </element>
+  <element>
+    <key>versioncode</key>
+    <value>0100</value>
+  </element>
+</array>
+<!-- End of file. -->
