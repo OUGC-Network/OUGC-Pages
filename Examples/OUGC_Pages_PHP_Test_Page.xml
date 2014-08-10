@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MyBB PluginLibrary XML-Export :: 2014-08-10T22:28:35+00:00 -->
+<array>
+  <element>
+    <key>name</key>
+    <value>PHP Test Page</value>
+  </element>
+  <element>
+    <key>description</key>
+    <value>Shows how to use the MyBB parser within a page.</value>
+  </element>
+  <element>
+    <key>url</key>
+    <value>parser-test-page</value>
+  </element>
+  <element>
+    <key>groups</key>
+    <value>-1</value>
+  </element>
+  <element>
+    <key>php</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>wol</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>visible</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>wrapper</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>init</key>
+    <value>0</value>
+  </element>
+  <element>
+    <key>template</key>
+    <value><![CDATA[<?php
+
+$parser_options = array(
+	'allow_html'		=> 1,
+	'allow_mycode'		=> 1,
+	'allow_smilies'		=> 1,
+	'allow_imgcode'		=> 1,
+	'allow_videocode'	=> 1,
+	'filter_badwords'	=> 1
+);
+
+$message = 'For those who don\'t know.
+
+[quote=\'WikiPedia\']<b>MyBB</b>, [i]originally[/i] <b>MyBulletinBoard</b>, is a [url=http://en.wikipedia.org/wiki/Free_and_open-source_software]free and open source[/url] [url=http://en.wikipedia.org/wiki/Forum_software]forum software[/url] which is developed by the MyBB Group. It is written in <a href="http://en.wikipedia.org/wiki/PHP">PHP</a>, supports [url=http://en.wikipedia.org/wiki/MySQL]MySQL[/url], [url=http://en.wikipedia.org/wiki/PostgreSQL]PostgreSQL[/url] and [url=http://en.wikipedia.org/wiki/SQLite]SQLite[/url] as [url=http://en.wikipedia.org/wiki/Database]database[/url] systems and has database [url=http://en.wikipedia.org/wiki/Failover]failover[/url] support. It is licensed under the [url=http://en.wikipedia.org/wiki/LGPL]LGPL[/url].[/quote]
+
+:)';
+
+$templates->cache['ougcpages_parser_test_page'] or $templates->cache['ougcpages_parser_test_page'] = '<html>
+<head>
+<title>{$mybb->settings[\'bbname\']} - {$pages[\'name\']}</title>
+{$headerinclude}
+</head>
+<body>
+	{$header}
+	{$content}
+	{$footer}
+</body>
+</html>';
+
+if(!is_object($parser))
+{
+	require_once MYBB_ROOT.'inc/class_parser.php';
+	$parser = new postParser;
+}
+
+if($mybb->user['showimages'] != 1 && $mybb->user['uid'] != 0 || $mybb->settings['guestimages'] != 1 && $mybb->user['uid'] == 0)
+{
+	$parser_options['allow_imgcode'] = 0;
+}
+
+if($mybb->user['showvideos'] != 1 && $mybb->user['uid'] != 0 || $mybb->settings['guestvideos'] != 1 && $mybb->user['uid'] == 0)
+{
+	$parser_options['allow_videocode'] = 0;
+}
+
+$message = $parser->parse_message($message, $parser_options);
+
+// Set-up page
+$bu_tmpl = $pages['template'];
+$pages['template'] = $message;
+$content = ougc_pages_show(true);
+$pages['template'] = $bu_tmpl;
+
+eval('$page = "'.$templates->get('ougcpages_parser_test_page').'";');
+output_page($page);
+
+exit;]]></value>
+  </element>
+  <element>
+    <key>versioncode</key>
+    <value>0100</value>
+  </element>
+</array>
+<!-- End of file. -->

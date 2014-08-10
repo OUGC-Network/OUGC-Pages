@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MyBB PluginLibrary XML-Export :: 2014-08-10T22:28:37+00:00 -->
+<array>
+  <element>
+    <key>name</key>
+    <value>Template Test Page</value>
+  </element>
+  <element>
+    <key>description</key>
+    <value>Shows how to create a simple HTML page.</value>
+  </element>
+  <element>
+    <key>url</key>
+    <value>tempalte-test-page</value>
+  </element>
+  <element>
+    <key>groups</key>
+    <value>-1</value>
+  </element>
+  <element>
+    <key>php</key>
+    <value>0</value>
+  </element>
+  <element>
+    <key>wol</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>visible</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>wrapper</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>init</key>
+    <value>0</value>
+  </element>
+  <element>
+    <key>template</key>
+    <value><![CDATA[For those who don't know.<br />
+<br />
+<blockquote><cite>WikiPedia Wrote:</cite><b>MyBB</b>, <span style="font-style: italic;">originally</span> <b>MyBulletinBoard</b>, is a <a href="http://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">free and open source</a> <a href="http://en.wikipedia.org/wiki/Forum_software" target="_blank">forum software</a> which is developed by the MyBB Group. It is written in <a href="http://en.wikipedia.org/wiki/PHP">PHP</a>, supports <a href="http://en.wikipedia.org/wiki/MySQL" target="_blank">MySQL</a>, <a href="http://en.wikipedia.org/wiki/PostgreSQL" target="_blank">PostgreSQL</a> and <a href="http://en.wikipedia.org/wiki/SQLite" target="_blank">SQLite</a> as <a href="http://en.wikipedia.org/wiki/Database" target="_blank">database</a> systems and has database <a href="http://en.wikipedia.org/wiki/Failover" target="_blank">failover</a> support. It is licensed under the <a href="http://en.wikipedia.org/wiki/LGPL" target="_blank">LGPL</a>.</blockquote>
+<br />
+<img src="http://localhost/mybb18/images/smilies/smile.png" alt="Smile" title="Smile" class="smilie smilie_1" />]]></value>
+  </element>
+  <element>
+    <key>versioncode</key>
+    <value>0100</value>
+  </element>
+</array>
+<!-- End of file. -->
