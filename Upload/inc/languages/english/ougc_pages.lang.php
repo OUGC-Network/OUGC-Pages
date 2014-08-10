@@ -43,4 +43,4 @@ $l['ougc_pages_navigation_previous'] = 'Previous';
 $l['ougc_pages_navigation_next'] = 'Next';
 
 // WOL
-$l['ougc_pages_wol'] = 'Viewing the <a href="{1}/{2}">{3}</a> page.';
+$l['ougc_pages_wol'] = 'Viewing the <a href="{1}">{2}</a> page.';

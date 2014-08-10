@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MyBB PluginLibrary XML-Export :: 2014-08-10T09:01:22+00:00 -->
+<array>
+  <element>
+    <key>name</key>
+    <value>Banned List</value>
+  </element>
+  <element>
+    <key>description</key>
+    <value>Banned List</value>
+  </element>
+  <element>
+    <key>url</key>
+    <value>banned-list</value>
+  </element>
+  <element>
+    <key>groups</key>
+    <value>3,4,6</value>
+  </element>
+  <element>
+    <key>php</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>wol</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>visible</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>wrapper</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>init</key>
+    <value>0</value>
+  </element>
+  <element>
+    <key>template</key>
+    <value><![CDATA[<?php
+
+$mybb->user['uid'] or error_no_permission();
+
+$lang->load('modcp');
+
+require_once MYBB_ROOT.'inc/class_parser.php';
+$parser = new postParser;
+
+$templates->cache('ougcpages_banned_ban, ougcpages_banned_nobanned, ougcpages_banned');
+
+$templates->cache['ougcpages_banned_ban'] or $templates->cache['ougcpages_banned_ban'] = '<tr>
+<td class="{$trow}">{$profile_link}</td>
+<td class="{$trow}">{$banned[\'reason\']}</td>
+<td class="{$trow}" align="center">{$banlength}<br /><span class="smalltext">{$timeremaining}</span></td>
+<td class="{$trow}" align="center">{$admin_profile}</td>
+</tr>';
+$templates->cache['ougcpages_banned_nobanned'] or $templates->cache['ougcpages_banned_nobanned'] = '<tr>
+	<td class="trow1" align="center" colspan="4">{$lang->no_banned}</td>
+</tr>';
+$templates->cache['ougcpages_banned'] or $templates->cache['ougcpages_banned'] = '<html>
+<head>
+<title>{$mybb->settings[\'bbname\']} - {$pages[\'name\']}</title>
+{$headerinclude}
+</head>
+<body>
+	{$header}
+	<table width="100%" border="0" align="center">
+		<tr>
+			{$modcp_nav}
+			<td valign="top">
+				<table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
+					<tr>
+						<td class="thead" colspan="4">
+						<strong>{$lang->ban_banned}</strong></td>
+					</tr>
+					<tr>
+						<td class="tcat" width="25%"><span class="smalltext"><strong>{$lang->username}</strong></span></td>
+						<td class="tcat" align="center" width="30%"><span class="smalltext"><strong>{$lang->reason}</strong></span></td>
+						<td class="tcat" align="center" width="25%"><span class="smalltext"><strong>{$lang->ban_length}</strong></span></td>
+						<td class="tcat" align="center" width="20%"><span class="smalltext"><strong>{$lang->ban_bannedby}</strong></span></td>
+					</tr>
+					{$bannedusers}
+				</table>
+				{$multipage}
+			</td>
+		</tr>
+	</table>
+	{$footer}
+</body>
+</html>';
+
+// Set up the array of ban times.
+$bantimes = fetch_ban_times();
+
+$category['name'] = htmlspecialchars_uni($category['name']);
+
+if($category['breadcrumb'])
+{
+	add_breadcrumb($category['name'], $ougc_pages->get_category_link($category['cid']));
+}
+
+$pages['name'] = htmlspecialchars_uni($pages['name']);
+
+add_breadcrumb($pages['name'], $ougc_pages->get_page_link($pages['pid']));
+
+if($mybb->settings['threadsperpage'] < 1)
+{
+	$mybb->settings['threadsperpage'] = 20;
+}
+
+// Figure out if we need to display multiple pages.
+$perpage = (int)$mybb->settings['threadsperpage'];
+$page = $mybb->get_input('pagination', 1);
+
+$query = $db->simple_select('banned', 'COUNT(uid) AS count');
+$banned_count = $db->fetch_field($query, 'count');
+
+$postcount = (int)$banned_count;
+$_pages = $postcount / $perpage;
+$_pages = ceil($_pages);
+
+if($page > $_pages || $page <= 0)
+{
+	$page = 1;
+}
+
+if($page)
+{
+	$start = ($page-1) * $perpage;
+}
+else
+{
+	$start = 0;
+	$page = 1;
+}
+$upper = $start+$perpage;
+
+$multipage = multipage($postcount, $perpage, $page, '?PLACE_HOLDER');
+$multipage = str_replace(array('page=', '?PLACE_HOLDER'), array('pagination=', $ougc_pages->get_page_link($pages['pid'])), $multipage);
+
+switch($mybb->get_input('sort'))
+{
+	case 'username':
+		$sort = 'u.username';
+		break;
+	case 'bannedby':
+		$sort = 'a.username';
+		break;
+	case 'bantime':
+		$sort = 'b.bantime';
+		break;
+	default:
+		$sort = 'dateline';
+		break;
+}
+
+switch($mybb->get_input('order'))
+{
+	case 'asc':
+		$order = 'ASC';
+		break;
+	default:
+		$order = 'DESC';
+		break;
+}
+
+$query = $db->query("
+	SELECT b.*, a.username AS adminuser, u.username
+	FROM ".TABLE_PREFIX."banned b
+	LEFT JOIN ".TABLE_PREFIX."users u ON (b.uid=u.uid)
+	LEFT JOIN ".TABLE_PREFIX."users a ON (b.admin=a.uid)
+	ORDER BY {$sort} {$order}
+	LIMIT {$start}, {$perpage}
+");
+
+// Get the banned users
+$bannedusers = '';
+while($banned = $db->fetch_array($query))
+{
+	$profile_link = build_profile_link($banned['username'], $banned['uid']);
+
+	$admin_profile = build_profile_link($banned['adminuser'], $banned['admin']);
+
+	$trow = alt_trow();
+
+	if($banned['reason'])
+	{
+		$banned['reason'] = htmlspecialchars_uni($parser->parse_badwords($banned['reason']));
+		$banned['reason'] = my_wordwrap($banned['reason']);
+	}
+	else
+	{
+		$banned['reason'] = $lang->na;
+	}
+
+	if($banned['lifted'] == 'perm' || $banned['lifted'] == '' || $banned['bantime'] == 'perm' || $banned['bantime'] == '---')
+	{
+		$banlength = $lang->permanent;
+		$timeremaining = $lang->na;
+	}
+	else
+	{
+		$banlength = $bantimes[$banned['bantime']];
+		$remaining = $banned['lifted']-TIME_NOW;
+
+		$timeremaining = nice_time($remaining, array('short' => 1, 'seconds' => false))."";
+
+		if($remaining < 3600)
+		{
+			$timeremaining = "<span style=\"color: red;\">({$timeremaining} {$lang->ban_remaining})</span>";
+		}
+		else if($remaining < 86400)
+		{
+			$timeremaining = "<span style=\"color: maroon;\">({$timeremaining} {$lang->ban_remaining})</span>";
+		}
+		else if($remaining < 604800)
+		{
+			$timeremaining = "<span style=\"color: green;\">({$timeremaining} {$lang->ban_remaining})</span>";
+		}
+		else
+		{
+			$timeremaining = "({$timeremaining} {$lang->ban_remaining})";
+		}
+	}
+
+	eval('$bannedusers .= "'.$templates->get('ougcpages_banned_ban').'";');
+}
+
+if(!$bannedusers)
+{
+	eval('$bannedusers = "'.$templates->get('ougcpages_banned_nobanned').'";');
+}
+
+eval('$page = "'.$templates->get('ougcpages_banned').'";');
+output_page($page);
+exit;]]></value>
+  </element>
+  <element>
+    <key>versioncode</key>
+    <value>0100</value>
+  </element>
+</array>
+<!-- End of file. -->

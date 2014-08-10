@@ -108,10 +108,14 @@ if($mybb->get_input('manage') == 'pages')
 <script src="./jscripts/codemirror/mode/javascript/javascript.js"></script>
 <script src="./jscripts/codemirror/mode/css/css.js"></script>
 <script src="./jscripts/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+<script src="./jscripts/codemirror/mode/php/php.js"></script>
 <link href="./jscripts/codemirror/addon/dialog/dialog-mybb.css" rel="stylesheet" >
 <script src="./jscripts/codemirror/addon/dialog/dialog.js"></script>
 <script src="./jscripts/codemirror/addon/search/searchcursor.js"></script>
 <script src="./jscripts/codemirror/addon/search/search.js"></script>
+<script src="./jscripts/codemirror/addon/edit/matchbrackets.js"></script>
+<script src="./jscripts/codemirror/mode/clike/clike.js"></script>
+<script src="./jscripts/codemirror/mode/php/php.js"></script>
 ';
 		}
 
@@ -127,7 +131,7 @@ if($mybb->get_input('manage') == 'pages')
 			$page->add_breadcrumb_item(strip_tags($pages['name']));
 		}
 
-		foreach(array('category', 'cid', 'name', 'description', 'url', 'groups', 'php', 'wol', 'disporder', 'template', 'visible') as $key)
+		foreach(array('category', 'cid', 'name', 'description', 'url', 'groups', 'php', 'wol', 'disporder', 'wrapper', 'init', 'template', 'visible') as $key)
 		{
 			if(!isset($mybb->input[$key]) && isset($pages[$key]))
 			{
@@ -207,6 +211,8 @@ if($mybb->get_input('manage') == 'pages')
 					'wol'			=> $mybb->get_input('wol', 1),
 					'disporder'		=> $mybb->get_input('disporder', 1),
 					'visible'		=> $mybb->get_input('visible', 1),
+					'wrapper'			=> $mybb->get_input('wrapper', 1),
+					'init'			=> $mybb->get_input('init', 1),
 					'template'		=> $mybb->get_input('template')
 				), $mybb->get_input('pid', 1));
 				$ougc_pages->update_cache();
@@ -252,11 +258,13 @@ if($mybb->get_input('manage') == 'pages')
 		$form_container->output_row($lang->ougc_pages_form_php, $lang->ougc_pages_form_php_desc, $form->generate_yes_no_radio('php', $mybb->get_input('php', 1)));
 		$form_container->output_row($lang->ougc_pages_form_wol, $lang->ougc_pages_form_wol_desc, $form->generate_yes_no_radio('wol', $mybb->get_input('wol', 1)));
 		$form_container->output_row($lang->ougc_pages_form_visible, $lang->ougc_pages_form_visible_desc, $form->generate_yes_no_radio('visible', $mybb->get_input('visible', 1)));
+		$form_container->output_row($lang->ougc_pages_form_wrapper, $lang->ougc_pages_form_wrapper_desc, $form->generate_yes_no_radio('wrapper', $mybb->get_input('wrapper', 1)));
+		$form_container->output_row($lang->ougc_pages_form_init, $lang->ougc_pages_form_init_desc, $form->generate_yes_no_radio('init', $mybb->get_input('init', 1)));
 		$form_container->output_row($lang->ougc_pages_form_disporder, $lang->ougc_pages_form_disporder_desc, $form->generate_text_box('disporder', $mybb->get_input('disporder', 1), array('style' => 'text-align: center; width: 30px;" maxlength="5')));
 		$form_container->output_row($lang->ougc_pages_form_template, $lang->ougc_pages_form_template_desc, $form->generate_text_area('template', $mybb->get_input('template'), array('rows' => 5, 'id' => 'template', 'class' => '', 'style' => 'width: 100%; height: 500px;')));
 
 		$form_container->end();
-		$form->output_submit_wrapper(array($form->generate_submit_button($lang->ougc_pageds_button_submit), $form->generate_reset_button($lang->reset)));
+		$form->output_submit_wrapper(array($form->generate_submit_button($lang->ougc_pages_button_submit), $form->generate_reset_button($lang->reset)));
 		$form->end();
 
 		if(!empty($admin_options['codepress']))
@@ -265,9 +273,10 @@ if($mybb->get_input('manage') == 'pages')
 				var editor = CodeMirror.fromTextArea(document.getElementById("template"), {
 					lineNumbers: true,
 					lineWrapping: true,
-					mode: "text/html",
 					tabMode: "indent",
-					theme: "mybb"
+					theme: "mybb",
+					mode: "application/x-httpd-php",
+					matchBrackets: true,
 				});
 			</script>';
 		}
@@ -332,6 +341,8 @@ if($mybb->get_input('manage') == 'pages')
 			'php'			=> $page['php'],
 			'wol'			=> $page['wol'],
 			'visible'		=> $page['visible'],
+			'wrapper'		=> $page['wrapper'],
+			'init'			=> $page['init'],
 			'template'		=> $page['template'],
 			'versioncode'	=> $info['versioncode']
 		), 'OUGC_Pages_'.$page['name'].'_'.$info['versioncode']);
@@ -443,6 +454,7 @@ if($mybb->get_input('manage') == 'pages')
 					if(isset($tree['pagemanager']) && $valid_version &&
 					is_array($tree['pagemanager']) && is_array($tree['pagemanager']['page']))
 					{
+						#if(!($template = base64_decode($tree['pagemanager']['page']['template']['value'], isset($tree['pagemanager']['page']['checksum']['value']) ? false : true)))
 						if(!($template = base64_decode($tree['pagemanager']['page']['template']['value'])))
 						{
 							$template = $tree['pagemanager']['page']['template']['value'];
@@ -456,6 +468,8 @@ if($mybb->get_input('manage') == 'pages')
 							'php'			=> !isset($tree['pagemanager']['page']['framework']['value']) || !(int)$tree['pagemanager']['page']['framework']['value'] ? 1 : 0,
 							'wol'			=> !isset($tree['pagemanager']['page']['online']['value']) || (int)$tree['pagemanager']['page']['online']['value'] ? 1 : 0,
 							'visible'		=> (int)$tree['pagemanager']['page']['enabled']['value'],
+							'wrapper'		=> 0, // It runs without a wrapper, similar here
+							'init'			=> 0, // It runs at misc_stats, similar here
 							'template'		=> (string)trim($template)
 						);
 					}
@@ -481,6 +495,8 @@ if($mybb->get_input('manage') == 'pages')
 						'wol'			=> $xml_import['wol'],
 						'disporder'		=> ++$max_disporder,
 						'visible'		=> $xml_import['visible'],
+						'wrapper'		=> $xml_import['wrapper'],
+						'init'			=> $xml_import['init'],
 						'template'		=> $xml_import['template']
 					));
 
@@ -505,7 +521,7 @@ if($mybb->get_input('manage') == 'pages')
 		$form_container->output_row($lang->ougc_pages_form_import_ignore_version, $lang->ougc_pages_form_import_ignore_version_desc, $form->generate_yes_no_radio('ignore_version', $mybb->get_input('ignore_version', 1)));
 
 		$form_container->end();
-		$form->output_submit_wrapper(array($form->generate_submit_button($lang->ougc_pageds_button_submit), $form->generate_reset_button($lang->reset)));
+		$form->output_submit_wrapper(array($form->generate_submit_button($lang->ougc_pages_button_submit), $form->generate_reset_button($lang->reset)));
 		$form->end();
 		$page->output_footer();
 	}
@@ -560,7 +576,7 @@ if($mybb->get_input('manage') == 'pages')
 
 				$pages['visible'] or $pages['name'] = '<em>'.$pages['name'].'</em>';
 
-				$table->construct_cell('<a href="'.$edit_link.'"><strong>'.$pages['name'].'</strong></a><br /><i>'.$ougc_pages->get_page_link($pages['pid']).'</i>');
+				$table->construct_cell('<a href="'.$edit_link.'"><strong>'.$pages['name'].'</strong></a> <span style="font-size: 90%">('.$ougc_pages->build_page_link($lang->ougc_pages_view_page, $pages['pid']).')</span>');
 				$table->construct_cell($form->generate_text_box('disporder['.$pages['pid'].']', (int)$pages['disporder'], array('style' => 'text-align: center; width: 30px;')), array('class' => 'align_center'));
 				$table->construct_cell('<a href="'.$ougc_pages->build_url(array('action' => 'update', 'pid' => $pages['pid'], 'my_post_key' => $mybb->post_code)).'"><img src="styles/default/images/icons/bullet_o'.(!$pages['visible'] ? 'ff' : 'n').'.png" alt="" title="'.(!$pages['visible'] ? $lang->ougc_pages_form_disabled : $lang->ougc_pages_form_visible).'" /></a>', array('class' => 'align_center'));
 
@@ -719,7 +735,7 @@ elseif($mybb->get_input('action') == 'add' || $mybb->get_input('action') == 'edi
 	$form_container->output_row($lang->ougc_pages_form_disporder, $lang->ougc_pages_form_disporder_desc, $form->generate_text_box('disporder', $mybb->get_input('disporder', 1), array('style' => 'text-align: center; width: 30px;" maxlength="5')));
 
 	$form_container->end();
-	$form->output_submit_wrapper(array($form->generate_submit_button($lang->ougc_pageds_button_submit), $form->generate_reset_button($lang->reset)));
+	$form->output_submit_wrapper(array($form->generate_submit_button($lang->ougc_pages_button_submit), $form->generate_reset_button($lang->reset)));
 	$form->end();
 	$page->output_footer();
 }
@@ -815,7 +831,7 @@ else
 
 			$category['visible'] or $category['name'] = '<em>'.$category['name'].'</em>';
 
-			$table->construct_cell('<a href="'.$manage_link.'"><strong>'.$category['name'].'</strong></a><br /><i>'.$ougc_pages->get_category_link($category['cid']).'</i>');
+			$table->construct_cell('<a href="'.$manage_link.'"><strong>'.$category['name'].'</strong></a> <span style="font-size: 90%">('.$ougc_pages->build_category_link($lang->ougc_pages_view_page, $category['cid']).')</span>');
 			$table->construct_cell($form->generate_text_box('disporder['.$category['cid'].']', (int)$category['disporder'], array('style' => 'text-align: center; width: 30px;')), array('class' => 'align_center'));
 			$table->construct_cell('<a href="'.$ougc_pages->build_url(array('action' => 'update', 'cid' => $category['cid'], 'my_post_key' => $mybb->post_code)).'"><img src="styles/default/images/icons/bullet_o'.(!$category['visible'] ? 'ff' : 'n').'.png" alt="" title="'.(!$category['visible'] ? $lang->ougc_pages_form_disabled : $lang->ougc_pages_form_visible).'" /></a>', array('class' => 'align_center'));
 
