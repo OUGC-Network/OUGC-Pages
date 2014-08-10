@@ -30,8 +30,17 @@
 // Plugin API
 $l['setting_group_ougc_pages'] = 'OUGC Pages';
 
-// Plugin API
+// Messages
 $l['ougc_pages_error_invalidpage'] = 'The selected page seems to be invalid.';
+$l['ougc_pages_error_invalidçategory'] = 'The selected category seems to be invalid.';
+
+// Categories
+$l['ougc_pages_category_list'] = '{1} Pages';
+$l['ougc_pages_category_list_empty'] = 'There are currently no pages in this category.';
+
+// Navigation
+$l['ougc_pages_navigation_previous'] = 'Previous';
+$l['ougc_pages_navigation_next'] = 'Next';
 
 // WOL
 $l['ougc_pages_wol'] = 'Viewing the <a href="{1}/{2}">{3}</a> page.';

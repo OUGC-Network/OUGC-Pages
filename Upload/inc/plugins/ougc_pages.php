@@ -36,6 +36,7 @@ if(defined('IN_ADMINCP'))
 	$plugins->add_hook('admin_config_menu', 'ougc_pages_config_menu');
 	$plugins->add_hook('admin_config_action_handler', 'ougc_pages_config_action_handler');
 	$plugins->add_hook('admin_config_permissions', 'ougc_pages_config_permissions');
+	$plugins->add_hook('admin_page_output_header', 'ougc_pages_output_header');
 
 	$plugins->add_hook('admin_config_settings_start', create_function('&$args', 'global $ougc_pages;	$ougc_pages->lang_load();'));
 	$plugins->add_hook('admin_config_settings_change', create_function('&$args', 'global $ougc_pages;	$ougc_pages->lang_load();'));
@@ -116,15 +117,17 @@ function ougc_pages_activate()
 
 	// Add template group
 	$PL->templates('ougcpages', '<lang:setting_group_ougc_pages>', array(
-		''	=> '<html>
+		''	=> '{$content}
+{$navigation_right[\'left\']}
+{$navigation_right[\'right\']}',
+		'wrapper'	=> '<html>
 	<head>
-		<title>{$pages[\'name\']} - {$settings[\'bbname\']}</title>
+		<title>{$pages[\'name\']} - {$mybb->settings[\'bbname\']}</title>
 		{$headerinclude}
 	</head>
 	<body>
 		{$header}
-		{$pages[\'code\']}
-		{$footer}
+		{$content}
 	</body>
 </html>'
 	));
@@ -175,6 +178,7 @@ function ougc_pages_install()
 			`pid` int UNSIGNED NOT NULL AUTO_INCREMENT,
 			`cid` int NOT NULL DEFAULT '0',
 			`name` varchar(100) NOT NULL DEFAULT '',
+			`description` varchar(255) NOT NULL DEFAULT '',
 			`url` varchar(100) NOT NULL DEFAULT '',
 			`groups` text NOT NULL,
 			`php` tinyint(1) NOT NULL DEFAULT '0',
@@ -191,11 +195,13 @@ function ougc_pages_install()
 	$db->write_query("CREATE TABLE `".TABLE_PREFIX."ougc_pages_categories` (
 			`cid` int UNSIGNED NOT NULL AUTO_INCREMENT,
 			`name` varchar(100) NOT NULL DEFAULT '',
+			`description` varchar(255) NOT NULL DEFAULT '',
 			`url` varchar(100) NOT NULL DEFAULT '',
 			`groups` text NOT NULL,
 			`disporder` smallint NOT NULL DEFAULT '0',
 			`visible` tinyint(1) NOT NULL DEFAULT '1',
 			`breadcrumb` tinyint(1) NOT NULL DEFAULT '1',
+			`navigation` tinyint(1) NOT NULL DEFAULT '0',
 			PRIMARY KEY (`cid`),
 			UNIQUE KEY `url` (`url`)
 		) ENGINE=MyISAM{$collation};"
@@ -299,6 +305,33 @@ function ougc_pages_config_permissions(&$args)
 	$args['ougc_pages'] = $lang->ougc_pages_config_permissions;
 }
 
+// Show a flash message if plug-in requires updating
+function ougc_pages_output_header()
+{
+	global $cache;
+
+	$plugins = $cache->read('ougc_plugins');
+	if(!$plugins)
+	{
+		$plugins = array();
+	}
+
+	$info = ougc_pages_info();
+
+	if(!isset($plugins['pages']))
+	{
+		$plugins['pages'] = $info['versioncode'];
+	}
+
+	if($info['versioncode'] != $plugins['pages'])
+	{
+		global $page, $ougc_pages, $lang;
+		$ougc_pages->lang_load();
+
+		$page->extra_messages['ougc_pages'] = array('message' => $lang->ougc_pages_error_update, 'type' => 'error');
+	}
+}
+
 // Cache manager
 function update_ougc_pages()
 {
@@ -350,56 +383,129 @@ function ougc_pages_wol(&$args)
 // Show the page
 function ougc_pages_show($portal=false)
 {
-	global $ougc_pages, $lang, $templates;
+	global $db, $ougc_pages, $lang, $templates, $mybb, $footer, $headerinclude, $header, $theme, $pages, $category;
 
 	// Load lang
 	$ougc_pages->lang_load();
 
 	!$ougc_pages->invalid_page or error($lang->ougc_pages_error_invalidpage);
 
+	!$ougc_pages->invalid_çategory or error($lang->ougc_pages_error_invalidçategory);
+
 	!$ougc_pages->no_permission or error_no_permission();
 
 	// Load custom page language file if exists
-	$lang->load('ougc_pages_'.$pages['url'], false, true);
+	$lang->load('ougc_pages_'.$category['cid'], false, true);
+	$lang->load('ougc_pages_'.$pages['pid'], false, true);
 
-	$pages = $ougc_pages->get_page_by_url($mybb->get_input('page'));
-	$category = $ougc_pages->get_category($pages['cid'], true);
+	$category['name'] = htmlspecialchars_uni($category['name']);
 
-	$ougc_pages->set_url($ougc_pages->get_category_link($pages['cid']));
+	$ougc_pages->set_url($ougc_pages->get_category_link($category['cid']));
 
 	if($category['breadcrumb'])
 	{
-		add_breadcrumb(htmlspecialchars_uni($category['name']), $ougc_pages->build_url());
+		add_breadcrumb($category['name'], $ougc_pages->build_url());
 	}
-	add_breadcrumb(htmlspecialchars_uni($pages['name']));
 
-	if(!isset($templates->cache['ougcpages']))
+	$gids = explode(',', $mybb->user['additionalgroups']);
+	$gids[] = $mybb->user['usergroup'];
+	$gids = array_filter(array_unique($gids));
+
+	$sqlwhere = 'cid=\''.(int)$category['cid'].'\' AND groups!=\'\' AND (groups=\'-1\'';
+	switch($db->type)
 	{
-		$templates->cache['ougcpages'] = '<html>
-	<head>
-		<title>{$pages[\'name\']} - {$settings[\'bbname\']}</title>
-		{$headerinclude}
-	</head>
-	<body>
-		{$header}
-		{$pages[\'template\']}
-		{$footer}
-		{$footer}
-	</body>
-	</html>';
+		case 'pgsql':
+		case 'sqlite':
+			foreach($gids as $gid)
+			{
+				$gid = (int)$gid;
+				$sqlwhere .= ' OR \',\'||groups||\',\' LIKE \'%,'.$gid.',%\'';
+			}
+			break;
+		default:
+			foreach($gids as $gid)
+			{
+				$gid = (int)$gid;
+				$sqlwhere .= ' OR CONCAT(\',\',groups,\',\') LIKE \'%,'.$gid.',%\'';
+			}
+			break;
 	}
+	$sqlwhere .= ')';
 
-	if(!isset($templates->cache['ougcpages_portal']))
+	if($pages)
 	{
-		$templates->cache['ougcpages_portal'] = '{$pages[\'template\']}';
-	}
+		$title = $pages['name'] = htmlspecialchars_uni($pages['name']);
+		$description = $pages['description'] = htmlspecialchars_uni($pages['description']);
 
-	eval('$page = "'.$templates->get('ougcpages'.($portal ? '_portal' : '')).'";');
+		$ougc_pages->set_url($ougc_pages->get_page_link($pages['pid']));
+
+		add_breadcrumb($pages['name'], $ougc_pages->build_url());
+
+		$navigation = array('previous' => '', 'right' => 'next');
+
+		if($category['navigation'])
+		{
+			$where = ' AND disporder<\''.(int)$pages['disporder'].'\'';
+			$query = $db->simple_select('ougc_pages', 'pid', $sqlwhere.$where, array('order_by' => 'disporder, name', 'limit' => 1));
+			$previous_page_id = (int)$db->fetch_field($query, 'pid');
+
+			if($previous_page_id)
+			{
+				$previous_link = $ougc_pages->get_page_link($previous_page_id);
+				eval('$navigation[\'previous\'] = "'.$templates->get('ougcpages_navigation_previous').'";');
+			}
+
+			$where = ' AND disporder>\''.(int)$pages['disporder'].'\'';
+			$query = $db->simple_select('ougc_pages', 'pid', $sqlwhere.$where, array('order_by' => 'disporder, name', 'limit' => 1));
+			$next_page_id = (int)$db->fetch_field($query, 'pid');
+
+			if($next_page_id)
+			{
+				$next_link = $ougc_pages->get_page_link($next_page_id);
+				eval('$navigation[\'next\'] = "'.$templates->get('ougcpages_navigation_next').'";');
+			}
+		}
+
+		$templates->cache['ougcpages_temporary_tmpl'] = $pages['template'];
+
+		eval('$content = "'.$templates->get('ougcpages_temporary_tmpl').'";');
+
+		eval('$content = "'.$templates->get('ougcpages_wrapper').'";');
+	}
+	else
+	{
+		$title = $lang->sprintf($lang->ougc_pages_category_list, $category['name']);
+		$description = $category['description'] = htmlspecialchars_uni($category['description']);
+
+		$query = $db->simple_select('ougc_pages', '*', $sqlwhere, array('order_by' => 'disporder'));
+
+		$page_list = '';
+		while($page = $db->fetch_array($query))
+		{
+			$page['name'] = htmlspecialchars_uni($page['name']);
+			$page_link = $ougc_pages->get_page_link($page['pid']);
+
+			eval('$page_list .= "'.$templates->get('ougcpages_category_list_item').'";');
+		}
+
+		if(!$page_list)
+		{
+			eval('$content = "'.$templates->get('ougcpages_category_list_empty').'";');
+		}
+		else
+		{
+			eval('$content = "'.$templates->get('ougcpages_category_list').'";');
+		}
+
+		eval('$content = "'.$templates->get('ougcpages_wrapper').'";');
+	}
 
 	if($portal)
 	{
-		return $page;
+		return $content;
 	}
+
+	eval('$page = "'.$templates->get('ougcpages').'";');
 
 	output_page($page);
 	exit;
@@ -408,17 +514,20 @@ function ougc_pages_show($portal=false)
 // Hijack the portal start
 function ougc_pages_portal_start()
 {
-	global $settings;
+	global $mybb;
 
-	$settings['portal_announcementsfid'] = false;
+	if($mybb->get_input('page') && !$mybb->get_input('page', 1) || $mybb->get_input('category'))
+	{
+		$mybb->settings['portal_announcementsfid'] = false;
+	}
 }
 
 // Hijack the portal announcements
 function ougc_pages_portal_end()
 {
-	global $announcements;
+	global $settings, $announcements;
 
-	$announcements = ougc_pages_show(true);
+	$settings['portal_announcementsfid'] or $announcements = ougc_pages_show(true);
 }
 
 // control_object by Zinga Burga from MyBBHacks ( mybbhacks.zingaburga.com ), 1.62
@@ -533,9 +642,9 @@ if(!function_exists('ougc_getpreview'))
 	}
 }
 
-if(!function_exists('print_selection_javascript'))
+if(!function_exists('ougc_print_selection_javascript'))
 {
-	function print_selection_javascript()
+	function ougc_print_selection_javascript()
 	{
 		static $already_printed = false;
 
@@ -589,6 +698,9 @@ class OUGC_Pages
 	public $invalid_page = false;
 
 	// Init helper
+	public $invalid_category = false;
+
+	// Init helper
 	public $no_permission = false;
 
 	// Build the class
@@ -601,7 +713,7 @@ class OUGC_Pages
 	{
 		global $lang;
 
-		isset($lang->setting_group_ougc_pages) or $lang->load('ougc_pages');
+		isset($lang->setting_group_ougc_pages) or $lang->load((defined('IN_ADMINCP') ? 'config_' : '').'ougc_pages');
 	}
 
 	// $PL->is_member(); helper
@@ -662,9 +774,11 @@ class OUGC_Pages
 		{
 			$update['categories'][(int)$category['cid']] = array(
 				'name'			=> (string)$category['name'],
+				'description'	=> (string)$category['description'],
 				'url'			=> (string)$category['url'],
 				'groups'		=> (string)$category['groups'],
-				'breadcrumb'	=> (bool)$category['breadcrumb']
+				'breadcrumb'	=> (bool)$category['breadcrumb'],
+				'navigation'	=> (bool)$category['navigation']
 			);
 		}
 
@@ -828,21 +942,18 @@ class OUGC_Pages
 	}
 
 	// Get a category from the DB
-	function get_category($cid, $cached=false)
+	function get_category($cid, $url=false)
 	{
-		if($cached)
-		{
-			global $cache;
-
-			return $cache->cache['ougc_pages']['categories'][$cid];
-		}
+		global $cache;
 
 		if(!isset($this->cache['categories'][$cid]))
 		{
 			global $db;
 			$this->cache['categories'][$cid] = false;
 
-			$query = $db->simple_select('ougc_pages_categories', '*', 'cid=\''.(int)$cid.'\'');
+			$where = ($url === false ? 'cid=\''.(int)$cid.'\'' : 'url=\''.$db->escape_string($url).'\'');
+
+			$query = $db->simple_select('ougc_pages_categories', '*', $where);
 			$category = $db->fetch_array($query);
 
 			if(isset($category['cid']))
@@ -852,6 +963,12 @@ class OUGC_Pages
 		}
 
 		return $this->cache['categories'][$cid];
+	}
+
+	// Get PID by url input
+	function get_category_by_url($url)
+	{
+		return $this->get_category(null, $url);
 	}
 
 	// Get a page from the DB
@@ -899,7 +1016,7 @@ class OUGC_Pages
 		exit;
 	}
 
-	// Get bar from DB or cache
+	// Delete category from DB
 	function delete_page_category($cid)
 	{
 		global $db;
@@ -932,6 +1049,11 @@ class OUGC_Pages
 			$insert_data['name'] = $db->escape_string($data['name']);
 		}
 
+		if(isset($data['description']))
+		{
+			$insert_data['description'] = $db->escape_string($data['description']);
+		}
+
 		if(isset($data['url']))
 		{
 			$insert_data['url'] = $db->escape_string($data['url']);
@@ -940,6 +1062,10 @@ class OUGC_Pages
 		if(isset($data['groups']))
 		{
 			$insert_data['groups'] = $db->escape_string($data['groups']);
+		}
+		elseif(!$update)
+		{
+			$insert_data['groups'] = '';
 		}
 
 		if(isset($data['disporder']))
@@ -955,6 +1081,11 @@ class OUGC_Pages
 		if(isset($data['breadcrumb']))
 		{
 			$insert_data['breadcrumb'] = (int)$data['breadcrumb'];
+		}
+
+		if(isset($data['navigation']))
+		{
+			$insert_data['navigation'] = (int)$data['navigation'];
 		}
 
 		if($insert_data)
@@ -998,6 +1129,11 @@ class OUGC_Pages
 			$insert_data['name'] = $db->escape_string($data['name']);
 		}
 
+		if(isset($data['description']))
+		{
+			$insert_data['description'] = $db->escape_string($data['description']);
+		}
+
 		if(isset($data['url']))
 		{
 			$insert_data['url'] = $db->escape_string($data['url']);
@@ -1006,6 +1142,10 @@ class OUGC_Pages
 		if(isset($data['groups']))
 		{
 			$insert_data['groups'] = $db->escape_string($data['groups']);
+		}
+		elseif(!$update)
+		{
+			$insert_data['groups'] = '';
 		}
 
 		if(isset($data['php']))
@@ -1031,6 +1171,10 @@ class OUGC_Pages
 		if(isset($data['template']))
 		{
 			$insert_data['template'] = $db->escape_string($data['template']);
+		}
+		elseif(!$update)
+		{
+			$insert_data['template'] = '';
 		}
 
 		if(isset($data['dateline']))
@@ -1065,7 +1209,19 @@ class OUGC_Pages
 	{
 		$this->insert_page($data, true, $pid);
 	}
-	
+
+	// Delete page from DB
+	function delete_page($pid)
+	{
+		global $db;
+
+		$this->pid = (int)$pid;
+
+		$db->delete_query('ougc_pages', 'pid=\''.$this->pid.'\'');
+
+		return $this->pid;
+	}
+
 	// Generate a category selection box.
 	function generate_category_select($name, $selected=array(), $options=array())
 	{
@@ -1114,7 +1270,7 @@ class OUGC_Pages
 		return $select;
 	}
 
-	// Cleans the unique url
+	// Cleans the unique URL
 	// Thanks Google SEO!
 	function clean_url($url)
 	{
@@ -1130,21 +1286,43 @@ class OUGC_Pages
 
 		return my_strtolower($url);
 	}
+
+	// Get an unique URL for import process
+	function get_import_url($name, $url='')
+	{
+		global $db;
+
+		!empty($url) or $url = $name;
+
+		$url = $this->clean_url($url);
+
+		$query = $db->simple_select('ougc_pages', 'pid', 'url=\''.$db->escape_string($url).'\' AND pid!=\''.$this->pid.'\'', array('limit' => 1));
+		$duplicate_url = (int)$db->fetch_field($query, 'pid');
+
+		if($duplicate_url)
+		{
+			return $this->get_import_url(null, $url.'-'.$this->pid);
+		}
+
+		return $url;
+	}
 }
 
 $GLOBALS['ougc_pages'] = new OUGC_Pages;
 
 // Initialize the plugin magic
-if(THIS_SCRIPT == 'portal.php' || THIS_SCRIPT == 'pages.php')
+ougc_pages_init();
+function ougc_pages_init()
 {
 	global $mybb;
+	global $templatelist, $ougc_pages;
+	global $category, $pages, $session;
+	global $db, $templates, $plugins, $cache, $settings, $lang, $maintimer;
 
-	if(THIS_SCRIPT == 'portal.php' && !$mybb->settings['ougc_pages_portal'])
+	if(!(THIS_SCRIPT == 'portal.php' && !empty($mybb->settings['ougc_pages_portal']) || THIS_SCRIPT == 'pages.php'))
 	{
 		return;
 	}
-
-	global $templatelist, $ougc_pages;
 
 	if(isset($templatelist))
 	{
@@ -1155,57 +1333,100 @@ if(THIS_SCRIPT == 'portal.php' || THIS_SCRIPT == 'pages.php')
 		$templatelist = '';
 	}
 
-	$templatelist .= 'ougcpages, ougcpages_portal';
+	$templatelist .= 'ougcpages, ougcpages_wrapper, ougcpages_category_list_item, ougcpages_category_list, ougcpages_navigation_previous, ougcpages_navigation_next';
+
+	$is_page = $mybb->get_input('page') && !empty($mybb->cache->cache['ougc_pages']['pages'][$mybb->get_input('page')]);
 
 	if($mybb->get_input('page') && !empty($mybb->cache->cache['ougc_pages']['pages'][$mybb->get_input('page')]))
 	{
-		if(THIS_SCRIPT == 'portal.php')
-		{
-			global $plugins;
-
-			$plugins->add_hook('portal_start', 'ougc_pages_portal_start');
-			$plugins->add_hook('portal_end', 'ougc_pages_portal_end');
-		}
-
 		if($pages = $ougc_pages->get_page_by_url($mybb->get_input('page')))
 		{
-			$category = $ougc_pages->get_category($pages['cid'], true);
-			if(!empty($category))
+			$templatelist .= ', ougcpages_page'.$pages['pid'];
+
+			if($category = $ougc_pages->get_category($pages['cid']))
 			{
-				if(!$pages['wol'] && !defined('NO_ONLINE'))
-				{
-					define('NO_ONLINE', 1);
-				}
-
-				// Save three queries if no permission check is necessary
-				if($category['groups'] || $pages['groups'])
-				{
-					// Create the session
-					require_once MYBB_ROOT.'inc/class_session.php';
-					$session = new session;
-					$session->init();
-
-					$ougc_pages->is_member($category['groups']) or $ougc_pages->no_permission = true;
-					$ougc_pages->is_member($pages['groups']) or $ougc_pages->no_permission = true;
-				}
-
-				if($pages['php'] && !$ougc_pages->no_permission)
-				{
-					global $db, $templates, $plugins, $cache, $settings, $lang, $maintimer;
-
-					#eval('? >'.$pages['template'].'<?php');
-					eval('?>'.$pages['template']);
-					exit;
-				}
+				#$templatelist .= ', ougcpages_category'.$category['cid'];
 			}
 			else
 			{
-				$ougc_pages->invalid_page = true;
+				$ougc_pages->invalid_category = true;
 			}
 		}
 		else
 		{
 			$ougc_pages->invalid_page = true;
 		}
+	}
+	elseif($mybb->get_input('category'))
+	{
+		if($category = $ougc_pages->get_category_by_url($mybb->get_input('category')))
+		{
+			#$templatelist .= ', ougcpages_category'.$category['cid'];
+		}
+		else
+		{
+			$ougc_pages->invalid_category = true;
+		}
+	}
+
+	if(!empty($category))
+	{
+		// Save three queries if no permission check is necessary
+		if($category['groups'] == '')
+		{
+			$ougc_pages->no_permission = true;
+		}
+		elseif($category['groups'] != -1)
+		{
+			// Create the session
+			require_once MYBB_ROOT.'inc/class_session.php';
+			$session = new session;
+			$session->init();
+
+			$ougc_pages->is_member($category['groups']) or $ougc_pages->no_permission = true;
+		}
+	}
+
+	if(!empty($pages))
+	{
+		if(!$pages['wol'] && !defined('NO_ONLINE'))
+		{
+			define('NO_ONLINE', 1);
+		}
+
+		// Save three queries if no permission check is necessary
+		if(!$ougc_pages->no_permission)
+		{
+			if($pages['groups'] == '')
+			{
+				$ougc_pages->no_permission = true;
+			}
+			elseif($pages['groups'] != -1)
+			{
+				// Create the session
+				if(!isset($session))
+				{
+					require_once MYBB_ROOT.'inc/class_session.php';
+					$session = new session;
+					$session->init();
+				}
+
+				$ougc_pages->is_member($pages['groups']) or $ougc_pages->no_permission = true;
+			}
+		}
+
+		if($pages['php'] && !$ougc_pages->no_permission)
+		{
+			#eval('? >'.$pages['template'].'<?php');
+			#TODO: Add option to run at here, global_end, global_intermediate or global_start
+			eval('?>'.$pages['template']);
+			exit;
+		}
+	}
+
+	if(THIS_SCRIPT == 'portal.php')
+	{
+		$plugins->add_hook('portal_start', 'ougc_pages_portal_start', 999999999);
+		$plugins->add_hook('portal_end', 'ougc_pages_portal_end');
 	}
 }

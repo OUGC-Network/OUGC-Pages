@@ -33,4 +33,10 @@ define('THIS_SCRIPT', 'pages.php');
 $templatelist = '';
 require_once './global.php';
 
-ougc_pages_show();
+
+if($mybb->get_input('page') && !$mybb->get_input('page', 1) || $mybb->get_input('category'))
+{
+	ougc_pages_show();
+}
+
+error_no_permission();
