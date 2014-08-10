@@ -32,13 +32,14 @@ $l['setting_group_ougc_pages'] = 'OUGC Pages';
 $l['setting_group_ougc_pages_desc'] = 'Create additional pages directly from the ACP.';
 
 // Settings
-$l['setting_ougc_pages_seo'] = 'Use SEO URLs';
-$l['setting_ougc_pages_seo_desc'] = 'Do you want to make use of the SEO URLs for categories and pages.';
-$l['setting_ougc_pages_seo_none'] = 'None';
-$l['setting_ougc_pages_seo_mybb'] = 'MyBB Style';
-$l['setting_ougc_pages_seo_google'] = 'Google Like';
-$l['setting_ougc_pages_perpage'] = 'Items Per Page';
-$l['setting_ougc_pages_perpage_desc'] = 'Maximum number of items to show per page in the ACP list.';
+$l['setting_ougc_pages_script'] = 'Use Custom Script';
+$l['setting_ougc_pages_script_desc'] = 'Do you want to make use of the custom <i>pages.php</i> script to output pages? Turning this to "No" will force the use of the <i>portal.php</i> script.';
+$l['setting_ougc_pages_seo_scheme'] = 'Page URL Scheme';
+$l['setting_ougc_pages_seo_scheme_desc'] = 'Enter the Page URL scheme. Leave empty to disable SEO URLs for Pages.';
+$l['setting_ougc_pages_seo_scheme_categories'] = 'Category URL Scheme';
+$l['setting_ougc_pages_seo_scheme_categories_desc'] = 'Enter the Category URL scheme. Leave empty to disable SEO URLs for Categories.';
+//$l['setting_ougc_pages_perpage'] = 'Items Per Page';
+//$l['setting_ougc_pages_perpage_desc'] = 'Maximum number of items to show per page in the ACP list.';
 
 // ACP
 $l['ougc_pages_manage'] = 'Manage Pages';

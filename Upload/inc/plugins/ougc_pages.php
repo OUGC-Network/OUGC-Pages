@@ -80,39 +80,30 @@ function ougc_pages_activate()
 
 	// Add settings group
 	$PL->settings('ougc_pages', $lang->setting_group_ougc_pages, $lang->setting_group_ougc_pages_desc, array(
-		'seo'					=> array(
-		   'title'			=> $lang->setting_ougc_pages_seo,
-		   'description'	=> $lang->setting_ougc_pages_seo_desc,
-		   'optionscode'	=> 'select
-0='.$lang->setting_ougc_pages_seo_none.'
-1='.$lang->setting_ougc_pages_seo_mybb.'
-2='.$lang->setting_ougc_pages_seo_google,
-		   'value'			=> 0
+		'script'				=> array(
+		   'title'			=> $lang->setting_ougc_pages_script,
+		   'description'	=> $lang->setting_ougc_pages_script_desc,
+		   'optionscode'	=> 'yesno',
+			'value'			=>	0,
 		),
 		'seo_scheme'			=> array(
 		   'title'			=> $lang->setting_ougc_pages_seo_scheme,
 		   'description'	=> $lang->setting_ougc_pages_seo_scheme_desc,
 		   'optionscode'	=> 'text',
-			'value'			=>	'page-{$url}.html',
+			'value'			=>	'',
 		),
 		'seo_scheme_categories'	=> array(
 		   'title'			=> $lang->setting_ougc_pages_seo_scheme_categories,
 		   'description'	=> $lang->setting_ougc_pages_seo_scheme_categories_desc,
 		   'optionscode'	=> 'text',
-			'value'			=>	'category-{$url}.html',
+			'value'			=>	'',
 		),
-		'perpage'				=> array(
+		/*'perpage'				=> array(
 		   'title'			=> $lang->setting_ougc_pages_perpage,
 		   'description'	=> $lang->setting_ougc_pages_perpage_desc,
 		   'optionscode'	=> 'text',
 			'value'			=>	20,
-		),
-		'portal'				=> array(
-		   'title'			=> $lang->setting_ougc_pages_portal,
-		   'description'	=> $lang->setting_ougc_pages_portal_desc,
-		   'optionscode'	=> 'yesno',
-			'value'			=>	0,
-		)
+		)*/
 	));
 
 	// Add template group
@@ -571,7 +562,7 @@ function ougc_pages_execute()
 {
 	global $mybb, $lang, $db, $plugins, $cache, $parser, $settings;
 	global $templates, $headerinclude, $header, $theme, $footer;
-	global $templatelist, $session, $maintimer;
+	global $templatelist, $session, $maintimer, $permissions;
 	global $ougc_pages, $category, $pages;
 
 	#eval('? >'.$pages['template'].'<?php');
@@ -653,8 +644,8 @@ if(!function_exists('ougc_getpreview'))
 			global $parser;
 			if(!is_object($parser))
 			{
-			require_once MYBB_ROOT.'inc/class_parser.php';
-			$parser = new postParser;
+				require_once MYBB_ROOT.'inc/class_parser.php';
+				$parser = new postParser;
 			}
 
 			$message = $parser->parse_message($message, array(
@@ -877,7 +868,8 @@ class OUGC_Pages
 	{
 		global $settings;
 
-		$this->query_limit = isset($limit) ? (int)$limit : (int)$settings['ougc_pages_perpage'];
+		//$this->query_limit = isset($limit) ? (int)$limit : (int)$settings['ougc_pages_perpage'];
+		$this->query_limit = isset($limit) ? (int)$limit : 20;
 		$this->query_limit = $this->query_limit > 100 ? 100 : ($this->query_limit < 1 && $this->query_limit != $spcl ? 1 : $this->query_limit);
 	}
 
@@ -936,16 +928,16 @@ class OUGC_Pages
 		$query = $db->simple_select('ougc_pages_categories', 'url', 'cid=\''.$cid.'\'');
 		$url = $db->fetch_field($query, 'url');
 
-		if($settings['ougc_pages_seo'])
+		if(my_strpos($settings['ougc_pages_seo_scheme_categories'], '{url}') !== false)
 		{
-			$link = str_replace('{url}', $url, $sesttings['ougc_pages_seo_scheme_categories']);
+			$url = str_replace('{url}', $url, $settings['ougc_pages_seo_scheme_categories']);
 		}
 		else
 		{
-			$link = ($settings['ougc_pages_portal'] ? 'portal' : 'pages').'.php?category='.$url;
+			$url = ($settings['ougc_pages_script'] ? 'pages' : 'portal').'.php?category='.$url;
 		}
 
-		return $settings['bburl'].'/'.htmlspecialchars_uni($link);
+		return $settings['bburl'].'/'.htmlspecialchars_uni($url);
 	}
 
 	// Build the page link.
@@ -964,13 +956,13 @@ class OUGC_Pages
 		$query = $db->simple_select('ougc_pages', 'url', 'pid=\''.$pid.'\'');
 		$url = $db->fetch_field($query, 'url');
 
-		if($settings['ougc_pages_seo'])
+		if(my_strpos($settings['ougc_pages_seo_scheme'], '{url}') !== false)
 		{
-			$link = str_replace('{url}', $url, $sesttings['ougc_pages_seo_scheme']);
+			$link = str_replace('{url}', $url, $settings['ougc_pages_seo_scheme']);
 		}
 		else
 		{
-			$link = ($settings['ougc_pages_portal'] ? 'portal' : 'pages').'.php?page='.$url;
+			$link = ($settings['ougc_pages_script'] ? 'pages' : 'portal').'.php?page='.$url;
 		}
 
 		return $settings['bburl'].'/'.htmlspecialchars_uni($link);
@@ -1377,7 +1369,7 @@ function ougc_pages_init()
 	global $category, $pages, $session;
 	global $plugins;
 
-	if(!(THIS_SCRIPT == 'portal.php' && !empty($mybb->settings['ougc_pages_portal']) || THIS_SCRIPT == 'pages.php'))
+	if(!(THIS_SCRIPT == 'portal.php' || !empty($mybb->settings['ougc_pages_script']) && THIS_SCRIPT == 'pages.php'))
 	{
 		return;
 	}

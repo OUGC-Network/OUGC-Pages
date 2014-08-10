@@ -15,6 +15,19 @@ Create additional pages directly from the ACP.
 3. Edit general settings from "OUGC Pages".
 4. __Enjoy!__
 
+### HTACCESS
+- Page URL Scheme
+	`page-{url}`
+- Category URL Scheme
+	`category-{url}`
+```
+	# OUGC Pages URL Page:
+	RewriteRule ^page\-([^./]+)$ portal.php?page=$1 [L,QSA,NC]
+
+	# OUGC Category URL Page:
+	RewriteRule ^category\-([^./]+)$ portal.php?category=$1 [L,QSA,NC]
+```
+
 ### Support
 Please visit [MyBB Plugins](http://forums.mybb-plugins.com/Forum-Free-Plugins--29 "Visit MyBB Plugins") for premium support. Free support may be received in the [MyBB Community](http://community.mybb.com "Visit MyBB Community")
 
