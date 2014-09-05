@@ -16,16 +16,21 @@ Create additional pages directly from the ACP.
 4. __Enjoy!__
 
 ### HTACCESS
-- Page URL Scheme
-	`page-{url}`
-- Category URL Scheme
-	`category-{url}`
-```
-	# OUGC Pages URL Page:
-	RewriteRule ^page\-([^./]+)$ portal.php?page=$1 [L,QSA,NC]
+- **Page URL Scheme:** `page-{url}`
+- **Category URL Scheme:** `category-{url}`
 
-	# OUGC Category URL Page:
-	RewriteRule ^category\-([^./]+)$ portal.php?category=$1 [L,QSA,NC]
+In .htaccess find:
+```
+	RewriteRule ^event-([0-9]+)\.html$ calendar.php?action=event&eid=$1 [L,QSA]
+```
+
+Add after:
+```
+	# OUGC Pages Category URL:
+	RewriteRule ^category\-([^./]+)$ pages.php?category=$1 [L,QSA,NC]
+
+	# OUGC Pages Page URL:
+	RewriteRule ^page\-([^./]+)$ pages.php?page=$1 [L,QSA,NC]
 ```
 
 ### Support

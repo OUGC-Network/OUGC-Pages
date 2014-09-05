@@ -115,7 +115,6 @@ if($mybb->get_input('manage') == 'pages')
 <script src="./jscripts/codemirror/addon/search/search.js"></script>
 <script src="./jscripts/codemirror/addon/edit/matchbrackets.js"></script>
 <script src="./jscripts/codemirror/mode/clike/clike.js"></script>
-<script src="./jscripts/codemirror/mode/php/php.js"></script>
 ';
 		}
 
@@ -542,7 +541,7 @@ if($mybb->get_input('manage') == 'pages')
 		$query = $db->simple_select('ougc_pages', 'COUNT(cid) AS pages', 'cid=\''.(int)$category['cid'].'\'');
 		$count = (int)$db->fetch_field($query, 'pages');
 
-		$multipage = $ougc_pages->build_multipage($count);
+		$multipage = $ougc_pages->build_multipage($count, $ougc_pages->build_url());
 	
 		if(!$count)
 		{
@@ -610,7 +609,7 @@ elseif($mybb->get_input('action') == 'add' || $mybb->get_input('action') == 'edi
 		$page->add_breadcrumb_item(strip_tags($category['name']));
 	}
 
-	foreach(array('name', 'description', 'groups', 'url', 'disporder', 'breadcrumb', 'navigation', 'visible') as $key)
+	foreach(array('name', 'description', 'groups', 'url', 'disporder'/*, 'breadcrumb', 'navigation'*/, 'visible') as $key)
 	{
 		if(!isset($mybb->input[$key]) && isset($category[$key]))
 		{
@@ -687,8 +686,8 @@ elseif($mybb->get_input('action') == 'add' || $mybb->get_input('action') == 'edi
 				'groups'		=> $ougc_pages->clean_ints($mybb->input['groups'], true),
 				'disporder'		=> $mybb->get_input('disporder', 1),
 				'visible'		=> $mybb->get_input('visible', 1),
-				'breadcrumb'	=> $mybb->get_input('breadcrumb', 1),
-				'navigation'	=> $mybb->get_input('navigation', 1)
+				/*'breadcrumb'	=> $mybb->get_input('breadcrumb', 1),
+				'navigation'	=> $mybb->get_input('navigation', 1)*/
 			), $mybb->get_input('cid', 1));
 			$ougc_pages->update_cache();
 			$ougc_pages->log_action();
@@ -730,8 +729,8 @@ elseif($mybb->get_input('action') == 'add' || $mybb->get_input('action') == 'edi
 	$form_container->output_row($lang->ougc_pages_form_groups, $lang->ougc_pages_form_groups_desc, $groups_select, '', array(), array('id' => 'row_groups'));
 
 	$form_container->output_row($lang->ougc_pages_form_visible, $lang->ougc_pages_form_visible_desc, $form->generate_yes_no_radio('visible', $mybb->get_input('visible', 1)));
-	$form_container->output_row($lang->ougc_pages_form_breadcrumb, $lang->ougc_pages_form_breadcrumb_desc, $form->generate_yes_no_radio('breadcrumb', $mybb->get_input('breadcrumb', 1)));
-	$form_container->output_row($lang->ougc_pages_form_navigation, $lang->ougc_pages_form_navigation_desc, $form->generate_yes_no_radio('navigation', $mybb->get_input('navigation', 1)));
+	#$form_container->output_row($lang->ougc_pages_form_breadcrumb, $lang->ougc_pages_form_breadcrumb_desc, $form->generate_yes_no_radio('breadcrumb', $mybb->get_input('breadcrumb', 1)));
+	#$form_container->output_row($lang->ougc_pages_form_navigation, $lang->ougc_pages_form_navigation_desc, $form->generate_yes_no_radio('navigation', $mybb->get_input('navigation', 1)));
 	$form_container->output_row($lang->ougc_pages_form_disporder, $lang->ougc_pages_form_disporder_desc, $form->generate_text_box('disporder', $mybb->get_input('disporder', 1), array('style' => 'text-align: center; width: 30px;" maxlength="5')));
 
 	$form_container->end();
@@ -755,7 +754,7 @@ elseif($mybb->get_input('action') == 'delete')
 
 		!$mybb->get_input('no') or $ougc_pages->redirect();
 
-		$ougc_pages->delete_page_category($mybb->get_input('cid', 1));
+		$ougc_pages->delete_category($mybb->get_input('cid', 1));
 		$ougc_pages->log_action();
 		$ougc_pages->update_cache();
 		$ougc_pages->redirect($lang->ougc_pages_success_delete);
@@ -797,7 +796,7 @@ else
 	$query = $db->simple_select('ougc_pages_categories', 'COUNT(cid) AS categories');
 	$count = (int)$db->fetch_field($query, 'categories');
 
-	$multipage = $ougc_pages->build_multipage($count);
+	$multipage = $ougc_pages->build_multipage($count, $ougc_pages->build_url());
 	
 	if(!$count)
 	{

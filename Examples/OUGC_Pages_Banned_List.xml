@@ -61,7 +61,7 @@ $templates->cache['ougcpages_banned_nobanned'] or $templates->cache['ougcpages_b
 </tr>';
 $templates->cache['ougcpages_banned'] or $templates->cache['ougcpages_banned'] = '<html>
 <head>
-<title>{$mybb->settings[\'bbname\']} - {$pages[\'name\']}</title>
+<title>{$mybb->settings[\'bbname\']} - {$page[\'name\']}</title>
 {$headerinclude}
 </head>
 <body>
@@ -101,9 +101,9 @@ if($category['breadcrumb'])
 	add_breadcrumb($category['name'], $ougc_pages->get_category_link($category['cid']));
 }
 
-$pages['name'] = htmlspecialchars_uni($pages['name']);
+$page['name'] = htmlspecialchars_uni($page['name']);
 
-add_breadcrumb($pages['name'], $ougc_pages->get_page_link($pages['pid']));
+add_breadcrumb($page['name'], $ougc_pages->get_page_link($page['pid']));
 
 if($mybb->settings['threadsperpage'] < 1)
 {
@@ -112,7 +112,7 @@ if($mybb->settings['threadsperpage'] < 1)
 
 // Figure out if we need to display multiple pages.
 $perpage = (int)$mybb->settings['threadsperpage'];
-$page = $mybb->get_input('pagination', 1);
+$pagenum = $mybb->get_input('pagination', 1);
 
 $query = $db->simple_select('banned', 'COUNT(uid) AS count');
 $banned_count = $db->fetch_field($query, 'count');
@@ -121,24 +121,24 @@ $postcount = (int)$banned_count;
 $_pages = $postcount / $perpage;
 $_pages = ceil($_pages);
 
-if($page > $_pages || $page <= 0)
+if($pagenum > $_pages || $pagenum <= 0)
 {
-	$page = 1;
+	$pagenum = 1;
 }
 
-if($page)
+if($pagenum)
 {
-	$start = ($page-1) * $perpage;
+	$start = ($pagenum-1) * $perpage;
 }
 else
 {
 	$start = 0;
-	$page = 1;
+	$pagenum = 1;
 }
 $upper = $start+$perpage;
 
-$multipage = multipage($postcount, $perpage, $page, '?PLACE_HOLDER');
-$multipage = str_replace(array('page=', '?PLACE_HOLDER'), array('pagination=', $ougc_pages->get_page_link($pages['pid'])), $multipage);
+$multipage = multipage($postcount, $perpage, $pagenum, '?PLACE_HOLDER');
+$multipage = str_replace(array('page=', '?PLACE_HOLDER'), array('pagination=', $ougc_pages->get_page_link($page['pid'])), $multipage);
 
 switch($mybb->get_input('sort'))
 {

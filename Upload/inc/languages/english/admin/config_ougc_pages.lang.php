@@ -32,8 +32,10 @@ $l['setting_group_ougc_pages'] = 'OUGC Pages';
 $l['setting_group_ougc_pages_desc'] = 'Create additional pages directly from the ACP.';
 
 // Settings
-$l['setting_ougc_pages_script'] = 'Use Custom Script';
-$l['setting_ougc_pages_script_desc'] = 'Do you want to make use of the custom <i>pages.php</i> script to output pages? Turning this to "No" will force the use of the <i>portal.php</i> script.';
+$l['setting_ougc_pages_portal'] = 'Use Portal Script';
+$l['setting_ougc_pages_portal_desc'] = 'Whether to show pages in the Portal page or not.';
+$l['setting_ougc_pages_seo'] = 'Use SEO friendly URLs';
+$l['setting_ougc_pages_seo'] = 'Whether if to enable SEO friendly URLs for pages.';
 $l['setting_ougc_pages_seo_scheme'] = 'Page URL Scheme';
 $l['setting_ougc_pages_seo_scheme_desc'] = 'Enter the Page URL scheme. Leave empty to disable SEO URLs for Pages.';
 $l['setting_ougc_pages_seo_scheme_categories'] = 'Category URL Scheme';
@@ -76,10 +78,10 @@ $l['ougc_pages_form_disabled'] = 'Disabled';
 $l['ougc_pages_form_disabled_desc'] = 'Disabled';
 $l['ougc_pages_form_visible'] = 'Active';
 $l['ougc_pages_form_visible_desc'] = 'Whether if this category/page is active or disabled.';
-$l['ougc_pages_form_breadcrumb'] = 'Show in Breadcrumb';
+/*$l['ougc_pages_form_breadcrumb'] = 'Show in Breadcrumb';
 $l['ougc_pages_form_breadcrumb_desc'] = 'Whether if to show this category in the navigation breadcrumb.';
 $l['ougc_pages_form_navigation'] = 'Show Navigation';
-$l['ougc_pages_form_navigation_desc'] = 'Whether if to show a previous/next pagination in this category in pages.';
+$l['ougc_pages_form_navigation_desc'] = 'Whether if to show a previous/next pagination in this category in pages.';*/
 $l['ougc_pages_form_php'] = 'PHP Code';
 $l['ougc_pages_form_php_desc'] = 'Whether if process this page as plain PHP code or use the MyBB template system instead.';
 $l['ougc_pages_form_wol'] = 'Show In Who Is On-line List';

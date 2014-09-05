@@ -58,7 +58,7 @@ $message = 'For those who don\'t know.
 
 $templates->cache['ougcpages_parser_test_page'] or $templates->cache['ougcpages_parser_test_page'] = '<html>
 <head>
-<title>{$mybb->settings[\'bbname\']} - {$pages[\'name\']}</title>
+<title>{$mybb->settings[\'bbname\']} - {$page[\'name\']}</title>
 {$headerinclude}
 </head>
 <body>
@@ -87,10 +87,10 @@ if($mybb->user['showvideos'] != 1 && $mybb->user['uid'] != 0 || $mybb->settings[
 $message = $parser->parse_message($message, $parser_options);
 
 // Set-up page
-$bu_tmpl = $pages['template'];
-$pages['template'] = $message;
+$bu_tmpl = $page['template'];
+$page['template'] = $message;
 $content = ougc_pages_show(true);
-$pages['template'] = $bu_tmpl;
+$page['template'] = $bu_tmpl;
 
 eval('$page = "'.$templates->get('ougcpages_parser_test_page').'";');
 output_page($page);
