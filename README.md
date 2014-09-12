@@ -6,7 +6,7 @@ Create additional pages directly from the ACP.
 ***
 
 ### Requirements
-- [MyBB](http://www.mybb.com/downloads "Download MyBB") version 1.6.5+
+- [MyBB](http://www.mybb.com/downloads "Download MyBB") version 1.8.0+
 - [PluginLibrary](http://mods.mybb.com/view/pluginlibrary "Download PluginLibrary") library for MyBB to work.
 
 ### Installation
