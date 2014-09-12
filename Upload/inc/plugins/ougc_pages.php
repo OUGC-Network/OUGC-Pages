@@ -58,7 +58,7 @@ function ougc_pages_info()
 	return array(
 		'name'			=> 'OUGC Pages',
 		'description'	=> $lang->setting_group_ougc_pages_desc,
-		'website'		=> 'http://mods.mybb.com/view/ougc-pages',
+		'website'		=> 'http://community.mybb.com/mods.php?action=view&pid=6',
 		'author'		=> 'Omar G.',
 		'authorsite'	=> 'http://omarg.me',
 		'version'		=> '1.0',
