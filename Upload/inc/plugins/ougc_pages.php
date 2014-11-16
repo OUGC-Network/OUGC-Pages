@@ -360,7 +360,7 @@ function update_ougc_pages()
 {
 	global $ougc_pages;
 
-	$ougc_pages->cache_update();
+	$ougc_pages->update_cache();
 }
 
 // WOL support
