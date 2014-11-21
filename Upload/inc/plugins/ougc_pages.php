@@ -1103,12 +1103,10 @@ class OUGC_Pages
 
 		if(defined('IN_ADMINCP'))
 		{
-			$multipage = (string)draw_admin_pagination($mybb->get_input('page', 1), $this->query_limit, $count, $url);
+			return (string)draw_admin_pagination($mybb->get_input('page', 1), $this->query_limit, $count, $url);
 		}
-		else
-		{
-			$multipage = (string)multipage($count, $this->query_limit, $mybb->get_input('page', 1), $url);
-		}
+
+		return (string)multipage($count, $this->query_limit, $mybb->get_input('page', 1), $url);
 	}
 
 	// Get a category from the DB
