@@ -43,7 +43,8 @@ if(defined('IN_ADMINCP'))
 }
 else
 {
-	$plugins->add_hook('build_friendly_wol_location_end', 'ougc_pages_wol');
+	$plugins->add_hook('fetch_wol_activity_end', 'ougc_pages_fetch_wol_activity_end');
+	$plugins->add_hook('build_friendly_wol_location_end', 'ougc_pages_build_friendly_wol_location_end');
 }
 
 // PLUGINLIBRARY
@@ -64,7 +65,7 @@ function ougc_pages_info()
 		'version'		=> '1.0',
 		'versioncode'	=> '1000',
 		'compatibility'	=> '18*',
-		'guid'			=> '',
+		'codename'		=> 'ougc_pages',
 		'pl'			=> array(
 			'version'	=> 12,
 			'url'		=> 'http://mods.mybb.com/view/pluginlibrary'
@@ -364,46 +365,59 @@ function update_ougc_pages()
 }
 
 // WOL support
-function ougc_pages_wol(&$args)
+function ougc_pages_fetch_wol_activity_end(&$args)
 {
-	if(!(in_array($args['user_activity']['activity'], array(/*'portal', */'pages')) && my_strpos($args['user_activity']['location'], 'page=')))
+	if($args['activity'] != 'unknown')
 	{
 		return;
 	}
 
-	global $cache;
-
-	$pagecache = $cache->read('ougc_pages');
-
-	$location = parse_url($args['user_activity']['location']);
-	$location['query'] = html_entity_decode($location['query']);
-	$location['query'] = explode('&', (string)$location['query']);
-
-	if(empty($location['query']))
+	if(my_strpos($args['location'], 'pages.php') === false)
 	{
 		return;
 	}
 
-	foreach($location['query'] as $query)
-	{
-		$param = explode('=', $query);
-		if($param[0] == 'page')
-		{
-			$url = $param[1];
-		}
-	}
+	$args['activity'] = 'ougc_pages';
+}
 
-	if(empty($pagecache['pages'][$url]))
-	{
-		return;
-	}
-
+function ougc_pages_build_friendly_wol_location_end(&$args)
+{
 	global $ougc_pages, $lang, $settings;
 	$ougc_pages->lang_load();
 
-	$page = $ougc_pages->get_page($pagecache['pages'][$url]);
+	if($args['user_activity']['activity'] == 'ougc_pages')
+	{
+		global $cache;
 
-	$args['location_name'] = $lang->sprintf($lang->ougc_pages_wol, $ougc_pages->get_page_link($pagecache['pages'][$url]), htmlspecialchars_uni($page['name']));
+		$pagecache = $cache->read('ougc_pages');
+
+		$location = parse_url($args['user_activity']['location']);
+		$location['query'] = html_entity_decode($location['query']);
+		$location['query'] = explode('&', (string)$location['query']);
+
+		if(empty($location['query']))
+		{
+			return;
+		}
+
+		foreach($location['query'] as $query)
+		{
+			$param = explode('=', $query);
+			if($param[0] == 'page')
+			{
+				$url = $param[1];
+			}
+		}
+
+		if(empty($pagecache['pages'][$url]))
+		{
+			return;
+		}
+
+		$page = $ougc_pages->get_page($pagecache['pages'][$url]);
+
+		$args['location_name'] = $lang->sprintf($lang->ougc_pages_wol, $ougc_pages->get_page_link($pagecache['pages'][$url]), htmlspecialchars_uni($page['name']));
+	}
 }
 
 // Show the page
@@ -606,9 +620,34 @@ function ougc_pages_init()
 
 	$templatelist .= 'ougcpages, ougcpages_wrapper, ougcpages_navigation, ougcpages_category_list_item, ougcpages_category_list, ougcpages_navigation_previous, ougcpages_navigation_next';
 
+	// should be fixed as well
+	if(strpos($mybb->settings['ougc_pages_seo_scheme'], '?') !== false && isset($mybb->input['page']) && empty($mybb->input['page']) && count((array)$mybb->input) > 1)
+	{
+		$pick = null;
+		foreach($mybb->input as $k => $v)
+		{
+			if($k == 'page')
+			{
+				$pick = true;
+				continue;
+			}
+
+			if($pick === true)
+			{
+				$mybb->input['page'] = $k; // we assume second input to be the page
+				break;
+			}
+		}
+		unset($pick);
+	}
+
+	$mybb->cache->read('ougc_pages'); // TODO FIX THIS SHIT
+
 	$is_page = $mybb->get_input('page') && !empty($mybb->cache->cache['ougc_pages']['pages'][$mybb->get_input('page')]);
 
-	if($mybb->get_input('page'))
+		//var_dump($is_page, $mybb->input);exit;
+		
+	if($is_page)
 	{
 		if(!empty($mybb->cache->cache['ougc_pages']['pages'][$mybb->get_input('page')]))
 		{
@@ -635,8 +674,29 @@ function ougc_pages_init()
 			$ougc_pages->invalid_page = true;
 		}
 	}
-	elseif($mybb->get_input('category'))
+	elseif(isset($mybb->input['category']))
 	{
+		// should be fixed as well
+		if(strpos($mybb->settings['ougc_pages_seo_scheme_categories'], '?') !== false && empty($mybb->input['category']) && count((array)$mybb->input) > 1)
+		{
+			$pick = null;
+			foreach($mybb->input as $k => $v)
+			{
+				if($k == 'category')
+				{
+					$pick = true;
+					continue;
+				}
+
+				if($pick === true)
+				{
+					$mybb->input['category'] = $k; // we assume second input to be the category
+					break;
+				}
+			}
+			unset($pick);
+		}
+
 		if($category = $ougc_pages->get_category_by_url($mybb->get_input('category')))
 		{
 			#$templatelist .= ', ougcpages_category'.$category['cid'];
