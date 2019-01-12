@@ -4,7 +4,7 @@
  *
  *	OUGC Pages plugin (/admin/modules/config/ougc_pages.php)
  *	Author: Omar Gonzalez
- *	Copyright: © 2014 Omar Gonzalez
+ *	Copyright: © 2014 - 2019 Omar Gonzalez
  *
  *	Website: http://omarg.me
  *
@@ -536,8 +536,6 @@ if($mybb->get_input('manage') == 'pages')
 		$table->construct_header($lang->ougc_pages_form_visible, array('width' => '10%', 'class' => 'align_center'));
 		$table->construct_header($lang->options, array('width' => '15%', 'class' => 'align_center'));
 
-		$ougc_pages->build_limit();
-
 		$query = $db->simple_select('ougc_pages', 'COUNT(cid) AS pages', 'cid=\''.(int)$category['cid'].'\'');
 		$count = (int)$db->fetch_field($query, 'pages');
 
@@ -790,8 +788,6 @@ else
 	$table->construct_header($lang->ougc_pages_form_disporder, array('width' => '15%', 'class' => 'align_center'));
 	$table->construct_header($lang->ougc_pages_form_visible, array('width' => '10%', 'class' => 'align_center'));
 	$table->construct_header($lang->options, array('width' => '15%', 'class' => 'align_center'));
-
-	$ougc_pages->build_limit();
 
 	$query = $db->simple_select('ougc_pages_categories', 'COUNT(cid) AS categories');
 	$count = (int)$db->fetch_field($query, 'categories');

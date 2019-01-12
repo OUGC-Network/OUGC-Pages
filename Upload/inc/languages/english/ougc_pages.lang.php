@@ -4,7 +4,7 @@
  *
  *	OUGC Pages plugin (/inc/languages/english/ougc_pages.lang.php)
  *	Author: Omar Gonzalez
- *	Copyright: © 2014 Omar Gonzalez
+ *	Copyright: © 2014 - 2019 Omar Gonzalez
  *
  *	Website: http://omarg.me
  *
@@ -43,3 +43,4 @@ $l['ougc_pages_navigation_next'] = 'Next';
 
 // WOL
 $l['ougc_pages_wol'] = 'Viewing the <a href="{1}">{2}</a> page.';
+$l['ougc_pages_wol_cat'] = 'Viewing the <a href="{1}">{2}</a> category page.';

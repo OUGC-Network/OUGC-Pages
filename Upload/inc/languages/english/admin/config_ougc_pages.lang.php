@@ -4,7 +4,7 @@
  *
  *	OUGC Pages plugin (/inc/languages/english/admin/ougc_pages.lang.php)
  *	Author: Omar Gonzalez
- *	Copyright: © 2014 Omar Gonzalez
+ *	Copyright: © 2014 - 2019 Omar Gonzalez
  *
  *	Website: http://omarg.me
  *
@@ -40,8 +40,8 @@ $l['setting_ougc_pages_seo_scheme'] = 'Page URL Scheme';
 $l['setting_ougc_pages_seo_scheme_desc'] = 'Enter the Page URL scheme. Leave empty to disable SEO URLs for Pages.';
 $l['setting_ougc_pages_seo_scheme_categories'] = 'Category URL Scheme';
 $l['setting_ougc_pages_seo_scheme_categories_desc'] = 'Enter the Category URL scheme. Leave empty to disable SEO URLs for Categories.';
-//$l['setting_ougc_pages_perpage'] = 'Items Per Page';
-//$l['setting_ougc_pages_perpage_desc'] = 'Maximum number of items to show per page in the ACP list.';
+$l['setting_ougc_pages_perpage'] = 'Items Per Page';
+$l['setting_ougc_pages_perpage_desc'] = 'Maximum number of items to show per page in the ACP list.';
 
 // ACP
 $l['ougc_pages_manage'] = 'Manage Pages';
