@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MyBB PluginLibrary XML-Export :: 2014-08-10T22:32:21+00:00 -->
+<!-- MyBB PluginLibrary XML-Export :: 2019-01-13T11:40:26+01:00 -->
 <array>
   <element>
     <key>name</key>
@@ -15,7 +15,7 @@
   </element>
   <element>
     <key>groups</key>
-    <value>-1</value>
+    <value></value>
   </element>
   <element>
     <key>php</key>
@@ -239,7 +239,7 @@ exit;]]></value>
   </element>
   <element>
     <key>versioncode</key>
-    <value>1000</value>
+    <value type="INT">1819</value>
   </element>
 </array>
 <!-- End of file. -->

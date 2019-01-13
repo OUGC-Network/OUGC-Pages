@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MyBB PluginLibrary XML-Export :: 2019-01-13T11:24:47+01:00 -->
+<array>
+  <element>
+    <key>name</key>
+    <value>ShoutBox Page</value>
+  </element>
+  <element>
+    <key>description</key>
+    <value>Show your shoutbox in a separate page. Requires DVZ Shoutbox or Miuna Shout Box installed.</value>
+  </element>
+  <element>
+    <key>url</key>
+    <value>shoutbox</value>
+  </element>
+  <element>
+    <key>groups</key>
+    <value></value>
+  </element>
+  <element>
+    <key>php</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>wol</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>visible</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>wrapper</key>
+    <value>1</value>
+  </element>
+  <element>
+    <key>init</key>
+    <value>0</value>
+  </element>
+  <element>
+    <key>template</key>
+    <value><![CDATA[<?php
+
+// 1 = DVZ Shoutbox, 2 = Miuna Shout box
+define('SHOUTBOX_TYPE', 1);
+
+if(SHOUTBOX_TYPE == 1)
+{
+	$templates->cache('dvz_shoutbox,dvz_shoutbox_panel');
+
+	$message = 'This page is currently unavailable.';
+	if(class_exists('dvz_shoutbox'))
+	{
+        global $dvz_shoutbox;
+
+		dvz_shoutbox::load_window();
+
+		$message = $dvz_shoutbox;
+	}
+}
+else
+{
+	$templates->cache('templateShoutBox,templateShoutBoxGuest,codebutmiuna');
+
+	$message = 'This page is currently unavailable.';
+	if(function_exists('MiunaShout'))
+	{
+		global $settings, $miunashout, $codebutmiuna;
+
+		MiunaShout();
+
+		$message = $miunashout;
+	}
+}
+
+// Set-up page
+$bu_tmpl = $page['template'];
+$page['template'] = $message;
+$content = ougc_pages_show(true);
+$page['template'] = $bu_tmpl;
+
+eval('$page = "'.$templates->get('ougcpages_parser_test_page').'";');
+output_page($page);
+
+exit;]]></value>
+  </element>
+  <element>
+    <key>versioncode</key>
+    <value type="INT">1819</value>
+  </element>
+</array>
+<!-- End of file. -->
