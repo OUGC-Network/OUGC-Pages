@@ -173,6 +173,15 @@ function ougc_pages_activate()
 
 	/*~*~* RUN UPDATES START *~*~*/
 
+	if($plugins['pages'] <= 1819)
+	{
+		$db->update_query('ougc_pages', array('visible' => 0), "groups=''");
+		$db->update_query('ougc_pages_categories', array('visible' => ''), "groups=''");
+
+		$db->update_query('ougc_pages', array('groups' => 0), "groups='-1'");
+		$db->update_query('ougc_pages_categories', array('groups' => ''), "groups='-1'");
+	}
+
 	/*~*~* RUN UPDATES END *~*~*/
 
 	$plugins['pages'] = $info['versioncode'];
@@ -491,26 +500,22 @@ function ougc_pages_show(/*$portal=false*/)
 	$gids[] = $mybb->user['usergroup'];
 	$gids = array_filter(array_unique($gids));
 
-	$sqlwhere = 'visible=\'1\' AND cid=\''.(int)$category['cid'].'\' AND groups!=\'\' AND (';
+	$sqlwhere = 'visible=\'1\' AND cid=\''.(int)$category['cid'].'\' AND (groups=\'\'';
 	switch($db->type)
 	{
 		case 'pgsql':
 		case 'sqlite':
 			foreach($gids as $gid)
 			{
-				$or = '';
 				$gid = (int)$gid;
-				$sqlwhere .= $or.'\',\'||groups||\',\' LIKE \'%,'.$gid.',%\'';
-				$or = ' OR ';
+				$sqlwhere .= ' OR \',\'||groups||\',\' LIKE \'%,'.$gid.',%\'';
 			}
 			break;
 		default:
 			foreach($gids as $gid)
 			{
-				$or = '';
 				$gid = (int)$gid;
-				$sqlwhere .= $or.'CONCAT(\',\',groups,\',\') LIKE \'%,'.$gid.',%\'';
-				$or = ' OR ';
+				$sqlwhere .= ' OR CONCAT(\',\',groups,\',\') LIKE \'%,'.$gid.',%\'';
 			}
 			break;
 	}
