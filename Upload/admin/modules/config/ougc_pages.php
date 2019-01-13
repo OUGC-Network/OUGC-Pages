@@ -4,7 +4,7 @@
  *
  *	OUGC Pages plugin (/admin/modules/config/ougc_pages.php)
  *	Author: Omar Gonzalez
- *	Copyright: © 2014 Omar Gonzalez
+ *	Copyright: © 2014 - 2019 Omar Gonzalez
  *
  *	Website: http://omarg.me
  *
@@ -132,7 +132,7 @@ if($mybb->get_input('manage') == 'pages')
 
 		foreach(array('category', 'cid', 'name', 'description', 'url', 'groups', 'php', 'wol', 'disporder', 'wrapper', 'init', 'template', 'visible') as $key)
 		{
-			if(!isset($mybb->input[$key]) && isset($pages[$key]))
+			if(!isset($mybb->input[$key]))
 			{
 				if(isset($pages[$key]))
 				{
@@ -146,28 +146,10 @@ if($mybb->get_input('manage') == 'pages')
 			unset($key);
 		}
 
-		$group_checked = array('all' => '', 'custom' => '', 'none' => '');
-		if($mybb->get_input('groups_type') == 'all' || $mybb->get_input('groups') == -1)
-		{
-			$mybb->input['groups_type'] = 'all';
-			$mybb->input['groups'] = -1;
-			$group_checked['all'] = 'checked="checked"';
-		}
-		elseif($mybb->get_input('groups_type') == 'none' || $mybb->get_input('groups') == '' && !$mybb->get_input('groups', 2))
-		{
-			$mybb->input['groups_type'] = 'none';
-			$mybb->input['groups'] = '';
-			$group_checked['none'] = 'checked="checked"';
-		}
-		else
-		{
-			$mybb->input['groups_type'] = 'custom';
-			$mybb->input['groups'] = $ougc_pages->clean_ints($mybb->input['groups']);
-			$group_checked['custom'] = 'checked="checked"';
-		}
-
 		$page->output_header($lang->ougc_pages_manage);
 		$page->output_nav_tabs($sub_tabs, $add ? 'ougc_pages_add' : 'ougc_pages_edit');
+
+		$form_url = $ougc_pages->build_url(($add ? 'action=add' : array('action' => 'edit', 'pid' => $pages['pid'])));
 
 		if($mybb->request_method == 'post')
 		{
@@ -205,7 +187,7 @@ if($mybb->get_input('manage') == 'pages')
 					'name'			=> $mybb->get_input('name'),
 					'description'	=> $mybb->get_input('description'),
 					'url'			=> $url,
-					'groups'		=> $ougc_pages->clean_ints($mybb->input['groups'], true),
+					'groups'		=> $ougc_pages->clean_ints($mybb->get_input('groups', MyBB::INPUT_ARRAY), true),
 					'php'			=> $mybb->get_input('php', 1),
 					'wol'			=> $mybb->get_input('wol', 1),
 					'disporder'		=> $mybb->get_input('disporder', 1),
@@ -214,8 +196,15 @@ if($mybb->get_input('manage') == 'pages')
 					'init'			=> $mybb->get_input('init', 1),
 					'template'		=> $mybb->get_input('template')
 				), $mybb->get_input('pid', 1));
+
 				$ougc_pages->update_cache();
 				$ougc_pages->log_action();
+
+				if(!$add && $mybb->get_input('continue'))
+				{
+					$ougc_pages->set_url($form_url);
+				}
+
 				$ougc_pages->redirect($lang->{$lang_val});
 			}
 			else
@@ -224,7 +213,7 @@ if($mybb->get_input('manage') == 'pages')
 			}
 		}
 
-		$form = new Form($ougc_pages->build_url(($add ? 'action=add' : array('action' => 'edit', 'pid' => $pages['pid']))), 'post');
+		$form = new Form($form_url, 'post');
 		$form_container = new FormContainer($sub_tabs['ougc_pages_'.($add ? 'add' : 'edit')]['description']);
 
 		$form_container->output_row($lang->ougc_pages_form_category, $lang->ougc_pages_form_category_desc, $ougc_pages->generate_category_select('category', $mybb->get_input('cid', 1)));
@@ -232,38 +221,33 @@ if($mybb->get_input('manage') == 'pages')
 		$form_container->output_row($lang->ougc_pages_form_description.' <em>*</em>', $lang->ougc_pages_form_description_desc, $form->generate_text_box('description', $mybb->get_input('description')));
 		$form_container->output_row($lang->ougc_pages_form_url.' <em>*</em>', $lang->ougc_pages_form_url_desc, $form->generate_text_box('url', $mybb->get_input('url')));
 
-		ougc_print_selection_javascript();
+		$form_container->output_row($lang->ougc_pages_form_groups, $lang->ougc_pages_form_groups_desc, $form->generate_group_select('groups[]', explode(',', $mybb->get_input('groups', MyBB::INPUT_STRING)), array('id' => 'groups', 'multiple' => true, 'size' => 5)), '', array(), array('id' => 'row_groups'));
 
-		$groups_select = "
-		<dl style=\"margin-top: 0; margin-bottom: 0; width: 100%\">
-			<dt><label style=\"display: block;\"><input type=\"radio\" name=\"groups_type\" value=\"all\" {$group_checked['all']} class=\"groups_forums_groups_check\" onclick=\"checkAction('groups');\" style=\"vertical-align: middle;\" /> <strong>{$lang->all_groups}</strong></label></dt>
-			<dt><label style=\"display: block;\"><input type=\"radio\" name=\"groups_type\" value=\"custom\" {$group_checked['custom']} class=\"groups_forums_groups_check\" onclick=\"checkAction('groups');\" style=\"vertical-align: middle;\" /> <strong>{$lang->select_groups}</strong></label></dt>
-			<dd style=\"margin-top: 4px;\" id=\"groups_forums_groups_custom\" class=\"groups_forums_groups\">
-				<table cellpadding=\"4\">
-					<tr>
-						<td valign=\"top\"><small>{$lang->groups_colon}</small></td>
-						<td>".$form->generate_group_select('groups[]', $mybb->get_input('groups', 2), array('multiple' => true, 'size' => 5))."</td>
-					</tr>
-				</table>
-			</dd>
-			<dt><label style=\"display: block;\"><input type=\"radio\" name=\"groups_type\" value=\"none\" {$group_checked['none']} class=\"groups_forums_groups_check\" onclick=\"checkAction('groups');\" style=\"vertical-align: middle;\" /> <strong>{$lang->none}</strong></label></dt>
-		</dl>
-		<script type=\"text/javascript\">
-			checkAction('groups');
-		</script>";
-
-		$form_container->output_row($lang->ougc_pages_form_groups, $lang->ougc_pages_form_groups_desc, $groups_select, '', array(), array('id' => 'row_groups'));
-
-		$form_container->output_row($lang->ougc_pages_form_php, $lang->ougc_pages_form_php_desc, $form->generate_yes_no_radio('php', $mybb->get_input('php', 1)));
 		$form_container->output_row($lang->ougc_pages_form_wol, $lang->ougc_pages_form_wol_desc, $form->generate_yes_no_radio('wol', $mybb->get_input('wol', 1)));
 		$form_container->output_row($lang->ougc_pages_form_visible, $lang->ougc_pages_form_visible_desc, $form->generate_yes_no_radio('visible', $mybb->get_input('visible', 1)));
 		$form_container->output_row($lang->ougc_pages_form_wrapper, $lang->ougc_pages_form_wrapper_desc, $form->generate_yes_no_radio('wrapper', $mybb->get_input('wrapper', 1)));
+		$form_container->output_row($lang->ougc_pages_form_php, $lang->ougc_pages_form_php_desc, $form->generate_yes_no_radio('php', $mybb->get_input('php', 1)));
 		$form_container->output_row($lang->ougc_pages_form_init, $lang->ougc_pages_form_init_desc, $form->generate_yes_no_radio('init', $mybb->get_input('init', 1)));
 		$form_container->output_row($lang->ougc_pages_form_disporder, $lang->ougc_pages_form_disporder_desc, $form->generate_text_box('disporder', $mybb->get_input('disporder', 1), array('style' => 'text-align: center; width: 30px;" maxlength="5')));
 		$form_container->output_row($lang->ougc_pages_form_template, $lang->ougc_pages_form_template_desc, $form->generate_text_area('template', $mybb->get_input('template'), array('rows' => 5, 'id' => 'template', 'class' => '', 'style' => 'width: 100%; height: 500px;')));
 
 		$form_container->end();
-		$form->output_submit_wrapper(array($form->generate_submit_button($lang->ougc_pages_button_submit), $form->generate_reset_button($lang->reset)));
+
+		$buttons = array(
+			$form->generate_submit_button($lang->ougc_pages_button_submit_continue, array('name' => 'continue')),
+			$form->generate_submit_button($lang->ougc_pages_button_submit),
+			$form->generate_reset_button($lang->reset)
+		);
+
+		if($add)
+		{
+			$buttons = array(
+				$form->generate_submit_button($lang->ougc_pages_button_submit),
+				$form->generate_reset_button($lang->reset)
+			);
+		}
+
+		$form->output_submit_wrapper($buttons);
 		$form->end();
 
 		if(!empty($admin_options['codepress']))
@@ -344,7 +328,7 @@ if($mybb->get_input('manage') == 'pages')
 			'init'			=> $page['init'],
 			'template'		=> $page['template'],
 			'versioncode'	=> $info['versioncode']
-		), 'OUGC_Pages_'.$page['name'].'_'.$info['versioncode']);
+		), 'OUGC_Pages_'.$page['name'].'_'.$info['versioncode'].'.xml');
 	}
 	elseif($mybb->get_input('action') == 'import')
 	{
@@ -463,7 +447,7 @@ if($mybb->get_input('manage') == 'pages')
 							'name'			=> (string)$tree['pagemanager']['page']['name']['value'],
 							'description'	=> '',
 							'url'			=> (string)$tree['pagemanager']['page']['url']['value'],
-							'groups'		=> -1,
+							'groups'		=> '',
 							'php'			=> !isset($tree['pagemanager']['page']['framework']['value']) || !(int)$tree['pagemanager']['page']['framework']['value'] ? 1 : 0,
 							'wol'			=> !isset($tree['pagemanager']['page']['online']['value']) || (int)$tree['pagemanager']['page']['online']['value'] ? 1 : 0,
 							'visible'		=> (int)$tree['pagemanager']['page']['enabled']['value'],
@@ -488,7 +472,7 @@ if($mybb->get_input('manage') == 'pages')
 						'cid'			=> $category['cid'],
 						'name'			=> $xml_import['name'],
 						'description'	=> $xml_import['description'],
-						'groups'		=> $xml_import['groups'],
+						'groups'		=> $xml_import['groups'] == -1 ? '' : $xml_import['groups'],
 						'php'			=> $xml_import['php'],
 						'url'			=> uniqid(),
 						'wol'			=> $xml_import['wol'],
@@ -535,8 +519,6 @@ if($mybb->get_input('manage') == 'pages')
 		$table->construct_header($lang->ougc_pages_form_disporder, array('width' => '15%', 'class' => 'align_center'));
 		$table->construct_header($lang->ougc_pages_form_visible, array('width' => '10%', 'class' => 'align_center'));
 		$table->construct_header($lang->options, array('width' => '15%', 'class' => 'align_center'));
-
-		$ougc_pages->build_limit();
 
 		$query = $db->simple_select('ougc_pages', 'COUNT(cid) AS pages', 'cid=\''.(int)$category['cid'].'\'');
 		$count = (int)$db->fetch_field($query, 'pages');
@@ -609,9 +591,9 @@ elseif($mybb->get_input('action') == 'add' || $mybb->get_input('action') == 'edi
 		$page->add_breadcrumb_item(strip_tags($category['name']));
 	}
 
-	foreach(array('name', 'description', 'groups', 'url', 'disporder'/*, 'breadcrumb', 'navigation'*/, 'visible') as $key)
+	foreach(array('name', 'description', 'groups', 'url', 'disporder', 'breadcrumb'/*, 'navigation'*/, 'visible') as $key)
 	{
-		if(!isset($mybb->input[$key]) && isset($category[$key]))
+		if(!isset($mybb->input[$key]))
 		{
 			if(isset($category[$key]))
 			{
@@ -623,26 +605,6 @@ elseif($mybb->get_input('action') == 'add' || $mybb->get_input('action') == 'edi
 			}
 		}
 		unset($key);
-	}
-
-	$group_checked = array('all' => '', 'custom' => '', 'none' => '');
-	if($mybb->get_input('groups_type') == 'all' || $mybb->get_input('groups') == -1)
-	{
-		$mybb->input['groups_type'] = 'all';
-		$mybb->input['groups'] = -1;
-		$group_checked['all'] = 'checked="checked"';
-	}
-	elseif($mybb->get_input('groups_type') == 'none' || $mybb->get_input('groups') == '' && !$mybb->get_input('groups', 2))
-	{
-		$mybb->input['groups_type'] = 'none';
-		$mybb->input['groups'] = '';
-		$group_checked['none'] = 'checked="checked"';
-	}
-	else
-	{
-		$mybb->input['groups_type'] = 'custom';
-		$mybb->input['groups'] = $ougc_pages->clean_ints($mybb->input['groups']);
-		$group_checked['custom'] = 'checked="checked"';
 	}
 
 	$page->output_header($lang->ougc_pages_manage);
@@ -683,12 +645,13 @@ elseif($mybb->get_input('action') == 'add' || $mybb->get_input('action') == 'edi
 				'name'			=> $mybb->get_input('name'),
 				'description'	=> $mybb->get_input('description'),
 				'url'			=> $url,
-				'groups'		=> $ougc_pages->clean_ints($mybb->input['groups'], true),
+				'groups'		=> $ougc_pages->clean_ints($mybb->get_input('groups', MyBB::INPUT_ARRAY), true),
 				'disporder'		=> $mybb->get_input('disporder', 1),
 				'visible'		=> $mybb->get_input('visible', 1),
-				/*'breadcrumb'	=> $mybb->get_input('breadcrumb', 1),
-				'navigation'	=> $mybb->get_input('navigation', 1)*/
+				'breadcrumb'	=> $mybb->get_input('breadcrumb', 1),
+				/*'navigation'	=> $mybb->get_input('navigation', 1)*/
 			), $mybb->get_input('cid', 1));
+
 			$ougc_pages->update_cache();
 			$ougc_pages->log_action();
 			$ougc_pages->redirect($lang->{$lang_val});
@@ -706,30 +669,10 @@ elseif($mybb->get_input('action') == 'add' || $mybb->get_input('action') == 'edi
 	$form_container->output_row($lang->ougc_pages_form_description.' <em>*</em>', $lang->ougc_pages_form_description_desc, $form->generate_text_box('description', $mybb->get_input('description')));
 	$form_container->output_row($lang->ougc_pages_form_url.' <em>*</em>', $lang->ougc_pages_form_url_desc, $form->generate_text_box('url', $mybb->get_input('url')));
 
-	ougc_print_selection_javascript();
-
-	$groups_select = "
-	<dl style=\"margin-top: 0; margin-bottom: 0; width: 100%\">
-		<dt><label style=\"display: block;\"><input type=\"radio\" name=\"groups_type\" value=\"all\" {$group_checked['all']} class=\"groups_forums_groups_check\" onclick=\"checkAction('groups');\" style=\"vertical-align: middle;\" /> <strong>{$lang->all_groups}</strong></label></dt>
-		<dt><label style=\"display: block;\"><input type=\"radio\" name=\"groups_type\" value=\"custom\" {$group_checked['custom']} class=\"groups_forums_groups_check\" onclick=\"checkAction('groups');\" style=\"vertical-align: middle;\" /> <strong>{$lang->select_groups}</strong></label></dt>
-		<dd style=\"margin-top: 4px;\" id=\"groups_forums_groups_custom\" class=\"groups_forums_groups\">
-			<table cellpadding=\"4\">
-				<tr>
-					<td valign=\"top\"><small>{$lang->groups_colon}</small></td>
-					<td>".$form->generate_group_select('groups[]', $mybb->get_input('groups', 2), array('multiple' => true, 'size' => 5))."</td>
-				</tr>
-			</table>
-		</dd>
-		<dt><label style=\"display: block;\"><input type=\"radio\" name=\"groups_type\" value=\"none\" {$group_checked['none']} class=\"groups_forums_groups_check\" onclick=\"checkAction('groups');\" style=\"vertical-align: middle;\" /> <strong>{$lang->none}</strong></label></dt>
-	</dl>
-	<script type=\"text/javascript\">
-		checkAction('groups');
-	</script>";
-
-	$form_container->output_row($lang->ougc_pages_form_groups, $lang->ougc_pages_form_groups_desc, $groups_select, '', array(), array('id' => 'row_groups'));
+	$form_container->output_row($lang->ougc_pages_form_groups, $lang->ougc_pages_form_groups_desc, $form->generate_group_select('groups[]', explode(',', $mybb->get_input('groups', MyBB::INPUT_STRING)), array('id' => 'groups', 'multiple' => true, 'size' => 5)), '', array(), array('id' => 'row_groups'));
 
 	$form_container->output_row($lang->ougc_pages_form_visible, $lang->ougc_pages_form_visible_desc, $form->generate_yes_no_radio('visible', $mybb->get_input('visible', 1)));
-	#$form_container->output_row($lang->ougc_pages_form_breadcrumb, $lang->ougc_pages_form_breadcrumb_desc, $form->generate_yes_no_radio('breadcrumb', $mybb->get_input('breadcrumb', 1)));
+	$form_container->output_row($lang->ougc_pages_form_breadcrumb, $lang->ougc_pages_form_breadcrumb_desc, $form->generate_yes_no_radio('breadcrumb', $mybb->get_input('breadcrumb', 1)));
 	#$form_container->output_row($lang->ougc_pages_form_navigation, $lang->ougc_pages_form_navigation_desc, $form->generate_yes_no_radio('navigation', $mybb->get_input('navigation', 1)));
 	$form_container->output_row($lang->ougc_pages_form_disporder, $lang->ougc_pages_form_disporder_desc, $form->generate_text_box('disporder', $mybb->get_input('disporder', 1), array('style' => 'text-align: center; width: 30px;" maxlength="5')));
 
@@ -790,8 +733,6 @@ else
 	$table->construct_header($lang->ougc_pages_form_disporder, array('width' => '15%', 'class' => 'align_center'));
 	$table->construct_header($lang->ougc_pages_form_visible, array('width' => '10%', 'class' => 'align_center'));
 	$table->construct_header($lang->options, array('width' => '15%', 'class' => 'align_center'));
-
-	$ougc_pages->build_limit();
 
 	$query = $db->simple_select('ougc_pages_categories', 'COUNT(cid) AS categories');
 	$count = (int)$db->fetch_field($query, 'categories');
