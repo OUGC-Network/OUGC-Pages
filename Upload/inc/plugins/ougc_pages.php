@@ -76,7 +76,7 @@ function ougc_pages_info()
 // _activate() routine
 function ougc_pages_activate()
 {
-	global $PL, $lang, $cache;
+	global $PL, $lang, $cache, $db;
 	ougc_pages_deactivate();
 
 	// Add settings group

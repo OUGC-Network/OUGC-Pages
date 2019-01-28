@@ -15,4 +15,4 @@ Any contribution is welcome.
 
 Thanks for downloading and using my plugins, I really appreciate it!
 
-[![Analytics](https://ga-beacon.appspot.com/UA-54127252-4/OUGC-Pages/README?flat&useReferer)](https://github.com/igrigorik/ga-beacon)
+[![Analytics](https://ga-beacon.appspot.com/UA-133144685-1/OUGC-Pages/?flat&useReferer)](https://github.com/igrigorik/ga-beacon)
