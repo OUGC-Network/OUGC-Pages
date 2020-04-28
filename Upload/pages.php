@@ -4,9 +4,9 @@
  *
  *	OUGC Pages plugin (/pages.php)
  *	Author: Omar Gonzalez
- *	Copyright: © 2014 - 2019 Omar Gonzalez
+ *	Copyright: © 2014 - 2020 Omar Gonzalez
  *
- *	Website: http://omarg.me
+ *	Website: https://ougc.network
  *
  *	Create additional pages directly from the ACP.
  *

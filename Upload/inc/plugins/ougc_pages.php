@@ -4,9 +4,9 @@
  *
  *	OUGC Pages plugin (/inc/plugins/ougc_pages.php)
  *	Author: Omar Gonzalez
- *	Copyright: © 2014 - 2019 Omar Gonzalez
+ *	Copyright: © 2014 - 2020 Omar Gonzalez
  *
- *	Website: http://omarg.me
+ *	Website: https://ougc.network
  *
  *	Create additional pages directly from the ACP.
  *
@@ -59,9 +59,9 @@ function ougc_pages_info()
 	return array(
 		'name'			=> 'OUGC Pages',
 		'description'	=> $lang->setting_group_ougc_pages_desc,
-		'website'		=> 'https://omarg.me/thread?public/plugins/mybb-ougc-pages',
+		'website'		=> 'https://ougc.network',
 		'author'		=> 'Omar G.',
-		'authorsite'	=> 'http://omarg.me',
+		'authorsite'	=> 'https://ougc.network',
 		'version'		=> '1.8.19',
 		'versioncode'	=> 1819,
 		'compatibility'	=> '18*',
@@ -654,7 +654,7 @@ function ougc_pages_init()
 		return;
 	}*/
 
-	if(THIS_SCRIPT != 'pages.php')
+	if((defined(THIS_SCRIPT) && THIS_SCRIPT == 'pages.php'))
 	{
 		return;
 	}
