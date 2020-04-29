@@ -106,7 +106,7 @@ $l['ougc_pages_view_page'] = 'View';
 
 // ACP Module: Messages
 $l['ougc_pages_error_update'] = 'OUGC Pages requires updating. Please deactivate and re-activate the plug-in to fix this issue.';
-$l['ougc_pages_error_add'] = 'There was a error while creating a new category';
+$l['ougc_pages_error_add'] = 'There was a error while creating a new category.';
 $l['ougc_pages_error_invalidname'] = 'The inserted name is invalid.';
 $l['ougc_pages_error_invaliddescription'] = 'The inserted description is invalid.';
 $l['ougc_pages_error_invalidcategory'] = 'The selected category is invalid.';
