@@ -4,9 +4,9 @@
  *
  *	OUGC Pages plugin (/inc/languages/english/admin/ougc_pages.lang.php)
  *	Author: Omar Gonzalez
- *	Copyright: © 2014 - 2019 Omar Gonzalez
+ *	Copyright: © 2014 - 2020 Omar Gonzalez
  *
- *	Website: http://omarg.me
+ *	Website: https://ougc.network
  *
  *	Create additional pages directly from the ACP.
  *
@@ -80,6 +80,8 @@ $l['ougc_pages_form_visible'] = 'Active';
 $l['ougc_pages_form_visible_desc'] = 'Whether if this category or page is active or disabled.';
 $l['ougc_pages_form_breadcrumb'] = 'Display in Breadcrumb';
 $l['ougc_pages_form_breadcrumb_desc'] = 'Whether if you want to display this category in the navigation breadcrumb.';
+$l['ougc_pages_form_wrapucp'] = 'Add to UserCP';
+$l['ougc_pages_form_wrapucp_desc'] = 'Whether if you want to display this category in the navigation panel in the User Control Panel.';
 /*$l['ougc_pages_form_navigation'] = 'Show Navigation';
 $l['ougc_pages_form_navigation_desc'] = 'Whether if to show a previous/next pagination in this category in pages.';*/
 $l['ougc_pages_form_wol'] = 'Show In Who Is On-line List';
@@ -104,7 +106,7 @@ $l['ougc_pages_view_page'] = 'View';
 
 // ACP Module: Messages
 $l['ougc_pages_error_update'] = 'OUGC Pages requires updating. Please deactivate and re-activate the plug-in to fix this issue.';
-$l['ougc_pages_error_add'] = 'There was a error while creating a new category';
+$l['ougc_pages_error_add'] = 'There was a error while creating a new category.';
 $l['ougc_pages_error_invalidname'] = 'The inserted name is invalid.';
 $l['ougc_pages_error_invaliddescription'] = 'The inserted description is invalid.';
 $l['ougc_pages_error_invalidcategory'] = 'The selected category is invalid.';

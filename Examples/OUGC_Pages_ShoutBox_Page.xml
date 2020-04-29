@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MyBB PluginLibrary XML-Export :: 2019-01-13T11:24:47+01:00 -->
+<!-- MyBB PluginLibrary XML-Export :: 2020-04-29T00:30:57+00:00 -->
 <array>
   <element>
     <key>name</key>
@@ -86,7 +86,7 @@ exit;]]></value>
   </element>
   <element>
     <key>versioncode</key>
-    <value type="INT">1819</value>
+    <value type="INT">1820</value>
   </element>
 </array>
 <!-- End of file. -->
