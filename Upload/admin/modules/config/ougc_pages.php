@@ -591,7 +591,7 @@ elseif($mybb->get_input('action') == 'add' || $mybb->get_input('action') == 'edi
 		$page->add_breadcrumb_item(strip_tags($category['name']));
 	}
 
-	foreach(array('name', 'description', 'groups', 'url', 'disporder', 'breadcrumb'/*, 'navigation'*/, 'visible') as $key)
+	foreach(array('name', 'description', 'groups', 'url', 'disporder', 'breadcrumb', 'wrapucp'/*, 'navigation'*/, 'visible') as $key)
 	{
 		if(!isset($mybb->input[$key]))
 		{
@@ -649,6 +649,7 @@ elseif($mybb->get_input('action') == 'add' || $mybb->get_input('action') == 'edi
 				'disporder'		=> $mybb->get_input('disporder', 1),
 				'visible'		=> $mybb->get_input('visible', 1),
 				'breadcrumb'	=> $mybb->get_input('breadcrumb', 1),
+				'wrapucp'	=> $mybb->get_input('wrapucp', 1),
 				/*'navigation'	=> $mybb->get_input('navigation', 1)*/
 			), $mybb->get_input('cid', 1));
 
@@ -673,6 +674,7 @@ elseif($mybb->get_input('action') == 'add' || $mybb->get_input('action') == 'edi
 
 	$form_container->output_row($lang->ougc_pages_form_visible, $lang->ougc_pages_form_visible_desc, $form->generate_yes_no_radio('visible', $mybb->get_input('visible', 1)));
 	$form_container->output_row($lang->ougc_pages_form_breadcrumb, $lang->ougc_pages_form_breadcrumb_desc, $form->generate_yes_no_radio('breadcrumb', $mybb->get_input('breadcrumb', 1)));
+	$form_container->output_row($lang->ougc_pages_form_wrapucp, $lang->ougc_pages_form_wrapucp_desc, $form->generate_yes_no_radio('wrapucp', $mybb->get_input('wrapucp', 1)));
 	#$form_container->output_row($lang->ougc_pages_form_navigation, $lang->ougc_pages_form_navigation_desc, $form->generate_yes_no_radio('navigation', $mybb->get_input('navigation', 1)));
 	$form_container->output_row($lang->ougc_pages_form_disporder, $lang->ougc_pages_form_disporder_desc, $form->generate_text_box('disporder', $mybb->get_input('disporder', 1), array('style' => 'text-align: center; width: 30px;" maxlength="5')));
 

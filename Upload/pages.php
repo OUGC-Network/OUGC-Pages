@@ -30,9 +30,10 @@
 // Boring stuff..
 define('IN_MYBB', 1);
 define('THIS_SCRIPT', 'pages.php');
-$templatelist = '';
+$templatelist = 'usercp_nav_messenger, usercp_nav_messenger_tracking, usercp_nav_messenger_compose, usercp_nav_messenger_folder, usercp_nav_changename, usercp_nav_editsignature, usercp_nav_profile, usercp_nav_attachments, usercp_nav_misc, ougcpages_wrapper_ucp_nav_item, ougcpages_wrapper_ucp_nav, usercp_nav_home, usercp_nav, ougcpages_wrapper_ucp,ougcpages_wrapper_ucp';
 require_once './global.php';
 
+$plugins->run_hooks('ougc_pages_start');
 
 if($mybb->get_input('page') && !$mybb->get_input('page', 1) || $mybb->get_input('category'))
 {

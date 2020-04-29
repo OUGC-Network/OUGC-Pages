@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MyBB PluginLibrary XML-Export :: 2019-01-13T11:24:46+01:00 -->
+<!-- MyBB PluginLibrary XML-Export :: 2020-04-29T00:31:02+00:00 -->
 <array>
   <element>
     <key>name</key>
@@ -327,6 +327,17 @@ $templates->cache['ougcpages_sticky_threads_list'] or $templates->cache['ougcpag
 </div>
 <br class="clear" />';
 
+$templates->cache['ougcpages_sticky_threads_list_empty'] or $templates->cache['ougcpages_sticky_threads_list_empty'] = '<tr class="inline_row">
+	<td class="{$bgcolor}" colspan="4">
+		{$lang->nothreads}
+	</td>
+</tr>';
+
+if(!$threads)
+{
+	$threads = eval($templates->render("ougcpages_sticky_threads_list_empty"));
+}
+
 eval("\$threadslist = \"".$templates->get("ougcpages_sticky_threads_list")."\";");
 
 $templates->cache['ougcpages_sticky_threads'] or $templates->cache['ougcpages_sticky_threads'] = '<html>
@@ -349,7 +360,7 @@ exit;]]></value>
   </element>
   <element>
     <key>versioncode</key>
-    <value type="INT">1819</value>
+    <value type="INT">1820</value>
   </element>
 </array>
 <!-- End of file. -->

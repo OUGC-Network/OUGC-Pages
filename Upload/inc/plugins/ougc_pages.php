@@ -45,6 +45,7 @@ else
 {
 	$plugins->add_hook('fetch_wol_activity_end', 'ougc_pages_fetch_wol_activity_end');
 	$plugins->add_hook('build_friendly_wol_location_end', 'ougc_pages_build_friendly_wol_location_end');
+	$plugins->add_hook('usercp_menu', 'ougc_pages_usercp_menu', 40);
 }
 
 // PLUGINLIBRARY
@@ -62,8 +63,8 @@ function ougc_pages_info()
 		'website'		=> 'https://ougc.network',
 		'author'		=> 'Omar G.',
 		'authorsite'	=> 'https://ougc.network',
-		'version'		=> '1.8.19',
-		'versioncode'	=> 1819,
+		'version'		=> '1.8.20',
+		'versioncode'	=> 1820,
 		'compatibility'	=> '18*',
 		'codename'		=> 'ougc_pages',
 		'pl'			=> array(
@@ -76,8 +77,8 @@ function ougc_pages_info()
 // _activate() routine
 function ougc_pages_activate()
 {
-	global $PL, $lang, $cache, $db;
-	ougc_pages_deactivate();
+	global $PL, $lang, $cache, $db, $ougc_pages;
+	ougc_pages_pl_check();
 
 	// Add settings group
 	$PL->settings('ougc_pages', $lang->setting_group_ougc_pages, $lang->setting_group_ougc_pages_desc, array(
@@ -151,7 +152,29 @@ function ougc_pages_activate()
 </td>
 </tr>
 </table>
-<br class="clear" />'
+<br class="clear" />',
+	'wrapper_ucp'	=> '<table width="100%" border="0" align="center">
+	<tr>
+		{$usercpnav}
+		<td valign="top">
+			{$content}
+		</td>
+	</tr>
+</table>',
+	'wrapper_ucp_nav'	=> '<tbody>
+<tr>
+	<td class="tcat tcat_menu tcat_collapse{$img}">
+		<div class="expcolimage"><img src="{$theme[\'imgdir\']}/collapse{$img}.png" id="{$collapse_id}_img" class="expander" alt="{$expaltext}" title="{$expaltext}" /></div>
+		<div><span class="smalltext"><strong>{$category[\'name\']}</strong></span></div>
+	</td>
+</tr>
+</tbody>
+<tbody style="{$_e}" id="{$collapse_id}_e">
+	{$navs}
+</tbody>',
+	'wrapper_ucp_nav_item'	=> '<tr>
+	<td class="trow1 smalltext"><a href="{$page_link}" class="usercp_nav_item usercp_nav_drafts">{$page[\'name\']}</a></td>
+</tr>',
 	));
 
 	// Update administrator permissions
@@ -172,6 +195,11 @@ function ougc_pages_activate()
 	}
 
 	/*~*~* RUN UPDATES START *~*~*/
+	$ougc_pages->_db_verify_tables();
+	$ougc_pages->_db_verify_columns();
+	$ougc_pages->_db_verify_indexes();
+
+	$ougc_pages->_verify_stylesheet();
 
 	if($plugins['pages'] <= 1819)
 	{
@@ -186,6 +214,8 @@ function ougc_pages_activate()
 
 	$plugins['pages'] = $info['versioncode'];
 	$cache->update('ougc_plugins', $plugins);
+
+	//find_replace_templatesets('index', '#'.preg_quote('{$forums}').'#', "{\$hello}\n{\$forums}");
 }
 
 // _deactivate() routine
@@ -200,9 +230,12 @@ function ougc_pages_deactivate()
 // _install() routine
 function ougc_pages_install()
 {
-	global $db;
+	global $ougc_pages;
 
-	$collation = $db->build_create_table_collation();
+	// Create our table(s)
+	$ougc_pages->_db_verify_tables();
+	$ougc_pages->_db_verify_columns();
+	$ougc_pages->_db_verify_indexes();
 
 	/*$dir = dirname(__FILE__).'/ougc_pages/';
 
@@ -220,61 +253,42 @@ function ougc_pages_install()
 
 		closedir($directory);
 	}*/
-
-	// Create our table(s)
-	$db->write_query("CREATE TABLE `".TABLE_PREFIX."ougc_pages` (
-			`pid` int UNSIGNED NOT NULL AUTO_INCREMENT,
-			`cid` int NOT NULL DEFAULT '0',
-			`name` varchar(100) NOT NULL DEFAULT '',
-			`description` varchar(255) NOT NULL DEFAULT '',
-			`url` varchar(100) NOT NULL DEFAULT '',
-			`groups` text NOT NULL,
-			`php` tinyint(1) NOT NULL DEFAULT '0',
-			`wol` tinyint(1) NOT NULL DEFAULT '1',
-			`disporder` tinyint(1) NOT NULL DEFAULT '0',
-			`visible` tinyint(1) NOT NULL DEFAULT '1',
-			`wrapper` tinyint(1) NOT NULL DEFAULT '1',
-			`init` tinyint(1) NOT NULL DEFAULT '1',
-			`template` text NOT NULL,
-			`dateline` int(10) NOT NULL DEFAULT '0',
-			PRIMARY KEY (`pid`),
-			UNIQUE KEY `url` (`url`)
-		) ENGINE=MyISAM{$collation};"
-	);
-
-	$db->write_query("CREATE TABLE `".TABLE_PREFIX."ougc_pages_categories` (
-			`cid` int UNSIGNED NOT NULL AUTO_INCREMENT,
-			`name` varchar(100) NOT NULL DEFAULT '',
-			`description` varchar(255) NOT NULL DEFAULT '',
-			`url` varchar(100) NOT NULL DEFAULT '',
-			`groups` text NOT NULL,
-			`disporder` smallint NOT NULL DEFAULT '0',
-			`visible` tinyint(1) NOT NULL DEFAULT '1',
-			`breadcrumb` tinyint(1) NOT NULL DEFAULT '1',
-			`navigation` tinyint(1) NOT NULL DEFAULT '0',
-			PRIMARY KEY (`cid`),
-			UNIQUE KEY `url` (`url`)
-		) ENGINE=MyISAM{$collation};"
-	);
 }
 
 // _is_installed() routine
 function ougc_pages_is_installed()
 {
-	global $db;
+	global $db, $ougc_pages;
 
-	return $db->table_exists('ougc_pages');
+	foreach($ougc_pages->_db_tables() as $name => $table)
+	{
+		$installed = $db->table_exists($name);
+		break;
+	}
+
+	return $installed;
 }
 
 // _uninstall() routine
 function ougc_pages_uninstall()
 {
-	global $db, $PL, $cache;
+	global $db, $PL, $cache, $ougc_pages;
 	ougc_pages_pl_check();
 
 	// Drop DB entries
-	$db->drop_table('ougc_pages');
-	$db->drop_table('ougc_pages_categories');
+	foreach($ougc_pages->_db_tables() as $name => $table)
+	{
+		$db->drop_table($name);
+	}
+	foreach($ougc_pages->_db_columns() as $table => $columns)
+	{
+		foreach($columns as $name => $definition)
+		{
+			!$db->field_exists($name, $table) || $db->drop_column($table, $name);
+		}
+	}
+
+	$ougc_pages->_remove_from_stylesheet();
 
 	$PL->cache_delete('ougc_pages');
 	$PL->settings_delete('ougc_pages');
@@ -491,6 +505,13 @@ function ougc_pages_show(/*$portal=false*/)
 
 	$category['name'] = htmlspecialchars_uni($category['name']);
 
+	if($category['wrapucp'])
+	{
+		$lang->load('usercp');
+
+		add_breadcrumb($lang->nav_usercp, "usercp.php");
+	}
+
 	if($category['breadcrumb'])
 	{
 		add_breadcrumb($category['name'], $ougc_pages->get_category_link($category['cid']));
@@ -603,6 +624,17 @@ function ougc_pages_show(/*$portal=false*/)
 		return $content;
 	}*/
 
+	if($category['wrapucp'])
+	{
+		global $usercpnav;
+
+		require_once MYBB_ROOT.'inc/functions_user.php';
+
+		usercp_menu();
+	
+		eval('$content = "'.$templates->get('ougcpages_wrapper_ucp').'";');
+	}
+
 	eval('$page = "'.$templates->get('ougcpages').'";');
 
 	output_page($page);
@@ -654,7 +686,7 @@ function ougc_pages_init()
 		return;
 	}*/
 
-	if((defined(THIS_SCRIPT) && THIS_SCRIPT == 'pages.php'))
+	if(defined('IN_ADMINCP') || (defined(THIS_SCRIPT) && THIS_SCRIPT == 'pages.php'))
 	{
 		return;
 	}
@@ -693,7 +725,7 @@ function ougc_pages_init()
 
 	$mybb->cache->read('ougc_pages'); // TODO FIX THIS SHIT
 
-	if($is_page = isset($mybb->input['page']))
+	if($is_page = !empty($mybb->input['page']))
 	{
 		!empty($mybb->cache->cache['ougc_pages']['pages'][$mybb->get_input('page')]) or $ougc_pages->invalid_page = true;
 	}
@@ -726,7 +758,7 @@ function ougc_pages_init()
 			$ougc_pages->invalid_page = true;
 		}
 	}
-	elseif(isset($mybb->input['category']))
+	elseif(!empty($mybb->input['category']))
 	{
 		// should be fixed as well
 		if(strpos($mybb->settings['ougc_pages_seo_scheme_categories'], '?') !== false && empty($mybb->input['category']) && count((array)$mybb->input) > 1)
@@ -805,6 +837,84 @@ function ougc_pages_init()
 		$plugins->add_hook('portal_start', 'ougc_pages_portal_start', 999999999);
 		$plugins->add_hook('portal_end', 'ougc_pages_portal_end');
 	}*/
+}
+
+function ougc_pages_usercp_menu()
+{
+	global $cache, $db, $ougc_pages, $templates, $mybb, $usercpmenu, $collapsed, $theme, $collapsedimg, $collapsed, $collapse;
+
+	$pages_cache = $cache->read('ougc_pages');
+
+	foreach($pages_cache['categories'] as $cid => $category)
+	{
+		if(!$category['wrapucp'])
+		{
+			continue;
+		}
+
+		$gids = explode(',', $mybb->user['additionalgroups']);
+		$gids[] = $mybb->user['usergroup'];
+		$gids = array_filter(array_unique($gids));
+
+		$sqlwhere = 'visible=\'1\' AND cid=\''.(int)$cid.'\' AND (groups=\'\'';
+		switch($db->type)
+		{
+			case 'pgsql':
+			case 'sqlite':
+				foreach($gids as $gid)
+				{
+					$gid = (int)$gid;
+					$sqlwhere .= ' OR \',\'||groups||\',\' LIKE \'%,'.$gid.',%\'';
+				}
+				break;
+			default:
+				foreach($gids as $gid)
+				{
+					$gid = (int)$gid;
+					$sqlwhere .= ' OR CONCAT(\',\',groups,\',\') LIKE \'%,'.$gid.',%\'';
+				}
+				break;
+		}
+		$sqlwhere .= ')';
+	
+		$query = $db->simple_select('ougc_pages', '*', $sqlwhere, array('order_by' => 'disporder'));
+	
+		$navs = '';
+
+		while($page = $db->fetch_array($query))
+		{
+			$page['name'] = htmlspecialchars_uni($page['name']);
+			$page_link = $ougc_pages->get_page_link($page['pid']);
+
+			$navs .= eval($templates->render('ougcpages_wrapper_ucp_nav_item'));
+		}
+
+		if(!$navs)
+		{
+			continue;
+		}
+
+		$category['name'] = htmlspecialchars_uni($category['name']);
+
+		$collapse_id = 'usercpougcpages'.$cid;
+
+		$expaltext = (in_array($collapse_id, $collapse)) ? "[+]" : "[-]";
+
+		if(!isset($collapsedimg[$collapse_id]))
+		{
+			$collapsedimg[$collapse_id] = '';
+		}
+
+		if(!isset($collapsed[$collapse_id.'_e']))
+		{
+			$collapsed[$collapse_id.'_e'] = '';
+		}
+
+		$img = $collapsedimg[$collapse_id];
+		$_e = $collapsed[$collapse_id.'_e'];
+
+		$usercpmenu .= eval($templates->render('ougcpages_wrapper_ucp_nav'));
+	}
 }
 
 // control_object by Zinga Burga from MyBBHacks ( mybbhacks.zingaburga.com ), 1.62
@@ -979,6 +1089,190 @@ class OUGC_Pages
 		return $val;
 	}
 
+	// List of tables
+	function _db_tables()
+	{
+		global $db;
+
+		$collation = $db->build_create_table_collation();
+	
+		$tables = array(
+			'ougc_pages'		=> array(
+				'pid'			=> "int UNSIGNED NOT NULL AUTO_INCREMENT",
+				'cid'			=> "int UNSIGNED NOT NULL DEFAULT '0'",
+				'name'			=> "varchar(100) NOT NULL DEFAULT ''",
+				'description'	=> "varchar(255) NOT NULL DEFAULT ''",
+				'url'			=> "varchar(100) NOT NULL DEFAULT ''",
+				'groups'		=> "text NOT NULL",
+				'php'			=> "tinyint(1) NOT NULL DEFAULT '0'",
+				'wol'			=> "tinyint(1) NOT NULL DEFAULT '1'",
+				'disporder'		=> "tinyint(5) NOT NULL DEFAULT '0'",
+				'visible'		=> "tinyint(1) NOT NULL DEFAULT '1'",
+				'wrapper'		=> "tinyint(1) NOT NULL DEFAULT '1'",
+				'init'			=> "tinyint(1) NOT NULL DEFAULT '1'",
+				'template'		=> "text NOT NULL",
+				'dateline'		=> "int(10) NOT NULL DEFAULT '0'",
+				'prymary_key'	=> "pid"
+			),
+			'ougc_pages_categories'	=> array(
+				'cid'			=> "int UNSIGNED NOT NULL AUTO_INCREMENT",
+				'name'			=> "varchar(100) NOT NULL DEFAULT ''",
+				'description'	=> "varchar(255) NOT NULL DEFAULT ''",
+				'url'			=> "varchar(100) NOT NULL DEFAULT ''",
+				'groups'		=> "text NOT NULL",
+				'disporder'		=> "tinyint(5) NOT NULL DEFAULT '0'",
+				'visible'		=> "tinyint(1) NOT NULL DEFAULT '1'",
+				'breadcrumb'	=> "tinyint(1) NOT NULL DEFAULT '1'",
+				'navigation'	=> "tinyint(1) NOT NULL DEFAULT '1'",
+				'wrapucp'		=> "tinyint(1) NOT NULL DEFAULT '0'",
+				'prymary_key'	=> "cid"
+			)
+		);
+
+		return $tables;
+	}
+
+	// List of columns
+	function _db_columns()
+	{
+		$tables = array();
+
+		return $tables;
+	}
+
+	// Verify DB indexes
+	function _db_verify_indexes()
+	{
+		global $db;
+
+		if(!$db->index_exists('ougc_pages', 'url'))
+		{
+			$db->write_query("ALTER TABLE ".TABLE_PREFIX."ougc_pages ADD UNIQUE KEY `url` (`url`)");
+		}
+		if(!$db->index_exists('ougc_pages_categories', 'url'))
+		{
+			$db->write_query("ALTER TABLE ".TABLE_PREFIX."ougc_pages_categories ADD UNIQUE KEY `url` (`url`)");
+		}
+	}
+
+	// Verify DB tables
+	function _db_verify_tables()
+	{
+		global $db;
+
+		$collation = $db->build_create_table_collation();
+		foreach($this->_db_tables() as $table => $fields)
+		{
+			if($db->table_exists($table))
+			{
+				foreach($fields as $field => $definition)
+				{
+					if($field == 'prymary_key')
+					{
+						continue;
+					}
+
+					if($db->field_exists($field, $table))
+					{
+						$db->modify_column($table, "`{$field}`", $definition);
+					}
+					else
+					{
+						$db->add_column($table, $field, $definition);
+					}
+				}
+			}
+			else
+			{
+				$query = "CREATE TABLE IF NOT EXISTS `".TABLE_PREFIX."{$table}` (";
+				foreach($fields as $field => $definition)
+				{
+					if($field == 'prymary_key')
+					{
+						$query .= "PRIMARY KEY (`{$definition}`)";
+					}
+					else
+					{
+						$query .= "`{$field}` {$definition},";
+					}
+				}
+				$query .= ") ENGINE=MyISAM{$collation};";
+				$db->write_query($query);
+			}
+		}
+	}
+
+	// Verify DB columns
+	function _db_verify_columns()
+	{
+		global $db;
+
+		foreach($this->_db_columns() as $table => $columns)
+		{
+			foreach($columns as $field => $definition)
+			{
+				if($db->field_exists($field, $table))
+				{
+					$db->modify_column($table, "`{$field}`", $definition);
+				}
+				else
+				{
+					$db->add_column($table, $field, $definition);
+				}
+			}
+		}
+	}
+
+	// Edit the master template to add our page to the core style sheet only
+	function _verify_stylesheet($remove=false)
+	{
+		global $db;
+
+		$query = $db->simple_select(
+			"themestylesheets",
+			"sid, attachedto",
+			"name='usercp.css' AND tid= '1'"
+		);
+	
+		$updated = false;
+
+		while($stylesheet = $db->fetch_array($query))
+		{
+			if(!$remove && my_strpos($stylesheet['attachedto'], '|pages.php') === false)
+			{
+				$db->update_query("themestylesheets", array(
+					"attachedto" => $stylesheet['attachedto'].'|pages.php',
+					"lastmodified" => TIME_NOW
+				), "sid = '" . (int)$stylesheet['sid'] . "'");
+				$updated = true;
+			}
+
+			if($remove && my_strpos($stylesheet['attachedto'], '|pages.php') !== false)
+			{
+				$db->update_query("themestylesheets", array(
+					"attachedto" => str_replace('|pages.php', '', $stylesheet['attachedto']),
+					"lastmodified" => TIME_NOW
+				), "sid = '" . (int)$stylesheet['sid'] . "'");
+				$updated = true;
+			}
+		}
+
+		if($updated)
+		{
+			$query = $db->simple_select("themes", "tid");
+			require_once MYBB_ADMIN_DIR . "inc/functions_themes.php";
+			while($tid = $db->fetch_field($query, "tid"))
+			{
+				update_theme_stylesheet_list($tid);
+			}
+		}
+	}
+
+	function _remove_from_stylesheet()
+	{
+		$this->_verify_stylesheet(true);
+	}
+
 	// Update pages cache
 	function update_cache()
 	{
@@ -999,6 +1293,7 @@ class OUGC_Pages
 				'url'			=> (string)$category['url'],
 				'groups'		=> (string)$category['groups'],
 				'breadcrumb'	=> (bool)$category['breadcrumb'],
+				'wrapucp'		=> (bool)$category['wrapucp'],
 				/*'navigation'	=> (bool)$category['navigation']*/
 			);
 		}
@@ -1455,6 +1750,11 @@ class OUGC_Pages
 		if(isset($data['breadcrumb']))
 		{
 			$insert_data['breadcrumb'] = (int)$data['breadcrumb'];
+		}
+
+		if(isset($data['wrapucp']))
+		{
+			$insert_data['wrapucp'] = (int)$data['wrapucp'];
 		}
 
 		if(isset($data['navigation']))
