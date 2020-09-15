@@ -845,6 +845,11 @@ function ougc_pages_usercp_menu()
 
 	$pages_cache = $cache->read('ougc_pages');
 
+	if(empty($pages_cache['categories']))
+	{
+		return;
+	}
+
 	foreach($pages_cache['categories'] as $cid => $category)
 	{
 		if(!$category['wrapucp'])
