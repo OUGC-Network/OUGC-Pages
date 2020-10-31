@@ -1334,7 +1334,7 @@ class OUGC_Pages
 
 		if(!is_object($PL))
 		{
-			return $this->url;
+			$PL or require_once PLUGINLIBRARY;
 		}
 
 		if($fetch_input_url === false)
