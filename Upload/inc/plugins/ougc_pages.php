@@ -63,8 +63,8 @@ function ougc_pages_info()
 		'website'		=> 'https://ougc.network',
 		'author'		=> 'Omar G.',
 		'authorsite'	=> 'https://ougc.network',
-		'version'		=> '1.8.20',
-		'versioncode'	=> 1820,
+		'version'		=> '1.8.21',
+		'versioncode'	=> 1821,
 		'compatibility'	=> '18*',
 		'codename'		=> 'ougc_pages',
 		'pl'			=> array(
@@ -845,6 +845,11 @@ function ougc_pages_usercp_menu()
 
 	$pages_cache = $cache->read('ougc_pages');
 
+	if(empty($pages_cache['categories']))
+	{
+		return;
+	}
+
 	foreach($pages_cache['categories'] as $cid => $category)
 	{
 		if(!$category['wrapucp'])
@@ -1329,7 +1334,7 @@ class OUGC_Pages
 
 		if(!is_object($PL))
 		{
-			return $this->url;
+			$PL or require_once PLUGINLIBRARY;
 		}
 
 		if($fetch_input_url === false)

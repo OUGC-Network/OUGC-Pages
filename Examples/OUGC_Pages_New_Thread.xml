@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MyBB PluginLibrary XML-Export :: 2020-04-29T00:30:41+00:00 -->
+<!-- MyBB PluginLibrary XML-Export :: 2020-04-29T03:51:43+00:00 -->
 <array>
   <element>
     <key>name</key>
@@ -140,6 +140,7 @@ $templates->cache['new_thread'] or $templates->cache['new_thread'] = '<html>
 
 
 $lang->load("newthread", false, true);
+$lang->newthread_in = $lang->sprintf($lang->newthread_in, $mybb->settings['bbname']);
 $lang->max_options = $lang->sprintf($lang->max_options, $mybb->settings['maxpolloptions']);
 add_breadcrumb("New Thread", "new.php");
 
