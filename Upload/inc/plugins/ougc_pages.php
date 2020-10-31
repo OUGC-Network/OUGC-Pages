@@ -63,8 +63,8 @@ function ougc_pages_info()
 		'website'		=> 'https://ougc.network',
 		'author'		=> 'Omar G.',
 		'authorsite'	=> 'https://ougc.network',
-		'version'		=> '1.8.20',
-		'versioncode'	=> 1820,
+		'version'		=> '1.8.21',
+		'versioncode'	=> 1821,
 		'compatibility'	=> '18*',
 		'codename'		=> 'ougc_pages',
 		'pl'			=> array(
