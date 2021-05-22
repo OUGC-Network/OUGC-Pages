@@ -1115,7 +1115,7 @@ class OUGC_Pages
 				'visible'		=> "tinyint(1) NOT NULL DEFAULT '1'",
 				'wrapper'		=> "tinyint(1) NOT NULL DEFAULT '1'",
 				'init'			=> "tinyint(1) NOT NULL DEFAULT '1'",
-				'template'		=> "text NOT NULL",
+				'template'		=> "MEDIUMTEXT NOT NULL",
 				'dateline'		=> "int(10) NOT NULL DEFAULT '0'",
 				'prymary_key'	=> "pid"
 			),
