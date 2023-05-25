@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- MyBB PluginLibrary XML-Export :: 2020-04-29T00:30:57+00:00 -->
 <array>
-  <element>
-    <key>name</key>
-    <value>ShoutBox Page</value>
-  </element>
-  <element>
-    <key>description</key>
-    <value>Show your shoutbox in a separate page. Requires DVZ Shoutbox or Miuna Shout Box installed.</value>
-  </element>
-  <element>
-    <key>url</key>
-    <value>shoutbox</value>
-  </element>
-  <element>
-    <key>groups</key>
-    <value></value>
-  </element>
-  <element>
-    <key>php</key>
-    <value>1</value>
-  </element>
-  <element>
-    <key>wol</key>
-    <value>1</value>
-  </element>
-  <element>
-    <key>visible</key>
-    <value>1</value>
-  </element>
-  <element>
-    <key>wrapper</key>
-    <value>1</value>
-  </element>
-  <element>
-    <key>init</key>
-    <value>0</value>
-  </element>
-  <element>
-    <key>template</key>
-    <value><![CDATA[<?php
+    <element>
+        <key>name</key>
+        <value>ShoutBox Page</value>
+    </element>
+    <element>
+        <key>description</key>
+        <value>Show your shoutbox in a separate page. Requires DVZ Shoutbox or Miuna Shout Box installed.</value>
+    </element>
+    <element>
+        <key>url</key>
+        <value>shoutbox</value>
+    </element>
+    <element>
+        <key>groups</key>
+        <value></value>
+    </element>
+    <element>
+        <key>php</key>
+        <value>1</value>
+    </element>
+    <element>
+        <key>wol</key>
+        <value>1</value>
+    </element>
+    <element>
+        <key>visible</key>
+        <value>1</value>
+    </element>
+    <element>
+        <key>wrapper</key>
+        <value>1</value>
+    </element>
+    <element>
+        <key>init</key>
+        <value>0</value>
+    </element>
+    <element>
+        <key>template</key>
+        <value><![CDATA[<?php
 
 // 1 = DVZ Shoutbox, 2 = Miuna Shout box
 define('SHOUTBOX_TYPE', 1);
@@ -83,10 +83,10 @@ eval('$page = "'.$templates->get('ougcpages_parser_test_page').'";');
 output_page($page);
 
 exit;]]></value>
-  </element>
-  <element>
-    <key>versioncode</key>
-    <value type="INT">1820</value>
-  </element>
+    </element>
+    <element>
+        <key>versioncode</key>
+        <value type="INT">1820</value>
+    </element>
 </array>
-<!-- End of file. -->
+        <!-- End of file. -->

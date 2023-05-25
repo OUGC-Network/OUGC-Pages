@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- MyBB PluginLibrary XML-Export :: 2020-04-29T03:51:43+00:00 -->
 <array>
-  <element>
-    <key>name</key>
-    <value>New Thread</value>
-  </element>
-  <element>
-    <key>description</key>
-    <value>Allows you to create thread copies at different forums at the same time.</value>
-  </element>
-  <element>
-    <key>url</key>
-    <value>new-thread</value>
-  </element>
-  <element>
-    <key>groups</key>
-    <value></value>
-  </element>
-  <element>
-    <key>php</key>
-    <value>1</value>
-  </element>
-  <element>
-    <key>wol</key>
-    <value>1</value>
-  </element>
-  <element>
-    <key>visible</key>
-    <value>1</value>
-  </element>
-  <element>
-    <key>wrapper</key>
-    <value>0</value>
-  </element>
-  <element>
-    <key>init</key>
-    <value>0</value>
-  </element>
-  <element>
-    <key>template</key>
-    <value><![CDATA[<?php
+    <element>
+        <key>name</key>
+        <value>New Thread</value>
+    </element>
+    <element>
+        <key>description</key>
+        <value>Allows you to create thread copies at different forums at the same time.</value>
+    </element>
+    <element>
+        <key>url</key>
+        <value>new-thread</value>
+    </element>
+    <element>
+        <key>groups</key>
+        <value></value>
+    </element>
+    <element>
+        <key>php</key>
+        <value>1</value>
+    </element>
+    <element>
+        <key>wol</key>
+        <value>1</value>
+    </element>
+    <element>
+        <key>visible</key>
+        <value>1</value>
+    </element>
+    <element>
+        <key>wrapper</key>
+        <value>0</value>
+    </element>
+    <element>
+        <key>init</key>
+        <value>0</value>
+    </element>
+    <element>
+        <key>template</key>
+        <value><![CDATA[<?php
 
 
 $templates->cache('new_thread_modoptions, new_thread_subscription, new_thread_postpoll, post_savedraftbutton, new_thread');
@@ -178,10 +178,10 @@ $forumsselected = "<select name=\"fid\" size=\"24\" style=\"width: 230px\">".$fo
 eval("\$page_new_thread = \"".$templates->get("new_thread", 1, 0)."\";");
 output_page($page_new_thread);
 exit;]]></value>
-  </element>
-  <element>
-    <key>versioncode</key>
-    <value type="INT">1820</value>
-  </element>
+    </element>
+    <element>
+        <key>versioncode</key>
+        <value type="INT">1820</value>
+    </element>
 </array>
-<!-- End of file. -->
+        <!-- End of file. -->
