@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- MyBB PluginLibrary XML-Export :: 2020-04-29T00:30:20+00:00 -->
 <array>
-  <element>
-    <key>name</key>
-    <value>Banned List</value>
-  </element>
-  <element>
-    <key>description</key>
-    <value>Lists all banned accounts.</value>
-  </element>
-  <element>
-    <key>url</key>
-    <value>banned-list</value>
-  </element>
-  <element>
-    <key>groups</key>
-    <value></value>
-  </element>
-  <element>
-    <key>php</key>
-    <value>1</value>
-  </element>
-  <element>
-    <key>wol</key>
-    <value>1</value>
-  </element>
-  <element>
-    <key>visible</key>
-    <value>1</value>
-  </element>
-  <element>
-    <key>wrapper</key>
-    <value>0</value>
-  </element>
-  <element>
-    <key>init</key>
-    <value>0</value>
-  </element>
-  <element>
-    <key>template</key>
-    <value><![CDATA[<?php
+    <element>
+        <key>name</key>
+        <value>Banned List</value>
+    </element>
+    <element>
+        <key>description</key>
+        <value>Lists all banned accounts.</value>
+    </element>
+    <element>
+        <key>url</key>
+        <value>banned-list</value>
+    </element>
+    <element>
+        <key>groups</key>
+        <value></value>
+    </element>
+    <element>
+        <key>php</key>
+        <value>1</value>
+    </element>
+    <element>
+        <key>wol</key>
+        <value>1</value>
+    </element>
+    <element>
+        <key>visible</key>
+        <value>1</value>
+    </element>
+    <element>
+        <key>wrapper</key>
+        <value>0</value>
+    </element>
+    <element>
+        <key>init</key>
+        <value>0</value>
+    </element>
+    <element>
+        <key>template</key>
+        <value><![CDATA[<?php
 
 $mybb->user['uid'] or error_no_permission();
 
@@ -96,18 +96,16 @@ $bantimes = fetch_ban_times();
 
 $category['name'] = htmlspecialchars_uni($category['name']);
 
-if($category['breadcrumb'])
-{
-	add_breadcrumb($category['name'], $ougc_pages->get_category_link($category['cid']));
+if ($category['breadcrumb']) {
+    add_breadcrumb($category['name'], $ougc_pages->get_category_link($category['cid']));
 }
 
 $page['name'] = htmlspecialchars_uni($page['name']);
 
 add_breadcrumb($page['name'], $ougc_pages->get_page_link($page['pid']));
 
-if($mybb->settings['threadsperpage'] < 1)
-{
-	$mybb->settings['threadsperpage'] = 20;
+if ($mybb->settings['threadsperpage'] < 1) {
+    $mybb->settings['threadsperpage'] = 20;
 }
 
 // Figure out if we need to display multiple pages.
@@ -121,125 +119,112 @@ $postcount = (int)$banned_count;
 $_pages = $postcount / $perpage;
 $_pages = ceil($_pages);
 
-if($pagenum > $_pages || $pagenum <= 0)
-{
-	$pagenum = 1;
+if ($pagenum > $_pages || $pagenum <= 0) {
+    $pagenum = 1;
 }
 
-if($pagenum)
-{
-	$start = ($pagenum-1) * $perpage;
+if ($pagenum) {
+    $start = ($pagenum - 1) * $perpage;
+} else {
+    $start = 0;
+    $pagenum = 1;
 }
-else
-{
-	$start = 0;
-	$pagenum = 1;
-}
-$upper = $start+$perpage;
+$upper = $start + $perpage;
 
 $multipage = multipage($postcount, $perpage, $pagenum, '?PLACE_HOLDER');
-$multipage = str_replace(array('page=', '?PLACE_HOLDER'), array('pagination=', $ougc_pages->get_page_link($page['pid'])), $multipage);
+$multipage = str_replace(array('page=', '?PLACE_HOLDER'),
+    array('pagination=', $ougc_pages->get_page_link($page['pid'])),
+    $multipage);
 
-switch($mybb->get_input('sort'))
-{
-	case 'username':
-		$sort = 'u.username';
-		break;
-	case 'bannedby':
-		$sort = 'a.username';
-		break;
-	case 'bantime':
-		$sort = 'b.bantime';
-		break;
-	default:
-		$sort = 'dateline';
-		break;
+switch ($mybb->get_input('sort')) {
+    case 'username':
+        $sort = 'u.username';
+        break;
+    case 'bannedby':
+        $sort = 'a.username';
+        break;
+    case 'bantime':
+        $sort = 'b.bantime';
+        break;
+    default:
+        $sort = 'dateline';
+        break;
 }
 
-switch($mybb->get_input('order'))
-{
-	case 'asc':
-		$order = 'ASC';
-		break;
-	default:
-		$order = 'DESC';
-		break;
+switch ($mybb->get_input('order')) {
+    case 'asc':
+        $order = 'ASC';
+        break;
+    default:
+        $order = 'DESC';
+        break;
 }
 
-$query = $db->query("
+$query = $db->query(
+    "
 	SELECT b.*, a.username AS adminuser, u.username
 	FROM ".TABLE_PREFIX."banned b
 	LEFT JOIN ".TABLE_PREFIX."users u ON (b.uid=u.uid)
 	LEFT JOIN ".TABLE_PREFIX."users a ON (b.admin=a.uid)
 	ORDER BY {$sort} {$order}
 	LIMIT {$start}, {$perpage}
-");
+"
+);
 
 // Get the banned users
 $bannedusers = '';
-while($banned = $db->fetch_array($query))
-{
-	$profile_link = build_profile_link($banned['username'], $banned['uid']);
+while ($banned = $db->fetch_array($query)) {
+    $profile_link = build_profile_link($banned['username'], $banned['uid']);
 
-	$admin_profile = build_profile_link($banned['adminuser'], $banned['admin']);
+    $admin_profile = build_profile_link($banned['adminuser'], $banned['admin']);
 
-	$trow = alt_trow();
+    $trow = alt_trow();
 
-	if($banned['reason'])
-	{
-		$banned['reason'] = htmlspecialchars_uni($parser->parse_badwords($banned['reason']));
-		$banned['reason'] = my_wordwrap($banned['reason']);
-	}
-	else
-	{
-		$banned['reason'] = $lang->na;
-	}
+    if ($banned['reason']) {
+        $banned['reason'] = htmlspecialchars_uni($parser->parse_badwords($banned['reason']));
+        $banned['reason'] = my_wordwrap($banned['reason']);
+    } else {
+        $banned['reason'] = $lang->na;
+    }
 
-	if($banned['lifted'] == 'perm' || $banned['lifted'] == '' || $banned['bantime'] == 'perm' || $banned['bantime'] == '---')
-	{
-		$banlength = $lang->permanent;
-		$timeremaining = $lang->na;
-	}
-	else
-	{
-		$banlength = $bantimes[$banned['bantime']];
-		$remaining = $banned['lifted']-TIME_NOW;
+    if ($banned['lifted'] == 'perm' || $banned['lifted'] == '' || $banned['bantime'] == 'perm' || $banned['bantime'] == '---') {
+        $banlength = $lang->permanent;
+        $timeremaining = $lang->na;
+    } else {
+        $banlength = $bantimes[$banned['bantime']];
+        $remaining = $banned['lifted'] - TIME_NOW;
 
-		$timeremaining = nice_time($remaining, array('short' => 1, 'seconds' => false))."";
+        $timeremaining = nice_time($remaining, array('short' => 1, 'seconds' => false))."";
 
-		if($remaining < 3600)
-		{
-			$timeremaining = "<span style=\"color: red;\">({$timeremaining} {$lang->ban_remaining})</span>";
-		}
-		else if($remaining < 86400)
-		{
-			$timeremaining = "<span style=\"color: maroon;\">({$timeremaining} {$lang->ban_remaining})</span>";
-		}
-		else if($remaining < 604800)
-		{
-			$timeremaining = "<span style=\"color: green;\">({$timeremaining} {$lang->ban_remaining})</span>";
-		}
-		else
-		{
-			$timeremaining = "({$timeremaining} {$lang->ban_remaining})";
-		}
-	}
+        if ($remaining < 3600) {
+            $timeremaining = "<span style=\"color: red;\">({$timeremaining} {$lang->ban_remaining})</span>";
+        } else {
+            if ($remaining < 86400) {
+                $timeremaining = "<span style=\"color: maroon;\">({$timeremaining} {$lang->ban_remaining})</span>";
+            } else {
+                if ($remaining < 604800) {
+                    $timeremaining = "<span style=\"color: green;\">({$timeremaining} {$lang->ban_remaining})</span>";
+                } else {
+                    $timeremaining = "({$timeremaining} {$lang->ban_remaining})";
+                }
+            }
+        }
+    }
 
-	eval('$bannedusers .= "'.$templates->get('ougcpages_banned_ban').'";');
+    eval('$bannedusers .= "'.$templates->get('ougcpages_banned_ban').'";');
 }
 
-if(!$bannedusers)
-{
-	eval('$bannedusers = "'.$templates->get('ougcpages_banned_nobanned').'";');
+if (!$bannedusers) {
+    eval('$bannedusers = "'.$templates->get('ougcpages_banned_nobanned').'";');
 }
 
 eval('$page = "'.$templates->get('ougcpages_banned').'";');
 output_page($page);
 exit;]]></value>
-  </element>
-  <element>
-    <key>versioncode</key>
-    <value type="INT">1820</value>
-  </element>
+    </element>
+    <element>
+        <key>versioncode</key>
+        <value type="INT">1820</value>
+    </element>
 </array>
-<!-- End of file. -->
+        <!-- End of file. -->

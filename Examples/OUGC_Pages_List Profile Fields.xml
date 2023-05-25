@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- MyBB PluginLibrary XML-Export :: 2020-10-31T00:32:42+00:00 -->
 <array>
-  <element>
-    <key>name</key>
-    <value>List Profile Fields</value>
-  </element>
-  <element>
-    <key>description</key>
-    <value>List users profile fields values.</value>
-  </element>
-  <element>
-    <key>url</key>
-    <value>list-user-fields</value>
-  </element>
-  <element>
-    <key>groups</key>
-    <value></value>
-  </element>
-  <element>
-    <key>php</key>
-    <value>1</value>
-  </element>
-  <element>
-    <key>wol</key>
-    <value>1</value>
-  </element>
-  <element>
-    <key>visible</key>
-    <value>1</value>
-  </element>
-  <element>
-    <key>wrapper</key>
-    <value>0</value>
-  </element>
-  <element>
-    <key>init</key>
-    <value>0</value>
-  </element>
-  <element>
-    <key>template</key>
-    <value><![CDATA[<?php
+    <element>
+        <key>name</key>
+        <value>List Profile Fields</value>
+    </element>
+    <element>
+        <key>description</key>
+        <value>List users profile fields values.</value>
+    </element>
+    <element>
+        <key>url</key>
+        <value>list-user-fields</value>
+    </element>
+    <element>
+        <key>groups</key>
+        <value></value>
+    </element>
+    <element>
+        <key>php</key>
+        <value>1</value>
+    </element>
+    <element>
+        <key>wol</key>
+        <value>1</value>
+    </element>
+    <element>
+        <key>visible</key>
+        <value>1</value>
+    </element>
+    <element>
+        <key>wrapper</key>
+        <value>0</value>
+    </element>
+    <element>
+        <key>init</key>
+        <value>0</value>
+    </element>
+    <element>
+        <key>template</key>
+        <value><![CDATA[<?php
 
 /*--START SETTINGS--*/
 
@@ -53,14 +53,15 @@ $perpage = 10;
 
 $category['visible'] or error($lang->ougc_pages_error_invalidçategory);
 
-if($category['groups'] != '')
-{
-	$ougc_pages->init_session();
+if ($category['groups'] != '') {
+    $ougc_pages->init_session();
 
-	is_member($category['groups']) or error_no_permission();
+    is_member($category['groups']) or error_no_permission();
 }
 
-$templates->cache('ougcpages_listuserfields, ougcpages_listuserfields_multipage, ougcpages_listuserfields_thead, ougcpages_listuserfields_user, ougcpages_listuserfields_user_field, ougcpages_listuserfields_empty, ougcpages_listuserfields_filter, ougcpages_listuserfields_filter_field, postbit_profilefield_multiselect_value, postbit_profilefield_multiselect, multipage_page_current, multipage_page, multipage_end, multipage_nextpage, multipage_jump_page, multipage');
+$templates->cache(
+    'ougcpages_listuserfields, ougcpages_listuserfields_multipage, ougcpages_listuserfields_thead, ougcpages_listuserfields_user, ougcpages_listuserfields_user_field, ougcpages_listuserfields_empty, ougcpages_listuserfields_filter, ougcpages_listuserfields_filter_field, postbit_profilefield_multiselect_value, postbit_profilefield_multiselect, multipage_page_current, multipage_page, multipage_end, multipage_nextpage, multipage_jump_page, multipage'
+);
 
 $templates->cache['ougcpages_listuserfields'] or $templates->cache['ougcpages_listuserfields'] = <<<EOF
 <table border="0" cellspacing="{\$theme['borderwidth']}" cellpadding="{\$theme['tablespace']}" class="tborder">
@@ -162,297 +163,261 @@ $ougc_pages->set_url($ougc_pages->get_page_link($page['pid']));
 $build_url = [];
 
 $selected = [
-	'desc' => '',
+    'desc' => '',
 ];
 
-if($mybb->get_input('fields', MyBB::INPUT_ARRAY))
-{
-	$fids = array_filter(array_unique(array_map('intval', $mybb->get_input('fields', MyBB::INPUT_ARRAY))));
+if ($mybb->get_input('fields', MyBB::INPUT_ARRAY)) {
+    $fids = array_filter(array_unique(array_map('intval', $mybb->get_input('fields', MyBB::INPUT_ARRAY))));
 
-	foreach($fids as $fid)
-	{
-		$build_url["fields[{$fid}]"] = $fid;
+    foreach ($fids as $fid) {
+        $build_url["fields[{$fid}]"] = $fid;
 
-		$selected["fid{$fid}"] = ' selected="selected"';
-	}
+        $selected["fid{$fid}"] = ' selected="selected"';
+    }
 
-	$profilefields_display = implode(',', $fids);
+    $profilefields_display = implode(',', $fids);
 }
 
 $query_fields = ['uf.*'];
 
 $pfcache = $cache->read('profilefields');
 
-if(is_array($pfcache) && (int)$profilefields_display != -1)
-{
-	$query_fields = [];
+if (is_array($pfcache) && (int)$profilefields_display != -1) {
+    $query_fields = [];
 
-	// Then loop through the profile fields.
-	foreach($pfcache as $key => $profilefield)
-	{
-		$fid = (int)$profilefield['fid'];
+    // Then loop through the profile fields.
+    foreach ($pfcache as $key => $profilefield) {
+        $fid = (int)$profilefield['fid'];
 
-		if(!isset($selected["fid{$fid}"]))
-		{
-			$selected["fid{$fid}"] = '';
-		}
+        if (!isset($selected["fid{$fid}"])) {
+            $selected["fid{$fid}"] = '';
+        }
 
-		if(!$fid || !is_member($profilefields_display, ['usergroup' => $fid]))
-		{
-			unset($pfcache[$key]);
-		}
-		else
-		{
-			$query_fields[] = "uf.fid{$fid}";
-		}
-	}
+        if (!$fid || !is_member($profilefields_display, ['usergroup' => $fid])) {
+            unset($pfcache[$key]);
+        } else {
+            $query_fields[] = "uf.fid{$fid}";
+        }
+    }
 }
 
 $multipage = $filter = '';
 
 $colspan = 1 + count($pfcache);
 
-$width = 100 / $colspan-1;
+$width = 100 / $colspan - 1;
 
 global $gobutton;
 
-if($mybb->get_input('perpage', MyBB::INPUT_INT))
-{
-	$perpage = $build_url['perpage'] = $mybb->get_input('perpage', MyBB::INPUT_INT);
+if ($mybb->get_input('perpage', MyBB::INPUT_INT)) {
+    $perpage = $build_url['perpage'] = $mybb->get_input('perpage', MyBB::INPUT_INT);
 }
 
-if(!$perpage)
-{
-	$perpage = 10;
+if (!$perpage) {
+    $perpage = 10;
 }
 
-if(is_array($pfcache))
-{
-	if(!is_object($parser))
-	{
-		require_once MYBB_ROOT.'inc/class_parser.php';
-	   
-		$parser = new postParser;
-	}
+if (is_array($pfcache)) {
+    if (!is_object($parser)) {
+        require_once MYBB_ROOT.'inc/class_parser.php';
 
-	$where = ['1=1'];
+        $parser = new postParser;
+    }
 
-	$query_fields = implode(',', $query_fields);
+    $where = ['1=1'];
 
-	if((int)$groups_display != -1)
-	{
-		$gids = array_filter(array_unique(array_map('intval', explode(',', $groups_display))));
+    $query_fields = implode(',', $query_fields);
 
-		$where2 = ["u.usergroup IN ('".implode("','", $gids)."')"];
+    if ((int)$groups_display != -1) {
+        $gids = array_filter(array_unique(array_map('intval', explode(',', $groups_display))));
 
-		switch($db->type)
-		{
-			case 'pgsql':
-			case 'sqlite':
+        $where2 = ["u.usergroup IN ('".implode("','", $gids)."')"];
 
-				foreach($gids as $gid)
-				{
-					$where2[] = "','||additionalgroups||',' LIKE '%,{$gid},%'";
-				}
+        switch ($db->type) {
+            case 'pgsql':
+            case 'sqlite':
 
-				break;
-			default:
+                foreach ($gids as $gid) {
+                    $where2[] = "','||additionalgroups||',' LIKE '%,{$gid},%'";
+                }
 
-				foreach($gids as $gid)
-				{
-					$where2[] = "CONCAT(',',`additionalgroups`,',') LIKE '%,{$gid},%'";
-				}
+                break;
+            default:
 
-				break;
-		}
+                foreach ($gids as $gid) {
+                    $where2[] = "CONCAT(',',`additionalgroups`,',') LIKE '%,{$gid},%'";
+                }
 
-		$where[] = '('.implode(' OR ', $where2).')';
+                break;
+        }
 
-		unset($where2);
-	}
+        $where[] = '('.implode(' OR ', $where2).')';
 
-	$where = implode(' AND ', $where);
+        unset($where2);
+    }
 
-	$query = $db->simple_select('users', 'COUNT(uid) AS total_users', $where);
+    $where = implode(' AND ', $where);
 
-	$total_users = $db->fetch_field($query, 'total_users');
+    $query = $db->simple_select('users', 'COUNT(uid) AS total_users', $where);
 
-	if($total_users)
-	{
-		$_page = $mybb->get_input('_page', \MyBB::INPUT_INT);
+    $total_users = $db->fetch_field($query, 'total_users');
 
-		$pages = $total_users / $perpage;
+    if ($total_users) {
+        $_page = $mybb->get_input('_page', \MyBB::INPUT_INT);
 
-		$pages = ceil($pages);
-	
-		if($_page > $pages || $_page <= 0)
-		{
-			$_page = 1;
-		}
+        $pages = $total_users / $perpage;
 
-		if($_page)
-		{
-			$start = ($_page-1) * $perpage;
-		}
-		else
-		{
-			$start = 0;
+        $pages = ceil($pages);
 
-			$_page = 1;
-		}
+        if ($_page > $pages || $_page <= 0) {
+            $_page = 1;
+        }
 
-		$order_dir = 'asc';
+        if ($_page) {
+            $start = ($_page - 1) * $perpage;
+        } else {
+            $start = 0;
 
-		if($mybb->get_input('orderdir') == 'desc')
-		{
-			$build_url['orderdir'] = 'desc';
+            $_page = 1;
+        }
 
-			$order_dir = 'desc';
+        $order_dir = 'asc';
 
-			$selected['desc'] = ' selected="selected"';
-		}
+        if ($mybb->get_input('orderdir') == 'desc') {
+            $build_url['orderdir'] = 'desc';
 
-		$multipage = (string)multipage(
-			$total_users,
-			$perpage,
-			$_page,
-			str_replace('PALCEHOLDER', '{page}', $ougc_pages->build_url(
-				array_merge($build_url, ['_page' => 'PALCEHOLDER'])
-			))
-		);
+            $order_dir = 'desc';
 
-		$query = $db->simple_select(
-			"users u LEFT JOIN {$db->table_prefix}userfields uf ON (u.uid=uf.ufid)",
-			"u.*,{$query_fields}",
-			$where,
-			[
-				'limit' => $perpage,
-				'limit_start' => $start,
-				'order_by' => 'u.username',
-				'order_dir' => $order_dir
-			]
-		);
-	
-		$trow = alt_trow(true);
-	
-		while($user = $db->fetch_array($query))
-		{
-			$user['username'] = htmlspecialchars_uni($user['username']);
-	
-			$username = format_name($user['username'], $user['usergroup'], $user['displaygroup']);
-	
-			$profilelink = build_profile_link($username, $user['uid']);
-	
-			$user_fields = '';
-	
-			foreach($pfcache as $field)
-			{
-				$fieldfid = "fid{$field['fid']}";
-	
-				$user_value = '';
-	
-				if(!empty($user[$fieldfid]))
-				{
-					$user['fieldname'] = htmlspecialchars_uni($field['name']);
-		
-					$thing = explode("\n", $field['type'], "2");
-					$type = trim($thing[0]);
-					$useropts = explode("\n", $user[$fieldfid]);
-		
-					if(is_array($useropts) && ($type == "multiselect" || $type == "checkbox"))
-					{
-						$fieldvalue_option = '';
-	
-						foreach($useropts as $val)
-						{
-							if($val)
-							{
-								$fieldvalue_option = eval($templates->render('postbit_profilefield_multiselect_value'));
-							}
-						}
-	
-						if($fieldvalue_option)
-						{
-							$user_value = eval($templates->render('postbit_profilefield_multiselect'));
-						}
-					}
-					else
-					{
-						$field_parser_options = array(
-							"allow_html" => $field['allowhtml'],
-							"allow_mycode" => $field['allowmycode'],
-							"allow_smilies" => $field['allowsmilies'],
-							"allow_imgcode" => $field['allowimgcode'],
-							"allow_videocode" => $field['allowvideocode'],
-							#"nofollow_on" => 1,
-							"filter_badwords" => 1
-						);
-		
-						if($customfield['type'] == "textarea")
-						{
-							$field_parser_options['me_username'] = $user['username'];
-						}
-						else
-						{
-							$field_parser_options['nl2br'] = 0;
-						}
-		
-						if($mybb->user['showimages'] != 1 && $mybb->user['uid'] != 0 || $mybb->settings['guestimages'] != 1 && $mybb->user['uid'] == 0)
-						{
-							$field_parser_options['allow_imgcode'] = 0;
-						}
-		
-						$user_value = $parser->parse_message($user[$fieldfid], $field_parser_options);
-					}
-				}
-	
-				$user_fields .= eval($templates->render('ougcpages_listuserfields_user_field'));
-			}
-	
-			$user_list .= eval($templates->render('ougcpages_listuserfields_user'));
-	
-			$trow = alt_trow();	
-		}
-	}
+            $selected['desc'] = ' selected="selected"';
+        }
+
+        $multipage = (string)multipage(
+            $total_users,
+            $perpage,
+            $_page,
+            str_replace(
+                'PALCEHOLDER',
+                '{page}',
+                $ougc_pages->build_url(
+                    array_merge($build_url, ['_page' => 'PALCEHOLDER'])
+                )
+            )
+        );
+
+        $query = $db->simple_select(
+            "users u LEFT JOIN {$db->table_prefix}userfields uf ON (u.uid=uf.ufid)",
+            "u.*,{$query_fields}",
+            $where,
+            [
+                'limit' => $perpage,
+                'limit_start' => $start,
+                'order_by' => 'u.username',
+                'order_dir' => $order_dir,
+            ]
+        );
+
+        $trow = alt_trow(true);
+
+        while ($user = $db->fetch_array($query)) {
+            $user['username'] = htmlspecialchars_uni($user['username']);
+
+            $username = format_name($user['username'], $user['usergroup'], $user['displaygroup']);
+
+            $profilelink = build_profile_link($username, $user['uid']);
+
+            $user_fields = '';
+
+            foreach ($pfcache as $field) {
+                $fieldfid = "fid{$field['fid']}";
+
+                $user_value = '';
+
+                if (!empty($user[$fieldfid])) {
+                    $user['fieldname'] = htmlspecialchars_uni($field['name']);
+
+                    $thing = explode("\n", $field['type'], "2");
+                    $type = trim($thing[0]);
+                    $useropts = explode("\n", $user[$fieldfid]);
+
+                    if (is_array($useropts) && ($type == "multiselect" || $type == "checkbox")) {
+                        $fieldvalue_option = '';
+
+                        foreach ($useropts as $val) {
+                            if ($val) {
+                                $fieldvalue_option = eval($templates->render('postbit_profilefield_multiselect_value'));
+                            }
+                        }
+
+                        if ($fieldvalue_option) {
+                            $user_value = eval($templates->render('postbit_profilefield_multiselect'));
+                        }
+                    } else {
+                        $field_parser_options = array(
+                            "allow_html" => $field['allowhtml'],
+                            "allow_mycode" => $field['allowmycode'],
+                            "allow_smilies" => $field['allowsmilies'],
+                            "allow_imgcode" => $field['allowimgcode'],
+                            "allow_videocode" => $field['allowvideocode'],
+                            #"nofollow_on" => 1,
+                            "filter_badwords" => 1,
+                        );
+
+                        if ($customfield['type'] == "textarea") {
+                            $field_parser_options['me_username'] = $user['username'];
+                        } else {
+                            $field_parser_options['nl2br'] = 0;
+                        }
+
+                        if ($mybb->user['showimages'] != 1 && $mybb->user['uid'] != 0 || $mybb->settings['guestimages'] != 1 && $mybb->user['uid'] == 0) {
+                            $field_parser_options['allow_imgcode'] = 0;
+                        }
+
+                        $user_value = $parser->parse_message($user[$fieldfid], $field_parser_options);
+                    }
+                }
+
+                $user_fields .= eval($templates->render('ougcpages_listuserfields_user_field'));
+            }
+
+            $user_list .= eval($templates->render('ougcpages_listuserfields_user'));
+
+            $trow = alt_trow();
+        }
+    }
 }
 
-if($mybb->usergroup['cancp'])
-{
-	$page_url = $ougc_pages->build_url($build_url);
+if ($mybb->usergroup['cancp']) {
+    $page_url = $ougc_pages->build_url($build_url);
 
-	$fields = '';
+    $fields = '';
 
-	foreach($cache->read('profilefields') as $profilefield)
-	{
-		$fid = (int)$profilefield['fid'];
+    foreach ($cache->read('profilefields') as $profilefield) {
+        $fid = (int)$profilefield['fid'];
 
-		$name = htmlspecialchars_uni($profilefield['name']);
+        $name = htmlspecialchars_uni($profilefield['name']);
 
-		$_selected = $selected["fid{$fid}"];
+        $_selected = $selected["fid{$fid}"];
 
-		$fields .= eval($templates->render('ougcpages_listuserfields_filter_field'));
-	}
+        $fields .= eval($templates->render('ougcpages_listuserfields_filter_field'));
+    }
 
-	$filter = eval($templates->render('ougcpages_listuserfields_filter'));
+    $filter = eval($templates->render('ougcpages_listuserfields_filter'));
 }
 
-if($multipage)
-{
-	$multipage = eval($templates->render('ougcpages_listuserfields_multipage'));
+if ($multipage) {
+    $multipage = eval($templates->render('ougcpages_listuserfields_multipage'));
 }
 
-if(!$user_list)
-{
-	$user_list = eval($templates->render('ougcpages_listuserfields_empty'));
+if (!$user_list) {
+    $user_list = eval($templates->render('ougcpages_listuserfields_empty'));
 }
 
 $thead_rows = '';
 
-foreach($pfcache as $field)
-{
-	$name = htmlspecialchars_uni($field['name']);
+foreach ($pfcache as $field) {
+    $name = htmlspecialchars_uni($field['name']);
 
-	$thead_rows .= eval($templates->render('ougcpages_listuserfields_thead'));
+    $thead_rows .= eval($templates->render('ougcpages_listuserfields_thead'));
 }
 
 $message = eval($templates->render('ougcpages_listuserfields'));
@@ -462,10 +427,10 @@ $ougc_pages->set_url($url_backup);
 // Set-up page
 $page['template'] = $message;
 ougc_pages_show(true);]]></value>
-  </element>
-  <element>
-    <key>versioncode</key>
-    <value type="INT">1820</value>
-  </element>
+    </element>
+    <element>
+        <key>versioncode</key>
+        <value type="INT">1820</value>
+    </element>
 </array>
-<!-- End of file. -->
+        <!-- End of file. -->
