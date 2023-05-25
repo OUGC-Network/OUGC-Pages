@@ -39,9 +39,20 @@
     </element>
     <element>
         <key>template</key>
-        <value><![CDATA[For those who don't know.<br />
-<br />
-<blockquote><cite>WikiPedia Wrote:</cite><b>MyBB</b>, <span style="font-style: italic;">originally</span> <b>MyBulletinBoard</b>, is a <a href="http://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">free and open source</a> <a href="http://en.wikipedia.org/wiki/Forum_software" target="_blank">forum software</a> which is developed by the MyBB Group. It is written in <a href="http://en.wikipedia.org/wiki/PHP">PHP</a>, supports <a href="http://en.wikipedia.org/wiki/MySQL" target="_blank">MySQL</a>, <a href="http://en.wikipedia.org/wiki/PostgreSQL" target="_blank">PostgreSQL</a> and <a href="http://en.wikipedia.org/wiki/SQLite" target="_blank">SQLite</a> as <a href="http://en.wikipedia.org/wiki/Database" target="_blank">database</a> systems and has database <a href="http://en.wikipedia.org/wiki/Failover" target="_blank">failover</a> support. It is licensed under the <a href="http://en.wikipedia.org/wiki/LGPL" target="_blank">LGPL</a>.</blockquote><br />
+        <value><![CDATA[For those who don't know.<br/>
+<br/>
+<blockquote><cite>WikiPedia Wrote:</cite><b>MyBB</b>, <span style="font-style: italic;">originally</span> <b>MyBulletinBoard</b>,
+    is a <a href="http://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">free and open source</a>
+    <a href="http://en.wikipedia.org/wiki/Forum_software" target="_blank">forum software</a> which is developed by the
+    MyBB Group. It is written in <a href="http://en.wikipedia.org/wiki/PHP">PHP</a>, supports <a
+            href="http://en.wikipedia.org/wiki/MySQL" target="_blank">MySQL</a>, <a
+            href="http://en.wikipedia.org/wiki/PostgreSQL" target="_blank">PostgreSQL</a> and <a
+            href="http://en.wikipedia.org/wiki/SQLite" target="_blank">SQLite</a> as <a
+            href="http://en.wikipedia.org/wiki/Database" target="_blank">database</a> systems and has database <a
+            href="http://en.wikipedia.org/wiki/Failover" target="_blank">failover</a> support. It is licensed under the
+    <a href="http://en.wikipedia.org/wiki/LGPL" target="_blank">LGPL</a>.
+</blockquote>
+<br/>
 :)]]></value>
     </element>
     <element>

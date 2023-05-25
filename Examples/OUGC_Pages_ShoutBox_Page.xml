@@ -44,33 +44,28 @@
 // 1 = DVZ Shoutbox, 2 = Miuna Shout box
 define('SHOUTBOX_TYPE', 1);
 
-if(SHOUTBOX_TYPE == 1)
-{
-	$templates->cache('dvz_shoutbox,dvz_shoutbox_panel');
+if (SHOUTBOX_TYPE == 1) {
+    $templates->cache('dvz_shoutbox,dvz_shoutbox_panel');
 
-	$message = 'This page is currently unavailable.';
-	if(class_exists('dvz_shoutbox'))
-	{
+    $message = 'This page is currently unavailable.';
+    if (class_exists('dvz_shoutbox')) {
         global $dvz_shoutbox;
 
-		dvz_shoutbox::load_window();
+        dvz_shoutbox::load_window();
 
-		$message = $dvz_shoutbox;
-	}
-}
-else
-{
-	$templates->cache('templateShoutBox,templateShoutBoxGuest,codebutmiuna');
+        $message = $dvz_shoutbox;
+    }
+} else {
+    $templates->cache('templateShoutBox,templateShoutBoxGuest,codebutmiuna');
 
-	$message = 'This page is currently unavailable.';
-	if(function_exists('MiunaShout'))
-	{
-		global $settings, $miunashout, $codebutmiuna;
+    $message = 'This page is currently unavailable.';
+    if (function_exists('MiunaShout')) {
+        global $settings, $miunashout, $codebutmiuna;
 
-		MiunaShout();
+        MiunaShout();
 
-		$message = $miunashout;
-	}
+        $message = $miunashout;
+    }
 }
 
 // Set-up page

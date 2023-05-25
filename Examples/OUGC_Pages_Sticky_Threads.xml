@@ -47,11 +47,10 @@ $category['visible'] or error($lang->ougc_pages_error_invalidçategory);
 
 // Save three queries if no permission check is necessary
 
-if($category['groups'] != '')
-{
-	$ougc_pages->init_session();
+if ($category['groups'] != '') {
+    $ougc_pages->init_session();
 
-	is_member($category['groups']) or error_no_permission();
+    is_member($category['groups']) or error_no_permission();
 }
 
 $lang->load("forumdisplay");
@@ -63,9 +62,8 @@ $parser = new postParser;
 
 $category['name'] = htmlspecialchars_uni($category['name']);
 
-if($category['breadcrumb'])
-{
-	add_breadcrumb($category['name'], $ougc_pages->get_category_link($category['cid']));
+if ($category['breadcrumb']) {
+    add_breadcrumb($category['name'], $ougc_pages->get_category_link($category['cid']));
 }
 
 $page['name'] = htmlspecialchars_uni($page['name']);
@@ -76,56 +74,48 @@ $forumcache = $cache->read("forums");
 $fpermissions = forum_permissions();
 
 $is_mod = $is_supermod = false;
-if($mybb->usergroup['issupermod'])
-{
-	$is_supermod = true;
+if ($mybb->usergroup['issupermod']) {
+    $is_supermod = true;
 }
 
-if($is_supermod || is_moderator())
-{
-	$is_mod = true;
+if ($is_supermod || is_moderator()) {
+    $is_mod = true;
 }
 
 // Moderators can view unapproved threads
-$query = $db->simple_select("moderators", "fid, canviewunapprove, canviewdeleted", "(id='{$mybb->user['uid']}' AND isgroup='0') OR (id='{$mybb->user['usergroup']}' AND isgroup='1')");
-if($mybb->usergroup['issupermod'] == 1)
-{
-	// Super moderators (and admins)
-	$unapproved_where = "t.visible>=-1";
-}
-elseif($db->num_rows($query))
-{
-	// Normal moderators
-	$unapprove_forums = array();
-	$deleted_forums = array();
-	$unapproved_where = '(t.visible = 1';
-	while($moderator = $db->fetch_array($query))
-	{
-		if($moderator['canviewunapprove'] == 1)
-		{
-			$unapprove_forums[] = $moderator['fid'];
-		}
+$query = $db->simple_select(
+    "moderators",
+    "fid, canviewunapprove, canviewdeleted",
+    "(id='{$mybb->user['uid']}' AND isgroup='0') OR (id='{$mybb->user['usergroup']}' AND isgroup='1')"
+);
+if ($mybb->usergroup['issupermod'] == 1) {
+    // Super moderators (and admins)
+    $unapproved_where = "t.visible>=-1";
+} elseif ($db->num_rows($query)) {
+    // Normal moderators
+    $unapprove_forums = array();
+    $deleted_forums = array();
+    $unapproved_where = '(t.visible = 1';
+    while ($moderator = $db->fetch_array($query)) {
+        if ($moderator['canviewunapprove'] == 1) {
+            $unapprove_forums[] = $moderator['fid'];
+        }
 
-		if($moderator['canviewdeleted'] == 1)
-		{
-			$deleted_forums[] = $moderator['fid'];
-		}
-	}
+        if ($moderator['canviewdeleted'] == 1) {
+            $deleted_forums[] = $moderator['fid'];
+        }
+    }
 
-	if(!empty($unapprove_forums))
-	{
-		$unapproved_where .= " OR (t.visible = 0 AND t.fid IN(".implode(',', $unapprove_forums)."))";
-	}
-	if(!empty($deleted_forums))
-	{
-		$unapproved_where .= " OR (t.visible = -1 AND t.fid IN(".implode(',', $deleted_forums)."))";
-	}
-	$unapproved_where .= ')';
-}
-else
-{
-	// Normal users
-	$unapproved_where = 't.visible>0';
+    if (!empty($unapprove_forums)) {
+        $unapproved_where .= " OR (t.visible = 0 AND t.fid IN(".implode(',', $unapprove_forums)."))";
+    }
+    if (!empty($deleted_forums)) {
+        $unapproved_where .= " OR (t.visible = -1 AND t.fid IN(".implode(',', $deleted_forums)."))";
+    }
+    $unapproved_where .= ')';
+} else {
+    // Normal users
+    $unapproved_where = 't.visible>0';
 }
 
 $permsql = "";
@@ -133,51 +123,53 @@ $onlyusfids = array();
 
 // Check group permissions if we can't view threads not started by us
 $group_permissions = forum_permissions();
-foreach($group_permissions as $fid => $forum_permissions)
-{
-	if(isset($forum_permissions['canonlyviewownthreads']) && $forum_permissions['canonlyviewownthreads'] == 1)
-	{
-		$onlyusfids[] = $fid;
-	}
+foreach ($group_permissions as $fid => $forum_permissions) {
+    if (isset($forum_permissions['canonlyviewownthreads']) && $forum_permissions['canonlyviewownthreads'] == 1) {
+        $onlyusfids[] = $fid;
+    }
 }
-if(!empty($onlyusfids))
-{
-	$permsql .= "AND ((t.fid IN(".implode(',', $onlyusfids).") AND t.uid='{$mybb->user['uid']}') OR t.fid NOT IN(".implode(',', $onlyusfids)."))";
+if (!empty($onlyusfids)) {
+    $permsql .= "AND ((t.fid IN(".implode(
+            ',',
+            $onlyusfids
+        ).") AND t.uid='{$mybb->user['uid']}') OR t.fid NOT IN(".implode(',', $onlyusfids)."))";
 }
 
 $unsearchforums = get_unsearchable_forums();
-if($unsearchforums)
-{
-	$permsql .= " AND t.fid NOT IN ($unsearchforums)";
+if ($unsearchforums) {
+    $permsql .= " AND t.fid NOT IN ($unsearchforums)";
 }
 $inactiveforums = get_inactive_forums();
-if($inactiveforums)
-{
-	$permsql .= " AND t.fid NOT IN ($inactiveforums)";
+if ($inactiveforums) {
+    $permsql .= " AND t.fid NOT IN ($inactiveforums)";
 }
 
 // Start Getting Threads
-$query = $db->query("
+$query = $db->query(
+    "
 	SELECT COUNT(t.tid) AS threadcount
 	FROM ".TABLE_PREFIX."threads t
 	WHERE t.sticky='1' AND {$unapproved_where} {$permsql} AND t.closed NOT LIKE 'moved|%'
 	ORDER BY t.dateline
-");
+"
+);
 $threadcount = $db->fetch_field($query, 'threadcount');
 
-$ougc_pages->build_multipage($threadcount, $url='', $check=false);
+$ougc_pages->build_multipage($threadcount, $url = '', $check = false);
 
 $perpage = (int)$mybb->settings['threadsperpage'];
 
 // Start Getting Threads
-$query = $db->query("
+$query = $db->query(
+    "
 	SELECT t.*, t.username AS threadusername, u.username
 	FROM ".TABLE_PREFIX."threads t
 	LEFT JOIN ".TABLE_PREFIX."users u ON (u.uid = t.uid)
 	WHERE t.sticky='1' AND {$unapproved_where} {$permsql} AND t.closed NOT LIKE 'moved|%'
 	ORDER BY t.dateline
 	LIMIT {$ougc_pages->query_start}, {$perpage}
-");
+"
+);
 
 $templates->cache['ougcpages_sticky_threads_thread'] or $templates->cache['ougcpages_sticky_threads_thread'] = '<tr class="inline_row">
 	<td class="{$bgcolor}{$thread_type_class}">
@@ -196,113 +188,96 @@ $templates->cache['ougcpages_sticky_threads_thread'] or $templates->cache['ougcp
 </tr>';
 
 $threads = '';
-while($thread = $db->fetch_array($query))
-{
-		$moved = explode("|", $thread['closed']);
+while ($thread = $db->fetch_array($query)) {
+    $moved = explode("|", $thread['closed']);
 
-		if($thread['visible'] == 0)
-		{
-			$bgcolor = "trow_shaded";
-		}
-		elseif($thread['visible'] == -1)
-		{
-			$bgcolor = "trow_shaded trow_deleted";
-		}
-		else
-		{
-			$bgcolor = alt_trow();
-		}
+    if ($thread['visible'] == 0) {
+        $bgcolor = "trow_shaded";
+    } elseif ($thread['visible'] == -1) {
+        $bgcolor = "trow_shaded trow_deleted";
+    } else {
+        $bgcolor = alt_trow();
+    }
 
-		$thread_type_class = " forumdisplay_sticky";
+    $thread_type_class = " forumdisplay_sticky";
 
-		$folder = '';
-		$prefix = '';
+    $folder = '';
+    $prefix = '';
 
-		$thread['author'] = $thread['uid'];
-		if(!$thread['username'])
-		{
-			$thread['username'] = $thread['threadusername'];
-			$thread['profilelink'] = $thread['threadusername'];
-		}
-		else
-		{
-			$thread['profilelink'] = build_profile_link($thread['username'], $thread['uid']);
-		}
+    $thread['author'] = $thread['uid'];
+    if (!$thread['username']) {
+        $thread['username'] = $thread['threadusername'];
+        $thread['profilelink'] = $thread['threadusername'];
+    } else {
+        $thread['profilelink'] = build_profile_link($thread['username'], $thread['uid']);
+    }
 
-		// If this thread has a prefix, insert a space between prefix and subject
-		$thread['threadprefix'] = $threadprefix = '';
-		if($thread['prefix'] != 0)
-		{
-			$threadprefix = build_prefixes($thread['prefix']);
-			if(!empty($threadprefix))
-			{
-				$thread['threadprefix'] = $threadprefix['displaystyle'].'&nbsp;';
-			}
-		}
+    // If this thread has a prefix, insert a space between prefix and subject
+    $thread['threadprefix'] = $threadprefix = '';
+    if ($thread['prefix'] != 0) {
+        $threadprefix = build_prefixes($thread['prefix']);
+        if (!empty($threadprefix)) {
+            $thread['threadprefix'] = $threadprefix['displaystyle'].'&nbsp;';
+        }
+    }
 
-		$thread['subject'] = $parser->parse_badwords($thread['subject']);
-		$thread['subject'] = htmlspecialchars_uni($thread['subject']);
+    $thread['subject'] = $parser->parse_badwords($thread['subject']);
+    $thread['subject'] = htmlspecialchars_uni($thread['subject']);
 
-		$prefix = '';
-		if($thread['poll'])
-		{
-			$prefix = $lang->poll_prefix;
-		}
+    $prefix = '';
+    if ($thread['poll']) {
+        $prefix = $lang->poll_prefix;
+    }
 
-		$rating = '';
+    $rating = '';
 
-		$thread['pages'] = 0;
-		$thread['multipage'] = '';
-		$threadpages = '';
-		$morelink = '';
-		$thread['posts'] = $thread['replies'] + 1;
+    $thread['pages'] = 0;
+    $thread['multipage'] = '';
+    $threadpages = '';
+    $morelink = '';
+    $thread['posts'] = $thread['replies'] + 1;
 
-		if($thread['unapprovedposts'] > 0 && $ismod)
-		{
-			$thread['posts'] += $thread['unapprovedposts'] + $thread['deletedposts'];
-		}
+    if ($thread['unapprovedposts'] > 0 && $ismod) {
+        $thread['posts'] += $thread['unapprovedposts'] + $thread['deletedposts'];
+    }
 
-		$threadpages = '';
-		$morelink = '';
-		$thread['multipage'] = '';
+    $threadpages = '';
+    $morelink = '';
+    $thread['multipage'] = '';
 
-		$modbit = '';
+    $modbit = '';
 
-		if($moved[0] == "moved")
-		{
-			$prefix = $lang->moved_prefix;
-			$thread['tid'] = $moved[1];
-			$thread['replies'] = "-";
-			$thread['views'] = "-";
-		}
+    if ($moved[0] == "moved") {
+        $prefix = $lang->moved_prefix;
+        $thread['tid'] = $moved[1];
+        $thread['replies'] = "-";
+        $thread['views'] = "-";
+    }
 
-		$thread['threadlink'] = get_thread_link($thread['tid']);
-		$thread['lastpostlink'] = get_thread_link($thread['tid'], 0, "lastpost");
+    $thread['threadlink'] = get_thread_link($thread['tid']);
+    $thread['lastpostlink'] = get_thread_link($thread['tid'], 0, "lastpost");
 
-		$gotounread = '';
-		$isnew = 0;
-		$donenew = 0;
+    $gotounread = '';
+    $isnew = 0;
+    $donenew = 0;
 
-		$lastposter = $thread['lastposter'];
-		$lastposteruid = $thread['lastposteruid'];
-		$lastpostdate = my_date('relative', $thread['lastpost']);
+    $lastposter = $thread['lastposter'];
+    $lastposteruid = $thread['lastposteruid'];
+    $lastpostdate = my_date('relative', $thread['lastpost']);
 
-		// Don't link to guest's profiles (they have no profile).
-		if($lastposteruid == 0)
-		{
-			$lastposterlink = $lastposter;
-		}
-		else
-		{
-			$lastposterlink = build_profile_link($lastposter, $lastposteruid);
-		}
+    // Don't link to guest's profiles (they have no profile).
+    if ($lastposteruid == 0) {
+        $lastposterlink = $lastposter;
+    } else {
+        $lastposterlink = build_profile_link($lastposter, $lastposteruid);
+    }
 
-		$thread['replies'] = my_number_format($thread['replies']);
-		$thread['views'] = my_number_format($thread['views']);
+    $thread['replies'] = my_number_format($thread['replies']);
+    $thread['views'] = my_number_format($thread['views']);
 
-		$unapproved_posts = '';
+    $unapproved_posts = '';
 
-		eval("\$threads .= \"".$templates->get("ougcpages_sticky_threads_thread")."\";");
+    eval("\$threads .= \"".$templates->get("ougcpages_sticky_threads_thread")."\";");
 }
 
 $templates->cache['ougcpages_sticky_threads_list'] or $templates->cache['ougcpages_sticky_threads_list'] = '<div class="float_left">
@@ -333,9 +308,8 @@ $templates->cache['ougcpages_sticky_threads_list_empty'] or $templates->cache['o
 	</td>
 </tr>';
 
-if(!$threads)
-{
-	$threads = eval($templates->render("ougcpages_sticky_threads_list_empty"));
+if (!$threads) {
+    $threads = eval($templates->render("ougcpages_sticky_threads_list_empty"));
 }
 
 eval("\$threadslist = \"".$templates->get("ougcpages_sticky_threads_list")."\";");

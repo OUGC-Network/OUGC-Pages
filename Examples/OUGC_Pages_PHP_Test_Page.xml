@@ -45,20 +45,19 @@ $category['visible'] or error($lang->ougc_pages_error_invalidçategory);
 
 // Save three queries if no permission check is necessary
 
-if($category['groups'] != '')
-{
-	$ougc_pages->init_session();
+if ($category['groups'] != '') {
+    $ougc_pages->init_session();
 
-	is_member($category['groups']) or error_no_permission();
+    is_member($category['groups']) or error_no_permission();
 }
 
 $parser_options = array(
-	'allow_html'		=> 1,
-	'allow_mycode'		=> 1,
-	'allow_smilies'		=> 1,
-	'allow_imgcode'		=> 1,
-	'allow_videocode'	=> 1,
-	'filter_badwords'	=> 1
+    'allow_html' => 1,
+    'allow_mycode' => 1,
+    'allow_smilies' => 1,
+    'allow_imgcode' => 1,
+    'allow_videocode' => 1,
+    'filter_badwords' => 1,
 );
 
 $message = 'For those who don\'t know.
@@ -79,20 +78,17 @@ $templates->cache['ougcpages_parser_test_page'] or $templates->cache['ougcpages_
 </body>
 </html>';
 
-if(!is_object($parser))
-{
-	require_once MYBB_ROOT.'inc/class_parser.php';
-	$parser = new postParser;
+if (!is_object($parser)) {
+    require_once MYBB_ROOT.'inc/class_parser.php';
+    $parser = new postParser;
 }
 
-if($mybb->user['showimages'] != 1 && $mybb->user['uid'] != 0 || $mybb->settings['guestimages'] != 1 && $mybb->user['uid'] == 0)
-{
-	$parser_options['allow_imgcode'] = 0;
+if ($mybb->user['showimages'] != 1 && $mybb->user['uid'] != 0 || $mybb->settings['guestimages'] != 1 && $mybb->user['uid'] == 0) {
+    $parser_options['allow_imgcode'] = 0;
 }
 
-if($mybb->user['showvideos'] != 1 && $mybb->user['uid'] != 0 || $mybb->settings['guestvideos'] != 1 && $mybb->user['uid'] == 0)
-{
-	$parser_options['allow_videocode'] = 0;
+if ($mybb->user['showvideos'] != 1 && $mybb->user['uid'] != 0 || $mybb->settings['guestvideos'] != 1 && $mybb->user['uid'] == 0) {
+    $parser_options['allow_videocode'] = 0;
 }
 
 $message = $parser->parse_message($message, $parser_options);

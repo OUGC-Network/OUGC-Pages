@@ -42,7 +42,9 @@
         <value><![CDATA[<?php
 
 
-$templates->cache('new_thread_modoptions, new_thread_subscription, new_thread_postpoll, post_savedraftbutton, new_thread');
+$templates->cache(
+    'new_thread_modoptions, new_thread_subscription, new_thread_postpoll, post_savedraftbutton, new_thread'
+);
 
 $templates->cache['new_thread_modoptions'] or $templates->cache['new_thread_modoptions'] = '<tr>
 <td class="trow2" valign="top"><strong>{$lang->mod_options}</strong>
@@ -146,14 +148,15 @@ add_breadcrumb("New Thread", "new.php");
 
 $codebuttons = build_mycode_inserter();
 $modoptions = $mybb->input['modoptions'];
-if($modoptions['closethread'] == 1){
-	$closecheck = "checked=\"checked\"";
-}else{
-	$closecheck = '';
-}if($modoptions['stickthread'] == 1){
-	$stickycheck = "checked=\"checked\"";
-}else{
-	$stickycheck = '';
+if ($modoptions['closethread'] == 1) {
+    $closecheck = "checked=\"checked\"";
+} else {
+    $closecheck = '';
+}
+if ($modoptions['stickthread'] == 1) {
+    $stickycheck = "checked=\"checked\"";
+} else {
+    $stickycheck = '';
 }
 unset($modoptions);
 $bgcolor = alt_trow();
@@ -165,12 +168,10 @@ eval("\$savedraftbutton = \"".$templates->get("post_savedraftbutton", 1, 0)."\";
 $forum_cache = $cache->read("forums");
 
 $forum_list = array();
-foreach($forum_cache as $fid => $forum)
-{
-	if($forum['type'] != "c")
-	{
-		$forum_list .= "<option value=\"".$fid."\">".htmlspecialchars_uni($forum['name'])."</option>"; 
-	}
+foreach ($forum_cache as $fid => $forum) {
+    if ($forum['type'] != "c") {
+        $forum_list .= "<option value=\"".$fid."\">".htmlspecialchars_uni($forum['name'])."</option>";
+    }
 }
 
 $forumsselected = "<select name=\"fid\" size=\"24\" style=\"width: 230px\">".$forum_list."</select>";
