@@ -51,7 +51,7 @@ if (defined('IN_ADMINCP')) {
 }
 
 // PLUGINLIBRARY
-defined('PLUGINLIBRARY') or define('PLUGINLIBRARY', MYBB_ROOT.'inc/plugins/pluginlibrary.php');
+defined('PLUGINLIBRARY') or define('PLUGINLIBRARY', MYBB_ROOT . 'inc/plugins/pluginlibrary.php');
 
 // Plugin API
 function ougc_pages_info()
@@ -487,8 +487,8 @@ function ougc_pages_show(/*$portal=false*/)
     !$ougc_pages->no_permission or error_no_permission();
 
     // Load custom page language file if exists
-    $lang->load('ougc_pages_'.$category['cid'], false, true);
-    $lang->load('ougc_pages_'.$page['pid'], false, true);
+    $lang->load('ougc_pages_' . $category['cid'], false, true);
+    $lang->load('ougc_pages_' . $page['pid'], false, true);
 
     $category['name'] = htmlspecialchars_uni($category['name']);
 
@@ -506,19 +506,19 @@ function ougc_pages_show(/*$portal=false*/)
     $gids[] = $mybb->user['usergroup'];
     $gids = array_filter(array_unique($gids));
 
-    $sqlwhere = 'visible=\'1\' AND cid=\''.(int)$category['cid'].'\' AND (groups=\'\'';
+    $sqlwhere = 'visible=\'1\' AND cid=\'' . (int)$category['cid'] . '\' AND (groups=\'\'';
     switch ($db->type) {
         case 'pgsql':
         case 'sqlite':
             foreach ($gids as $gid) {
                 $gid = (int)$gid;
-                $sqlwhere .= ' OR \',\'||groups||\',\' LIKE \'%,'.$gid.',%\'';
+                $sqlwhere .= ' OR \',\'||groups||\',\' LIKE \'%,' . $gid . ',%\'';
             }
             break;
         default:
             foreach ($gids as $gid) {
                 $gid = (int)$gid;
-                $sqlwhere .= ' OR CONCAT(\',\',groups,\',\') LIKE \'%,'.$gid.',%\'';
+                $sqlwhere .= ' OR CONCAT(\',\',groups,\',\') LIKE \'%,' . $gid . ',%\'';
             }
             break;
     }
@@ -560,10 +560,10 @@ function ougc_pages_show(/*$portal=false*/)
 
         #TODO: Add "Las updated on DATELINE..." to page
 
-        eval('$content = "'.$templates->get('ougcpages_temporary_tmpl').'";');
+        eval('$content = "' . $templates->get('ougcpages_temporary_tmpl') . '";');
 
         if ($page['wrapper']) {
-            eval('$content = "'.$templates->get('ougcpages_wrapper').'";');
+            eval('$content = "' . $templates->get('ougcpages_wrapper') . '";');
         }
     } else {
         $title = $category['name'] = htmlspecialchars_uni($category['name']);
@@ -576,16 +576,16 @@ function ougc_pages_show(/*$portal=false*/)
             $page['name'] = htmlspecialchars_uni($page['name']);
             $page_link = $ougc_pages->get_page_link($page['pid']);
 
-            eval('$page_list .= "'.$templates->get('ougcpages_category_list_item').'";');
+            eval('$page_list .= "' . $templates->get('ougcpages_category_list_item') . '";');
         }
 
         if (!$page_list) {
-            eval('$content = "'.$templates->get('ougcpages_category_list_empty').'";');
+            eval('$content = "' . $templates->get('ougcpages_category_list_empty') . '";');
         } else {
-            eval('$content = "'.$templates->get('ougcpages_category_list').'";');
+            eval('$content = "' . $templates->get('ougcpages_category_list') . '";');
         }
 
-        eval('$content = "'.$templates->get('ougcpages_wrapper').'";');
+        eval('$content = "' . $templates->get('ougcpages_wrapper') . '";');
     }
 
     /*if($category['navigation'])
@@ -601,14 +601,14 @@ function ougc_pages_show(/*$portal=false*/)
     if ($category['wrapucp']) {
         global $usercpnav;
 
-        require_once MYBB_ROOT.'inc/functions_user.php';
+        require_once MYBB_ROOT . 'inc/functions_user.php';
 
         usercp_menu();
 
-        eval('$content = "'.$templates->get('ougcpages_wrapper_ucp').'";');
+        eval('$content = "' . $templates->get('ougcpages_wrapper_ucp') . '";');
     }
 
-    eval('$page = "'.$templates->get('ougcpages').'";');
+    eval('$page = "' . $templates->get('ougcpages') . '";');
 
     output_page($page);
     exit;
@@ -642,7 +642,7 @@ function ougc_pages_execute()
     global $ougc_pages, $category, $page;
 
     #eval('? >'.$page['template'].'<?php');
-    eval('?>'.$page['template']);
+    eval('?>' . $page['template']);
     exit;
 }
 
@@ -806,19 +806,19 @@ function ougc_pages_usercp_menu()
         $gids[] = $mybb->user['usergroup'];
         $gids = array_filter(array_unique($gids));
 
-        $sqlwhere = 'visible=\'1\' AND cid=\''.(int)$cid.'\' AND (groups=\'\'';
+        $sqlwhere = 'visible=\'1\' AND cid=\'' . (int)$cid . '\' AND (groups=\'\'';
         switch ($db->type) {
             case 'pgsql':
             case 'sqlite':
                 foreach ($gids as $gid) {
                     $gid = (int)$gid;
-                    $sqlwhere .= ' OR \',\'||groups||\',\' LIKE \'%,'.$gid.',%\'';
+                    $sqlwhere .= ' OR \',\'||groups||\',\' LIKE \'%,' . $gid . ',%\'';
                 }
                 break;
             default:
                 foreach ($gids as $gid) {
                     $gid = (int)$gid;
-                    $sqlwhere .= ' OR CONCAT(\',\',groups,\',\') LIKE \'%,'.$gid.',%\'';
+                    $sqlwhere .= ' OR CONCAT(\',\',groups,\',\') LIKE \'%,' . $gid . ',%\'';
                 }
                 break;
         }
@@ -841,7 +841,7 @@ function ougc_pages_usercp_menu()
 
         $category['name'] = htmlspecialchars_uni($category['name']);
 
-        $collapse_id = 'usercpougcpages'.$cid;
+        $collapse_id = 'usercpougcpages' . $cid;
 
         $expaltext = (in_array($collapse_id, $collapse)) ? "[+]" : "[-]";
 
@@ -849,12 +849,12 @@ function ougc_pages_usercp_menu()
             $collapsedimg[$collapse_id] = '';
         }
 
-        if (!isset($collapsed[$collapse_id.'_e'])) {
-            $collapsed[$collapse_id.'_e'] = '';
+        if (!isset($collapsed[$collapse_id . '_e'])) {
+            $collapsed[$collapse_id . '_e'] = '';
         }
 
         $img = $collapsedimg[$collapse_id];
-        $_e = $collapsed[$collapse_id.'_e'];
+        $_e = $collapsed[$collapse_id . '_e'];
 
         $usercpmenu .= eval($templates->render('ougcpages_wrapper_ucp_nav'));
     }
@@ -865,10 +865,10 @@ if (!function_exists('control_object')) {
     function control_object(&$obj, $code)
     {
         static $cnt = 0;
-        $newname = '_objcont_'.(++$cnt);
+        $newname = '_objcont_' . (++$cnt);
         $objserial = serialize($obj);
         $classname = get_class($obj);
-        $checkstr = 'O:'.strlen($classname).':"'.$classname.'":';
+        $checkstr = 'O:' . strlen($classname) . ':"' . $classname . '":';
         $checkstr_len = strlen($checkstr);
         if (substr($objserial, 0, $checkstr_len) == $checkstr) {
             $vars = [];
@@ -887,8 +887,8 @@ if (!function_exists('control_object')) {
 					}
 				';
             }
-            eval('class '.$newname.' extends '.$classname.' {'.$code.'}');
-            $obj = unserialize('O:'.strlen($newname).':"'.$newname.'":'.substr($objserial, $checkstr_len));
+            eval('class ' . $newname . ' extends ' . $classname . ' {' . $code . '}');
+            $obj = unserialize('O:' . strlen($newname) . ':"' . $newname . '":' . substr($objserial, $checkstr_len));
             if (!empty($vars)) {
                 $obj->___setvars($vars);
             }
@@ -902,10 +902,10 @@ if (!function_exists('ougc_getpreview')) {
      * Shorts a message to look like a preview.
      * Based off Zinga Burga's "Thread Tooltip Preview" plugin threadtooltip_getpreview() function.
      *
-     * @param  string Message to short.
-     * @param  int Maximum characters to show.
-     * @param  bool Strip MyCode Quotes from message.
-     * @param  bool Strip MyCode from message.
+     * @param string Message to short.
+     * @param int Maximum characters to show.
+     * @param bool Strip MyCode Quotes from message.
+     * @param bool Strip MyCode from message.
      * @return string Shortened message
      **/
     function ougc_getpreview($message, $maxlen = 100, $stripquotes = true, $stripmycode = true)
@@ -924,7 +924,7 @@ if (!function_exists('ougc_getpreview')) {
         if ($stripmycode) {
             global $parser;
             if (!is_object($parser)) {
-                require_once MYBB_ROOT.'inc/class_parser.php';
+                require_once MYBB_ROOT . 'inc/class_parser.php';
                 $parser = new postParser;
             }
 
@@ -958,7 +958,7 @@ if (!function_exists('ougc_getpreview')) {
 
         // Shorten the message if too long
         if (my_strlen($message) > $maxlen) {
-            $message = my_substr($message, 0, $maxlen - 1).'...';
+            $message = my_substr($message, 0, $maxlen - 1) . '...';
         }
 
         return htmlspecialchars_uni($message);
@@ -999,7 +999,7 @@ class OUGC_Pages
     {
         global $lang;
 
-        isset($lang->setting_group_ougc_pages) or $lang->load((defined('IN_ADMINCP') ? 'config_' : '').'ougc_pages');
+        isset($lang->setting_group_ougc_pages) or $lang->load((defined('IN_ADMINCP') ? 'config_' : '') . 'ougc_pages');
     }
 
     // Clean input
@@ -1079,10 +1079,10 @@ class OUGC_Pages
         global $db;
 
         if (!$db->index_exists('ougc_pages', 'url')) {
-            $db->write_query("ALTER TABLE ".TABLE_PREFIX."ougc_pages ADD UNIQUE KEY `url` (`url`)");
+            $db->write_query("ALTER TABLE " . TABLE_PREFIX . "ougc_pages ADD UNIQUE KEY `url` (`url`)");
         }
         if (!$db->index_exists('ougc_pages_categories', 'url')) {
-            $db->write_query("ALTER TABLE ".TABLE_PREFIX."ougc_pages_categories ADD UNIQUE KEY `url` (`url`)");
+            $db->write_query("ALTER TABLE " . TABLE_PREFIX . "ougc_pages_categories ADD UNIQUE KEY `url` (`url`)");
         }
     }
 
@@ -1106,7 +1106,7 @@ class OUGC_Pages
                     }
                 }
             } else {
-                $query = "CREATE TABLE IF NOT EXISTS `".TABLE_PREFIX."{$table}` (";
+                $query = "CREATE TABLE IF NOT EXISTS `" . TABLE_PREFIX . "{$table}` (";
                 foreach ($fields as $field => $definition) {
                     if ($field == 'prymary_key') {
                         $query .= "PRIMARY KEY (`{$definition}`)";
@@ -1152,9 +1152,9 @@ class OUGC_Pages
         while ($stylesheet = $db->fetch_array($query)) {
             if (!$remove && my_strpos($stylesheet['attachedto'], '|pages.php') === false) {
                 $db->update_query("themestylesheets", [
-                    "attachedto" => $stylesheet['attachedto'].'|pages.php',
+                    "attachedto" => $stylesheet['attachedto'] . '|pages.php',
                     "lastmodified" => TIME_NOW,
-                ], "sid = '".(int)$stylesheet['sid']."'");
+                ], "sid = '" . (int)$stylesheet['sid'] . "'");
                 $updated = true;
             }
 
@@ -1162,14 +1162,14 @@ class OUGC_Pages
                 $db->update_query("themestylesheets", [
                     "attachedto" => str_replace('|pages.php', '', $stylesheet['attachedto']),
                     "lastmodified" => TIME_NOW,
-                ], "sid = '".(int)$stylesheet['sid']."'");
+                ], "sid = '" . (int)$stylesheet['sid'] . "'");
                 $updated = true;
             }
         }
 
         if ($updated) {
             $query = $db->simple_select("themes", "tid");
-            require_once MYBB_ADMIN_DIR."inc/functions_themes.php";
+            require_once MYBB_ADMIN_DIR . "inc/functions_themes.php";
             while ($tid = $db->fetch_field($query, "tid")) {
                 update_theme_stylesheet_list($tid);
             }
@@ -1211,10 +1211,10 @@ class OUGC_Pages
         $query = $db->simple_select(
             'ougc_pages',
             'pid, url',
-            'visible=\'1\''.(!empty($update['categories']) ? ' AND cid NOT IN (\''.implode(
+            'visible=\'1\'' . (!empty($update['categories']) ? ' AND cid NOT IN (\'' . implode(
                     '\', \'',
                     $update['categories']
-                ).'\')' : ''),
+                ) . '\')' : ''),
             ['order_by' => 'disporder']
         );
 
@@ -1266,9 +1266,9 @@ class OUGC_Pages
 
         $pattern = preg_replace('/[\\\\\\^\\-\\[\\]\\/]/u', '\\\\\\0', '!"#$%&\'( )*+,-./:;<=>?@[\]^_`{|}~');
 
-        $url = preg_replace('/^['.$pattern.']+|['.$pattern.']+$/u', '', $url);
+        $url = preg_replace('/^[' . $pattern . ']+|[' . $pattern . ']+$/u', '', $url);
 
-        $url = preg_replace('/['.$pattern.']+/u', '-', $url);
+        $url = preg_replace('/[' . $pattern . ']+/u', '-', $url);
 
         return my_strtolower($url);
     }
@@ -1285,13 +1285,13 @@ class OUGC_Pages
         $query = $db->simple_select(
             'ougc_pages',
             'pid',
-            'url=\''.$db->escape_string($url).'\' AND pid!=\''.$this->pid.'\'',
+            'url=\'' . $db->escape_string($url) . '\' AND pid!=\'' . $this->pid . '\'',
             ['limit' => 1]
         );
         $duplicate_url = (int)$db->fetch_field($query, 'pid');
 
         if ($duplicate_url) {
-            return $this->get_import_url(null, $url.'-'.$this->pid);
+            return $this->get_import_url(null, $url . '-' . $this->pid);
         }
 
         return $url;
@@ -1303,7 +1303,7 @@ class OUGC_Pages
         global $session;
 
         if (!isset($session)) {
-            require_once MYBB_ROOT.'inc/class_session.php';
+            require_once MYBB_ROOT . 'inc/class_session.php';
             $session = new session;
             $session->init();
         }
@@ -1370,7 +1370,7 @@ class OUGC_Pages
             global $db;
             $this->cache['categories'][$cid] = false;
 
-            $where = ($url === false ? 'cid=\''.(int)$cid.'\'' : 'url=\''.$db->escape_string($url).'\'');
+            $where = ($url === false ? 'cid=\'' . (int)$cid . '\'' : 'url=\'' . $db->escape_string($url) . '\'');
 
             $query = $db->simple_select('ougc_pages_categories', '*', $where);
             $category = $db->fetch_array($query);
@@ -1396,7 +1396,7 @@ class OUGC_Pages
 
         $cid = (int)$cid;
 
-        $query = $db->simple_select('ougc_pages_categories', 'url', 'cid=\''.$cid.'\'');
+        $query = $db->simple_select('ougc_pages_categories', 'url', 'cid=\'' . $cid . '\'');
         $url = $db->fetch_field($query, 'url');
 
         if ($settings['ougc_pages_seo'] && my_strpos(
@@ -1406,19 +1406,19 @@ class OUGC_Pages
             $url = str_replace('{url}', $url, $settings['ougc_pages_seo_scheme_categories']);
         } else {
             if ($settings['ougc_pages_portal']) {
-                $url = 'portal.php?action=pages&category='.$url;
+                $url = 'portal.php?action=pages&category=' . $url;
             } else {
-                $url = 'pages.php?category='.$url;
+                $url = 'pages.php?category=' . $url;
             }
         }
 
-        return $settings['bburl'].'/'.htmlspecialchars_uni($url);
+        return $settings['bburl'] . '/' . htmlspecialchars_uni($url);
     }
 
     // Build the page link.
     function build_category_link($name, $pid)
     {
-        return '<a href="'.$this->get_category_link($pid).'">'.htmlspecialchars_uni($name).'</a>';
+        return '<a href="' . $this->get_category_link($pid) . '">' . htmlspecialchars_uni($name) . '</a>';
     }
 
     // Get a page from the DB
@@ -1428,7 +1428,7 @@ class OUGC_Pages
             global $db;
             $this->cache['pages'][$pid] = false;
 
-            $where = ($url === false ? 'pid=\''.(int)$pid.'\'' : 'url=\''.$db->escape_string($url).'\'');
+            $where = ($url === false ? 'pid=\'' . (int)$pid . '\'' : 'url=\'' . $db->escape_string($url) . '\'');
 
             $query = $db->simple_select('ougc_pages', '*', $where);
             $page = $db->fetch_array($query);
@@ -1454,7 +1454,7 @@ class OUGC_Pages
 
         $pid = (int)$pid;
 
-        $query = $db->simple_select('ougc_pages', 'url', 'pid=\''.$pid.'\'');
+        $query = $db->simple_select('ougc_pages', 'url', 'pid=\'' . $pid . '\'');
         $url = $db->fetch_field($query, 'url');
 
         if ($settings['ougc_pages_seo'] && my_strpos($settings['ougc_pages_seo_scheme'], '{url}') !== false) {
@@ -1468,16 +1468,16 @@ class OUGC_Pages
 			{
 				$url = 'pages.php?page='.$url;
 			}*/
-            $url = 'pages.php?page='.$url;
+            $url = 'pages.php?page=' . $url;
         }
 
-        return $settings['bburl'].'/'.htmlspecialchars_uni($url);
+        return $settings['bburl'] . '/' . htmlspecialchars_uni($url);
     }
 
     // Build the category link.
     function build_page_link($name, $pid)
     {
-        return '<a href="'.$this->get_page_link($pid).'">'.htmlspecialchars_uni($name).'</a>';
+        return '<a href="' . $this->get_page_link($pid) . '">' . htmlspecialchars_uni($name) . '</a>';
     }
 
     // Insert a new page to the DB
@@ -1554,12 +1554,12 @@ class OUGC_Pages
 
             if ($update) {
                 $this->pid = (int)$pid;
-                $db->update_query('ougc_pages', $insert_data, 'pid=\''.$this->pid.'\'');
+                $db->update_query('ougc_pages', $insert_data, 'pid=\'' . $this->pid . '\'');
             } else {
                 $this->pid = (int)$db->insert_query('ougc_pages', $insert_data);
             }
 
-            $plugins->run_hooks('ouc_pages_'.($update ? 'update' : 'insert').'_page', $this);
+            $plugins->run_hooks('ouc_pages_' . ($update ? 'update' : 'insert') . '_page', $this);
         }
     }
 
@@ -1576,7 +1576,7 @@ class OUGC_Pages
 
         $this->pid = (int)$pid;
 
-        $db->delete_query('ougc_pages', 'pid=\''.$this->pid.'\'');
+        $db->delete_query('ougc_pages', 'pid=\'' . $this->pid . '\'');
 
         return $this->pid;
     }
@@ -1629,12 +1629,12 @@ class OUGC_Pages
 
             if ($update) {
                 $this->cid = (int)$cid;
-                $db->update_query('ougc_pages_categories', $insert_data, 'cid=\''.$this->cid.'\'');
+                $db->update_query('ougc_pages_categories', $insert_data, 'cid=\'' . $this->cid . '\'');
             } else {
                 $this->cid = (int)$db->insert_query('ougc_pages_categories', $insert_data);
             }
 
-            $plugins->run_hooks('ouc_pages_'.($update ? 'update' : 'insert').'_category', $this);
+            $plugins->run_hooks('ouc_pages_' . ($update ? 'update' : 'insert') . '_category', $this);
         }
     }
 
@@ -1651,7 +1651,7 @@ class OUGC_Pages
 
         $this->cid = (int)$cid;
 
-        $db->delete_query('ougc_pages_categories', 'cid=\''.$this->cid.'\'');
+        $db->delete_query('ougc_pages_categories', 'cid=\'' . $this->cid . '\'');
 
         return $this->cid;
     }
@@ -1663,22 +1663,22 @@ class OUGC_Pages
 
         is_array($selected) or $selected = [$selected];
 
-        $select = '<select name="'.$name.'"';
+        $select = '<select name="' . $name . '"';
 
         if (isset($options['multiple'])) {
             $select .= ' multiple="multiple"';
         }
 
         if (isset($options['class'])) {
-            $select .= ' class="'.$options['class'].'"';
+            $select .= ' class="' . $options['class'] . '"';
         }
 
         if (isset($options['id'])) {
-            $select .= ' id="'.$options['id'].'"';
+            $select .= ' id="' . $options['id'] . '"';
         }
 
         if (isset($options['size'])) {
-            $select .= ' size="'.$options['size'].'"';
+            $select .= ' size="' . $options['size'] . '"';
         }
 
         $select .= '>';
@@ -1690,9 +1690,9 @@ class OUGC_Pages
             if (in_array($category['cid'], $selected)) {
                 $s = ' selected="selected"';
             }
-            $select .= '<option value="'.$category['cid'].'"'.$s.'>'.htmlspecialchars_uni(
+            $select .= '<option value="' . $category['cid'] . '"' . $s . '>' . htmlspecialchars_uni(
                     $category['name']
-                ).'</option>';
+                ) . '</option>';
         }
 
         $select .= '</select>';

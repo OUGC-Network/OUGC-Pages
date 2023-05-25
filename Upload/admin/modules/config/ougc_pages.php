@@ -166,7 +166,7 @@ if ($mybb->get_input('manage') == 'pages') {
             $query = $db->simple_select(
                 'ougc_pages',
                 'pid',
-                'url=\''.$db->escape_string($url).'\''.($add ? '' : ' AND pid!=\''.$mybb->get_input('pid', 1).'\''),
+                'url=\'' . $db->escape_string($url) . '\'' . ($add ? '' : ' AND pid!=\'' . $mybb->get_input('pid', 1) . '\''),
                 array('limit' => 1)
             );
 
@@ -211,7 +211,7 @@ if ($mybb->get_input('manage') == 'pages') {
         }
 
         $form = new Form($form_url, 'post');
-        $form_container = new FormContainer($sub_tabs['ougc_pages_'.($add ? 'add' : 'edit')]['description']);
+        $form_container = new FormContainer($sub_tabs['ougc_pages_' . ($add ? 'add' : 'edit')]['description']);
 
         $form_container->output_row(
             $lang->ougc_pages_form_category,
@@ -219,17 +219,17 @@ if ($mybb->get_input('manage') == 'pages') {
             $ougc_pages->generate_category_select('category', $mybb->get_input('cid', 1))
         );
         $form_container->output_row(
-            $lang->ougc_pages_form_name.' <em>*</em>',
+            $lang->ougc_pages_form_name . ' <em>*</em>',
             $lang->ougc_pages_form_name_desc,
             $form->generate_text_box('name', $mybb->get_input('name'))
         );
         $form_container->output_row(
-            $lang->ougc_pages_form_description.' <em>*</em>',
+            $lang->ougc_pages_form_description . ' <em>*</em>',
             $lang->ougc_pages_form_description_desc,
             $form->generate_text_box('description', $mybb->get_input('description'))
         );
         $form_container->output_row(
-            $lang->ougc_pages_form_url.' <em>*</em>',
+            $lang->ougc_pages_form_url . ' <em>*</em>',
             $lang->ougc_pages_form_url_desc,
             $form->generate_text_box('url', $mybb->get_input('url'))
         );
@@ -376,7 +376,7 @@ if ($mybb->get_input('manage') == 'pages') {
             'init' => $page['init'],
             'template' => $page['template'],
             'versioncode' => $info['versioncode'],
-        ), 'OUGC_Pages_'.$page['name'].'_'.$info['versioncode'].'.xml');
+        ), 'OUGC_Pages_' . $page['name'] . '_' . $info['versioncode'] . '.xml');
     } elseif ($mybb->get_input('action') == 'import') {
         $page->add_breadcrumb_item(htmlspecialchars_uni($category['name']));
         $page->output_header($lang->ougc_pages_manage);
@@ -391,7 +391,7 @@ if ($mybb->get_input('manage') == 'pages') {
             } elseif ($_FILES['local_file'] && $_FILES['local_file']['error'] != 4) {
                 // Find out if there was an error with the uploaded file
                 if ($_FILES['local_file']['error'] != 0) {
-                    $errors[] = $lang->error_uploadfailed.$lang->error_uploadfailed_detail;
+                    $errors[] = $lang->error_uploadfailed . $lang->error_uploadfailed_detail;
                     switch ($_FILES['local_file']['error']) {
                         case 1: // UPLOAD_ERR_INI_SIZE
                             $errors[] = $lang->error_uploadfailed_php1;
@@ -448,7 +448,7 @@ if ($mybb->get_input('manage') == 'pages') {
                     }
                 } else {
                     // try to get this as a "Page Manager" page
-                    require_once MYBB_ROOT.'inc/class_xml.php';
+                    require_once MYBB_ROOT . 'inc/class_xml.php';
                     $xml_parser = new XMLParser($contents);
                     $tree = $xml_parser->get_tree();
 
@@ -490,7 +490,7 @@ if ($mybb->get_input('manage') == 'pages') {
                     $query = $db->simple_select(
                         'ougc_pages',
                         'MAX(disporder) as max_disporder',
-                        'cid=\''.(int)$category['cid'].'\''
+                        'cid=\'' . (int)$category['cid'] . '\''
                     );
                     $max_disporder = (int)$db->fetch_field($query, 'max_disporder');
 
@@ -561,13 +561,13 @@ if ($mybb->get_input('manage') == 'pages') {
         $table->construct_header($lang->ougc_pages_form_visible, array('width' => '10%', 'class' => 'align_center'));
         $table->construct_header($lang->options, array('width' => '15%', 'class' => 'align_center'));
 
-        $query = $db->simple_select('ougc_pages', 'COUNT(cid) AS pages', 'cid=\''.(int)$category['cid'].'\'');
+        $query = $db->simple_select('ougc_pages', 'COUNT(cid) AS pages', 'cid=\'' . (int)$category['cid'] . '\'');
         $count = (int)$db->fetch_field($query, 'pages');
 
         $multipage = $ougc_pages->build_multipage($count, $ougc_pages->build_url());
 
         if (!$count) {
-            $table->construct_cell('<div align="center">'.$lang->ougc_pages_view_empty.'</div>', array('colspan' => 5));
+            $table->construct_cell('<div align="center">' . $lang->ougc_pages_view_empty . '</div>', array('colspan' => 5));
             $table->construct_row();
 
             $table->output($sub_tabs['ougc_pages_view']['title']);
@@ -583,7 +583,7 @@ if ($mybb->get_input('manage') == 'pages') {
             $query = $db->simple_select(
                 'ougc_pages',
                 '*',
-                'cid=\''.(int)$category['cid'].'\'',
+                'cid=\'' . (int)$category['cid'] . '\'',
                 array(
                     'limit_start' => $ougc_pages->query_start,
                     'limit' => $ougc_pages->query_limit,
@@ -599,30 +599,30 @@ if ($mybb->get_input('manage') == 'pages') {
                 $edit_link = $ougc_pages->build_url(array('action' => 'edit', 'pid' => $pages['pid']));
                 $pages['name'] = htmlspecialchars_uni($pages['name']);
 
-                $pages['visible'] or $pages['name'] = '<em>'.$pages['name'].'</em>';
+                $pages['visible'] or $pages['name'] = '<em>' . $pages['name'] . '</em>';
 
                 $table->construct_cell(
-                    '<a href="'.$edit_link.'"><strong>'.$pages['name'].'</strong></a> <span style="font-size: 90%">('.$ougc_pages->build_page_link(
+                    '<a href="' . $edit_link . '"><strong>' . $pages['name'] . '</strong></a> <span style="font-size: 90%">(' . $ougc_pages->build_page_link(
                         $lang->ougc_pages_view_page,
                         $pages['pid']
-                    ).')</span>'
+                    ) . ')</span>'
                 );
                 $table->construct_cell(
                     $form->generate_text_box(
-                        'disporder['.$pages['pid'].']',
+                        'disporder[' . $pages['pid'] . ']',
                         (int)$pages['disporder'],
                         array('style' => 'text-align: center; width: 30px;')
                     ),
                     array('class' => 'align_center')
                 );
                 $table->construct_cell(
-                    '<a href="'.$ougc_pages->build_url(
+                    '<a href="' . $ougc_pages->build_url(
                         array('action' => 'update', 'pid' => $pages['pid'], 'my_post_key' => $mybb->post_code)
-                    ).'"><img src="styles/default/images/icons/bullet_o'.(!$pages['visible'] ? 'ff' : 'n').'.png" alt="" title="'.(!$pages['visible'] ? $lang->ougc_pages_form_disabled : $lang->ougc_pages_form_visible).'" /></a>',
+                    ) . '"><img src="styles/default/images/icons/bullet_o' . (!$pages['visible'] ? 'ff' : 'n') . '.png" alt="" title="' . (!$pages['visible'] ? $lang->ougc_pages_form_disabled : $lang->ougc_pages_form_visible) . '" /></a>',
                     array('class' => 'align_center')
                 );
 
-                $popup = new PopupMenu('page_'.$pages['pid'], $lang->options);
+                $popup = new PopupMenu('page_' . $pages['pid'], $lang->options);
                 $popup->add_item($lang->edit, $edit_link);
                 $popup->add_item(
                     $lang->ougc_pages_form_export,
@@ -705,7 +705,7 @@ if ($mybb->get_input('manage') == 'pages') {
         $query = $db->simple_select(
             'ougc_pages_categories',
             'cid',
-            'url=\''.$db->escape_string($url).'\''.($add ? '' : ' AND cid!=\''.$mybb->get_input('cid', 1).'\''),
+            'url=\'' . $db->escape_string($url) . '\'' . ($add ? '' : ' AND cid!=\'' . $mybb->get_input('cid', 1) . '\''),
             array('limit' => 1)
         );
 
@@ -740,20 +740,20 @@ if ($mybb->get_input('manage') == 'pages') {
     $form = new Form(
         $ougc_pages->build_url(($add ? 'action=add' : array('action' => 'edit', 'cid' => $category['cid']))), 'post'
     );
-    $form_container = new FormContainer($sub_tabs['ougc_pages_'.($add ? 'cat_add' : 'edit')]['description']);
+    $form_container = new FormContainer($sub_tabs['ougc_pages_' . ($add ? 'cat_add' : 'edit')]['description']);
 
     $form_container->output_row(
-        $lang->ougc_pages_form_name.' <em>*</em>',
+        $lang->ougc_pages_form_name . ' <em>*</em>',
         $lang->ougc_pages_form_name_desc,
         $form->generate_text_box('name', $mybb->get_input('name'))
     );
     $form_container->output_row(
-        $lang->ougc_pages_form_description.' <em>*</em>',
+        $lang->ougc_pages_form_description . ' <em>*</em>',
         $lang->ougc_pages_form_description_desc,
         $form->generate_text_box('description', $mybb->get_input('description'))
     );
     $form_container->output_row(
-        $lang->ougc_pages_form_url.' <em>*</em>',
+        $lang->ougc_pages_form_url . ' <em>*</em>',
         $lang->ougc_pages_form_url_desc,
         $form->generate_text_box('url', $mybb->get_input('url'))
     );
@@ -857,7 +857,7 @@ if ($mybb->get_input('manage') == 'pages') {
     $multipage = $ougc_pages->build_multipage($count, $ougc_pages->build_url());
 
     if (!$count) {
-        $table->construct_cell('<div align="center">'.$lang->ougc_pages_view_empty.'</div>', array('colspan' => 4));
+        $table->construct_cell('<div align="center">' . $lang->ougc_pages_view_empty . '</div>', array('colspan' => 4));
         $table->construct_row();
 
         $table->output($sub_tabs['ougc_pages_cat_view']['title']);
@@ -889,30 +889,30 @@ if ($mybb->get_input('manage') == 'pages') {
             $manage_link = $ougc_pages->build_url(array('manage' => 'pages', 'cid' => $category['cid']));
             $category['name'] = htmlspecialchars_uni($category['name']);
 
-            $category['visible'] or $category['name'] = '<em>'.$category['name'].'</em>';
+            $category['visible'] or $category['name'] = '<em>' . $category['name'] . '</em>';
 
             $table->construct_cell(
-                '<a href="'.$manage_link.'"><strong>'.$category['name'].'</strong></a> <span style="font-size: 90%">('.$ougc_pages->build_category_link(
+                '<a href="' . $manage_link . '"><strong>' . $category['name'] . '</strong></a> <span style="font-size: 90%">(' . $ougc_pages->build_category_link(
                     $lang->ougc_pages_view_page,
                     $category['cid']
-                ).')</span>'
+                ) . ')</span>'
             );
             $table->construct_cell(
                 $form->generate_text_box(
-                    'disporder['.$category['cid'].']',
+                    'disporder[' . $category['cid'] . ']',
                     (int)$category['disporder'],
                     array('style' => 'text-align: center; width: 30px;')
                 ),
                 array('class' => 'align_center')
             );
             $table->construct_cell(
-                '<a href="'.$ougc_pages->build_url(
+                '<a href="' . $ougc_pages->build_url(
                     array('action' => 'update', 'cid' => $category['cid'], 'my_post_key' => $mybb->post_code)
-                ).'"><img src="styles/default/images/icons/bullet_o'.(!$category['visible'] ? 'ff' : 'n').'.png" alt="" title="'.(!$category['visible'] ? $lang->ougc_pages_form_disabled : $lang->ougc_pages_form_visible).'" /></a>',
+                ) . '"><img src="styles/default/images/icons/bullet_o' . (!$category['visible'] ? 'ff' : 'n') . '.png" alt="" title="' . (!$category['visible'] ? $lang->ougc_pages_form_disabled : $lang->ougc_pages_form_visible) . '" /></a>',
                 array('class' => 'align_center')
             );
 
-            $popup = new PopupMenu('category_'.$category['cid'], $lang->options);
+            $popup = new PopupMenu('category_' . $category['cid'], $lang->options);
             $popup->add_item($lang->ougc_pages_manage, $manage_link);
             $popup->add_item($lang->edit, $ougc_pages->build_url(array('action' => 'edit', 'cid' => $category['cid'])));
             $popup->add_item(
