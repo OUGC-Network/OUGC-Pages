@@ -4,7 +4,7 @@
  *
  *    OUGC Pages plugin (/pages.php)
  *    Author: Omar Gonzalez
- *    Copyright: © 2014 - 2020 Omar Gonzalez
+ *    Copyright: © 2014 - 2023 Omar Gonzalez
  *
  *    Website: https://ougc.network
  *
@@ -27,15 +27,42 @@
  ****************************************************************************/
 
 // Boring stuff..
-define('IN_MYBB', 1);
-define('THIS_SCRIPT', 'pages.php');
-$templatelist = 'usercp_nav_messenger, usercp_nav_messenger_tracking, usercp_nav_messenger_compose, usercp_nav_messenger_folder, usercp_nav_changename, usercp_nav_editsignature, usercp_nav_profile, usercp_nav_attachments, usercp_nav_misc, ougcpages_wrapper_ucp_nav_item, ougcpages_wrapper_ucp_nav, usercp_nav_home, usercp_nav, ougcpages_wrapper_ucp,ougcpages_wrapper_ucp';
-require_once './global.php';
+define( 'IN_MYBB', true );
+define( 'THIS_SCRIPT', 'pages.php' );
 
-$plugins->run_hooks('ougc_pages_start');
+$workingDirectory = dirname( __FILE__ );
 
-if ($mybb->get_input('page') && !$mybb->get_input('page', 1) || $mybb->get_input('category')) {
-    ougc_pages_show();
+if ( !$workingDirectory ) {
+    $workingDirectory = '.';
+}
+
+$shutdown_queries = $shutdown_functions = [];
+
+require_once $workingDirectory . '/inc/init.php';
+
+if ( !function_exists( 'OUGCPages\\Core\\initRun' ) ) {
+    error_no_permission();
+}
+
+\OUGCPages\Core\initRun();
+
+if ( isset( $templatelist ) ) {
+    $templatelist .= ',';
+} else {
+    $templatelist = '';
+}
+
+$templatelist = 'usercp_nav_messenger, usercp_nav_messenger_tracking, usercp_nav_messenger_compose, usercp_nav_messenger_folder, usercp_nav_changename, usercp_nav_editsignature, usercp_nav_profile, usercp_nav_attachments, usercp_nav_misc, ougcpages_wrapper_ucp_nav_item, ougcpages_wrapper_ucp_nav, usercp_nav_home, usercp_nav, ougcpages_wrapper_ucp, ougcpages_wrapper_ucp';
+
+require_once $workingDirectory . '/global.php';
+
+\OUGCPages\Core\runHooks( 'ougc_pages_start' );
+
+if (
+    $mybb->get_input( 'page' ) && !$mybb->get_input( 'page', \MyBB::INPUT_INT ) ||
+    $mybb->get_input( 'category' )
+) {
+    \OUGCPages\Core\initShow();
 }
 
 error_no_permission();

@@ -34,13 +34,15 @@ $l['setting_group_ougc_pages_desc'] = 'Create additional pages directly from the
 $l['setting_ougc_pages_portal'] = 'Use Portal Script';
 $l['setting_ougc_pages_portal_desc'] = 'Whether to show pages in the Portal page or not.';
 $l['setting_ougc_pages_seo'] = 'Use SEO friendly URLs';
-$l['setting_ougc_pages_seo'] = 'Whether if to enable SEO friendly URLs for pages.';
+$l['setting_ougc_pages_seo_desc'] = 'Whether if to enable SEO friendly URLs for pages.';
 $l['setting_ougc_pages_seo_scheme'] = 'Page URL Scheme';
 $l['setting_ougc_pages_seo_scheme_desc'] = 'Enter the Page URL scheme. Leave empty to disable SEO URLs for Pages.';
 $l['setting_ougc_pages_seo_scheme_categories'] = 'Category URL Scheme';
 $l['setting_ougc_pages_seo_scheme_categories_desc'] = 'Enter the Category URL scheme. Leave empty to disable SEO URLs for Categories.';
 $l['setting_ougc_pages_perpage'] = 'Items Per Page';
 $l['setting_ougc_pages_perpage_desc'] = 'Maximum number of items to show per page in the ACP list.';
+$l['setting_ougc_pages_usercp_priority'] = 'UserCP Nav Priority';
+$l['setting_ougc_pages_usercp_priority_desc'] = 'The priority given to UserCP navigation categories.';
 
 // ACP
 $l['ougc_pages_manage'] = 'Manage Pages';
@@ -89,8 +91,12 @@ $l['ougc_pages_form_wrapper'] = 'Use Template Wrapper';
 $l['ougc_pages_form_wrapper_desc'] = 'Whether or not to use the template wrapper for non-PHP pages.';
 $l['ougc_pages_form_php'] = 'PHP Code';
 $l['ougc_pages_form_php_desc'] = 'Whether if process this page as plain PHP code or use the MyBB template system instead.';
-$l['ougc_pages_form_init'] = 'Run At Initialization';
-$l['ougc_pages_form_init_desc'] = 'Whether or not to run PHP script at initialization ("No" to run at <i>global_end</i>).';
+$l['ougc_pages_form_execution'] = 'Execution Level';
+$l['ougc_pages_form_execution_desc'] = 'Select the execution priority to run PHP script.';
+$l['ougc_pages_form_execution_init'] = 'Initialization';
+$l['ougc_pages_form_execution_start'] = 'Global Start';
+$l['ougc_pages_form_execution_intermediate'] = 'Global Intermediate';
+$l['ougc_pages_form_execution_end'] = 'Default "Global End"';
 $l['ougc_pages_form_template'] = 'Template';
 $l['ougc_pages_form_template_desc'] = 'Insert the page template below.';
 $l['ougc_pages_form_disporder'] = 'Display Order';
@@ -108,6 +114,7 @@ $l['ougc_pages_error_update'] = 'OUGC Pages requires updating. Please deactivate
 $l['ougc_pages_error_add'] = 'There was a error while creating a new category.';
 $l['ougc_pages_error_invalidname'] = 'The inserted name is invalid.';
 $l['ougc_pages_error_invaliddescription'] = 'The inserted description is invalid.';
+$l['ougc_pages_error_invalidtemplate'] = 'The inserted template appears to have invalid code for non PHP pages.';
 $l['ougc_pages_error_invalidcategory'] = 'The selected category is invalid.';
 $l['ougc_pages_error_invalidurl'] = 'The inserted unique URL is invalid.';
 $l['ougc_pages_error_invalidimport'] = 'The page content seems to be invalid.';
@@ -121,4 +128,4 @@ $l['ougc_pages_config_permissions'] = 'Can manage pages?';
 
 // PluginLibrary
 $l['ougc_pages_pl_required'] = 'This plugin requires <a href="{1}">PluginLibrary</a> version {2} or later to be uploaded to your forum.';
-$l['ougc_pages_pl_old'] = 'This plugin requires <a href="{1}">PluginLibrary</a> version {2} or later, whereas your current version is {3}.';
+$l['ougc_pages_pl_old'] = 'This plugin requires <a href="{1}">PluginLibrary</a> version {2} or later, whereas your current version is {3}.'; // DEPRECATED
