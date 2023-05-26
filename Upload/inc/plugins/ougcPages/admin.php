@@ -28,6 +28,172 @@
 
 namespace OUGCPages\Admin;
 
+const FIELDS_DATA_CATEGORIES = [
+    'cid' => [
+        'type' => 'INT',
+        'unsigned' => true,
+        'auto_increment' => true,
+        'primary_key' => true,
+    ],
+    'name' => [
+        'type' => 'VARCHAR',
+        'formType' => 'textBox',
+        'size' => 100,
+        'cache' => true
+    ],
+    'description' => [
+        'type' => 'VARCHAR',
+        'formType' => 'textBox',
+        'size' => 255
+    ],
+    'url' => [
+        'type' => 'VARCHAR',
+        'formType' => 'textBox',
+        'size' => 100,
+        'unique' => true,
+        'cache' => true
+    ],
+    'allowedGroups' => [
+        'type' => 'VARCHAR',
+        'formType' => 'groupSelect',
+        'size' => 255,
+        'cache' => true
+    ],
+    'disporder' => [
+        'type' => 'SMALLINT',
+        'unsigned' => true,
+        'default' => 0
+    ],
+    'visible' => [
+        'type' => 'TINYINT',
+        'unsigned' => true,
+        'default' => 1
+    ],
+    'breadcrumb' => [
+        'type' => 'TINYINT',
+        'formType' => 'yesNo',
+        'unsigned' => true,
+        'default' => 1
+    ],
+    'displayNavigation' => [
+        'type' => 'TINYINT',
+        'formType' => 'yesNo',
+        'unsigned' => true,
+        'default' => 1
+    ],
+    'buildMenu' => [
+        'type' => 'TINYINT',
+        'formType' => 'basicSelect',
+        'unsigned' => true,
+        'default' => 1,
+        'cache' => true
+    ],
+    'wrapucp' => [
+        'type' => 'TINYINT',
+        'formType' => 'yesNo',
+        'unsigned' => true,
+        'default' => 0,
+        'cache' => true
+    ]
+];
+
+const FIELDS_DATA_PAGES = [
+    'pid' => [
+        'type' => 'INT',
+        'unsigned' => true,
+        'auto_increment' => true,
+        'primary_key' => true
+    ],
+    'cid' => [
+        'type' => 'INT',
+        'formType' => 'basicSelect',
+        'unsigned' => true,
+        'cache' => true
+    ],
+    'name' => [
+        'type' => 'VARCHAR',
+        'formType' => 'textBox',
+        'size' => 100,
+        'cache' => true
+    ],
+    'description' => [
+        'type' => 'VARCHAR',
+        'formType' => 'textBox',
+        'size' => 255
+    ],
+    'url' => [
+        'type' => 'VARCHAR',
+        'formType' => 'textBox',
+        'size' => 100,
+        'unique' => true,
+        'cache' => true
+    ],
+    'allowedGroups' => [
+        'type' => 'VARCHAR',
+        'formType' => 'groupSelect',
+        'size' => 255,
+        'cache' => true
+    ],
+    'disporder' => [
+        'type' => 'SMALLINT',
+        'unsigned' => true,
+        'default' => 0
+    ],
+    'visible' => [
+        'type' => 'TINYINT',
+        'unsigned' => true,
+        'default' => 1
+    ],
+    'menuItem' => [
+        'type' => 'TINYINT',
+        'formType' => 'yesNo',
+        'unsigned' => true,
+        'default' => 1,
+        'cache' => true
+    ],
+    'wrapper' => [
+        'type' => 'TINYINT',
+        'formType' => 'yesNo',
+        'unsigned' => true,
+        'default' => 1
+    ],
+    'wol' => [
+        'type' => 'TINYINT',
+        'formType' => 'yesNo',
+        'unsigned' => true,
+        'default' => 1
+    ],
+    'php' => [
+        'type' => 'TINYINT',
+        'formType' => 'yesNo',
+        'unsigned' => true,
+        'default' => 0
+    ],
+    'classicTemplate' => [
+        'type' => 'TINYINT',
+        'formType' => 'yesNo',
+        'unsigned' => true,
+        'default' => 0
+    ],
+    'template' => [
+        'type' => 'MEDIUMTEXT',
+        'formType' => 'textArea',
+        'null' => true
+    ],
+    'init' => [
+        'type' => 'TINYINT',
+        'formType' => 'basicSelect',
+        'unsigned' => true,
+        'default' => \OUGCPages\Core\EXECUTION_HOOK_GLOBAL_END,
+        'cache' => true
+    ],
+    'dateline' => [
+        'type' => 'INT',
+        'unsigned' => true,
+        'default' => 0
+    ]
+];
+
 function pluginInfo(): array
 {
     global $lang;
@@ -58,78 +224,82 @@ function pluginActivate(): true
     \OUGCPages\Core\loadPluginLibrary();
 
     // Add settings
-    $settingsContents = \file_get_contents( OUGC_PAGES_ROOT . '/settings.json' );
+    $settingsContents = \file_get_contents(OUGC_PAGES_ROOT . '/settings.json');
 
-    $settingsData = \json_decode( $settingsContents, true );
+    $settingsData = \json_decode($settingsContents, true);
 
-    foreach ( $settingsData as $settingKey => &$settingData ) {
-        $settingData[ 'title' ] = $lang->{"setting_ougc_pages_{$settingKey}"};
-        $settingData[ 'description' ] = $lang->{"setting_ougc_pages_{$settingKey}_desc"};
+    foreach ($settingsData as $settingKey => &$settingData) {
+        if (empty($lang->{"setting_ougc_pages_{$settingKey}"})) {
+            continue;
+        }
+
+        $settingData['title'] = $lang->{"setting_ougc_pages_{$settingKey}"};
+        $settingData['description'] = $lang->{"setting_ougc_pages_{$settingKey}_desc"};
     }
 
-    $PL->settings( 'ougc_pages', $lang->setting_group_ougc_pages, $lang->setting_group_ougc_pages_desc, $settingsData );
+    $PL->settings('ougc_pages', $lang->setting_group_ougc_pages, $lang->setting_group_ougc_pages_desc, $settingsData);
 
     // Add templates
-    $templatesDirIterator = new \DirectoryIterator( OUGC_PAGES_ROOT . '/templates' );
+    $templatesDirIterator = new \DirectoryIterator(OUGC_PAGES_ROOT . '/templates');
 
     $templates = [];
 
-    foreach ( $templatesDirIterator as $template ) {
-        if ( !$template->isFile() ) {
+    foreach ($templatesDirIterator as $template) {
+        if (!$template->isFile()) {
             continue;
         }
 
         $pathName = $template->getPathname();
 
-        $pathInfo = \pathinfo( $pathName );
+        $pathInfo = \pathinfo($pathName);
 
-        if ( $pathInfo[ 'extension' ] === 'html' ) {
-            $templates[ $pathInfo[ 'filename' ] ] = \file_get_contents( $pathName );
+        if ($pathInfo['extension'] === 'html') {
+            $templates[$pathInfo['filename']] = \file_get_contents($pathName);
         }
     }
 
-    if ( $templates ) {
-        $PL->templates( 'ougcpages', 'OUGC Pages', $templates );
+    if ($templates) {
+        $PL->templates('ougcpages', 'OUGC Pages', $templates);
     }
 
     // Insert/update version into cache
-    $plugins = (array) $cache->read( 'ougc_plugins' );
+    $plugins = (array)$cache->read('ougc_plugins');
 
-    if ( !$plugins ) {
+    if (!$plugins) {
         $plugins = [];
     }
 
-    if ( !isset( $plugins[ 'pages' ] ) ) {
-        $plugins[ 'pages' ] = pluginInfo()[ 'versioncode' ];
+    if (!isset($plugins['pages'])) {
+        $plugins['pages'] = pluginInfo()['versioncode'];
     }
 
     VerifyStylesheet();
 
     /*~*~* RUN UPDATES START *~*~*/
 
-    if ( $plugins[ 'pages' ] <= 1819 ) {
-        $db->update_query( 'ougc_pages', [ 'visible' => 0 ], "groups=''" );
-        $db->update_query( 'ougc_pages_categories', [ 'visible' => '' ], "groups=''" );
+    if ($plugins['pages'] <= 1819) {
+        $db->update_query('ougc_pages', ['visible' => 0], "groups=''");
+        $db->update_query('ougc_pages_categories', ['visible' => ''], "groups=''");
 
-        $db->update_query( 'ougc_pages', [ 'groups' => 0 ], "groups='-1'" );
-        $db->update_query( 'ougc_pages_categories', [ 'groups' => '' ], "groups='-1'" );
+        $db->update_query('ougc_pages', ['groups' => 0], "groups='-1'");
+        $db->update_query('ougc_pages_categories', ['groups' => ''], "groups='-1'");
     }
 
-    if ( $plugins[ 'pages' ] <= 1833 ) {
-        if ( $db->field_exists( 'groups', 'ougc_pages' ) ) {
+    if ($plugins['pages'] <= 1833) {
+        if ($db->field_exists('groups', 'ougc_pages')) {
             $db->rename_column(
                 'ougc_pages',
                 'groups',
                 'allowedGroups',
-                dbTables()[ 'ougc_pages' ][ 'allowedGroups' ]
+                dbTables()['ougc_pages']['allowedGroups']
             );
         }
-        if ( $db->field_exists( 'groups', 'ougc_pages_categories' ) ) {
+        if ($db->field_exists('groups', 'ougc_pages_categories')) {
             $db->rename_column(
                 'ougc_pages_categories',
                 'groups',
                 'allowedGroups',
-                dbTables()[ 'ougc_pages_categories' ][ 'allowedGroups' ]
+                dbTables()['ougc_pages_categories']['allowedGroups']
             );
         }
     }
@@ -138,12 +308,12 @@ function pluginActivate(): true
 
     dbVerifyTables();
 
-    $plugins[ 'pages' ] = pluginInfo()[ 'versioncode' ];
+    $plugins['pages'] = pluginInfo()['versioncode'];
 
-    $cache->update( 'ougc_plugins', $plugins );
+    $cache->update('ougc_plugins', $plugins);
 
     // Update administrator permissions
-    change_admin_permission( 'config', 'ougc_pages' );
+    change_admin_permission('config', 'ougc_pages');
 
     return true;
 }
@@ -153,7 +323,7 @@ function pluginDeactivate(): true
     \OUGCPages\Core\loadPluginLibrary();
 
     // Update administrator permissions
-    change_admin_permission( 'config', 'ougc_pages', 0 );
+    change_admin_permission('config', 'ougc_pages', 0);
 
     return true;
 }
@@ -164,9 +334,9 @@ function pluginIsInstalled(): bool
 
     static $pluginIsInstalled = null;
 
-    if ( $pluginIsInstalled === null ) {
-        foreach ( dbTables() as $table => $fields ) {
-            $pluginIsInstalled = (bool) $db->table_exists( $table );
+    if ($pluginIsInstalled === null) {
+        foreach (dbTables() as $table => $fields) {
+            $pluginIsInstalled = (bool)$db->table_exists($table);
 
             break;
         }
@@ -182,31 +352,31 @@ function pluginUninstall(): true
     \OUGCPages\Core\loadPluginLibrary();
 
     // Drop DB entries
-    foreach ( dbTables() as $name => $table ) {
-        $db->drop_table( $name );
+    foreach (dbTables() as $name => $table) {
+        $db->drop_table($name);
     }
 
-    verifyStylesheet( true );
+    verifyStylesheet(true);
 
-    $PL->cache_delete( 'ougc_pages' );
-    $PL->settings_delete( 'ougc_pages' );
-    $PL->templates_delete( 'ougcpages' );
+    $PL->cache_delete('ougc_pages');
+    $PL->settings_delete('ougc_pages');
+    $PL->templates_delete('ougcpages');
 
     // Delete version from cache
-    $plugins = (array) $cache->read( 'ougc_plugins' );
+    $plugins = (array)$cache->read('ougc_plugins');
 
-    if ( isset( $plugins[ 'pages' ] ) ) {
-        unset( $plugins[ 'pages' ] );
+    if (isset($plugins['pages'])) {
+        unset($plugins['pages']);
     }
 
-    if ( !empty( $plugins ) ) {
-        $cache->update( 'ougc_plugins', $plugins );
+    if (!empty($plugins)) {
+        $cache->update('ougc_plugins', $plugins);
     } else {
-        $PL->cache_delete( 'ougc_plugins' );
+        $PL->cache_delete('ougc_plugins');
     }
 
     // Remove administrator permissions
-    change_admin_permission( 'config', 'ougc_pages', -1 );
+    change_admin_permission('config', 'ougc_pages', -1);
 
     return true;
 }
@@ -218,33 +388,33 @@ function dbVerifyTables(): true
 
     $collation = $db->build_create_table_collation();
 
-    foreach ( dbTables() as $table => $fields ) {
-        if ( $db->table_exists( $table ) ) {
-            foreach ( $fields as $field => $definition ) {
-                if ( $field == 'primary_key' || $field == 'unique_key' ) {
+    foreach (dbTables() as $table => $fields) {
+        if ($db->table_exists($table)) {
+            foreach ($fields as $field => $definition) {
+                if ($field == 'primary_key' || $field == 'unique_key') {
                     continue;
                 }
 
-                if ( $db->field_exists( $field, $table ) ) {
-                    $db->modify_column( $table, "`{$field}`", $definition );
+                if ($db->field_exists($field, $table)) {
+                    $db->modify_column($table, "`{$field}`", $definition);
                 } else {
-                    $db->add_column( $table, $field, $definition );
+                    $db->add_column($table, $field, $definition);
                 }
             }
         } else {
             $query = "CREATE TABLE IF NOT EXISTS `{$db->table_prefix}{$table}` (";
 
-            foreach ( $fields as $field => $definition ) {
-                if ( $field == 'primary_key' ) {
+            foreach ($fields as $field => $definition) {
+                if ($field == 'primary_key') {
                     $query .= "PRIMARY KEY (`{$definition}`)";
-                } else if ( $field != 'unique_key' ) {
+                } else if ($field != 'unique_key') {
                     $query .= "`{$field}` {$definition},";
                 }
             }
 
             $query .= ") ENGINE=MyISAM{$collation};";
 
-            $db->write_query( $query );
+            $db->write_query($query);
         }
     }
 
@@ -257,18 +427,18 @@ function dbVerifyIndexes(): true
 {
     global $db;
 
-    foreach ( dbTables() as $table => $fields ) {
-        if ( !$db->table_exists( $table ) ) {
+    foreach (dbTables() as $table => $fields) {
+        if (!$db->table_exists($table)) {
             continue;
         }
 
-        if ( isset( $fields[ 'unique_key' ] ) ) {
-            foreach ( $fields[ 'unique_key' ] as $k => $v ) {
-                if ( $db->index_exists( $table, $k ) ) {
+        if (isset($fields['unique_key'])) {
+            foreach ($fields['unique_key'] as $k => $v) {
+                if ($db->index_exists($table, $k)) {
                     continue;
                 }
 
-                $db->write_query( "ALTER TABLE {$db->table_prefix}{$table} ADD UNIQUE KEY {$k} ({$v})" );
+                $db->write_query("ALTER TABLE {$db->table_prefix}{$table} ADD UNIQUE KEY {$k} ({$v})");
             }
         }
     }
@@ -291,14 +461,14 @@ function dbTables(): array
             'wol' => "tinyint(1) NOT NULL DEFAULT '1'",
             'disporder' => "tinyint(5) NOT NULL DEFAULT '0'",
             'visible' => "tinyint(1) NOT NULL DEFAULT '1'",
-            'navigation' => "tinyint(1) NOT NULL DEFAULT '1'", // TODO
-            'menuitem' => "tinyint(1) NOT NULL DEFAULT '1'", // TODO
+            'menuItem' => "tinyint(1) NOT NULL DEFAULT '1'",
             'wrapper' => "tinyint(1) NOT NULL DEFAULT '1'",
-            'init' => "tinyint(1) NOT NULL DEFAULT '1'",
+            'classicTemplate' => "tinyint(1) NOT NULL DEFAULT '1'",
             'template' => "MEDIUMTEXT NOT NULL",
+            'init' => "tinyint(1) NOT NULL DEFAULT '4'",
             'dateline' => "int(10) NOT NULL DEFAULT '0'",
             'primary_key' => "pid",
-            'unique_key' => [ 'url' => 'url' ]
+            'unique_key' => ['url' => 'url']
         ],
         'ougc_pages_categories' => [
             'cid' => "int UNSIGNED NOT NULL AUTO_INCREMENT",
@@ -309,17 +479,17 @@ function dbTables(): array
             'disporder' => "tinyint(5) NOT NULL DEFAULT '0'",
             'visible' => "tinyint(1) NOT NULL DEFAULT '1'",
             'breadcrumb' => "tinyint(1) NOT NULL DEFAULT '1'",
-            'navigation' => "tinyint(1) NOT NULL DEFAULT '1'",
-            'menuitem' => "tinyint(1) NOT NULL DEFAULT '1'",
-            'classicTemplate' => "tinyint(1) NOT NULL DEFAULT '1'", // TODO
+            'displayNavigation' => "tinyint(1) NOT NULL DEFAULT '1'",
+            'buildMenu' => "tinyint(1) NOT NULL DEFAULT '1'",
+            //'classicTemplate' => "tinyint(1) NOT NULL DEFAULT '1'", // TODO
             'wrapucp' => "tinyint(1) NOT NULL DEFAULT '0'",
             'primary_key' => "cid",
-            'unique_key' => [ 'url' => 'url' ]
+            'unique_key' => ['url' => 'url']
         ]
     ];
 }
 
-function verifyStylesheet( $removeStylesheet = false ): true
+function verifyStylesheet($removeStylesheet = false): true
 {
     global $db;
 
@@ -331,35 +501,210 @@ function verifyStylesheet( $removeStylesheet = false ): true
 
     $updateResult = false;
 
-    while ( $stylesheet = $db->fetch_array( $dbQuery ) ) {
-        $sheetID = (int) $stylesheet[ 'sid' ];
+    while ($stylesheet = $db->fetch_array($dbQuery)) {
+        $sheetID = (int)$stylesheet['sid'];
 
-        if ( !$removeStylesheet && my_strpos( $stylesheet[ 'attachedto' ], '|pages.php' ) === false ) {
-            $db->update_query( 'themestylesheets', [
-                'attachedto' => $stylesheet[ 'attachedto' ] . '|pages.php',
+        if (!$removeStylesheet && my_strpos($stylesheet['attachedto'], '|pages.php') === false) {
+            $db->update_query('themestylesheets', [
+                'attachedto' => $stylesheet['attachedto'] . '|pages.php',
                 'lastmodified' => TIME_NOW
-            ], "sid = '{$sheetID}'" );
+            ], "sid = '{$sheetID}'");
             $updateResult = true;
         }
 
-        if ( $removeStylesheet && my_strpos( $stylesheet[ 'attachedto' ], '|pages.php' ) !== false ) {
-            $db->update_query( 'themestylesheets', [
-                'attachedto' => str_replace( '|pages.php', '', $stylesheet[ 'attachedto' ] ),
+        if ($removeStylesheet && my_strpos($stylesheet['attachedto'], '|pages.php') !== false) {
+            $db->update_query('themestylesheets', [
+                'attachedto' => str_replace('|pages.php', '', $stylesheet['attachedto']),
                 'lastmodified' => TIME_NOW
-            ], "sid = '{$sheetID}'" );
+            ], "sid = '{$sheetID}'");
             $updateResult = true;
         }
     }
 
-    if ( $updateResult ) {
-        $dbQuery = $db->simple_select( 'themes', 'tid' );
+    if ($updateResult) {
+        $dbQuery = $db->simple_select('themes', 'tid');
 
         require_once MYBB_ADMIN_DIR . 'inc/functions_themes.php';
 
-        while ( $tid = $db->fetch_field( $dbQuery, 'tid' ) ) {
-            update_theme_stylesheet_list( $tid );
+        while ($tid = $db->fetch_field($dbQuery, 'tid')) {
+            update_theme_stylesheet_list($tid);
         }
     }
 
     return true;
+}
+
+function categoryFormCheckFields(array &$errors, string $errorIdentifier = 'category', array $fieldsData = FIELDS_DATA_CATEGORIES): void
+{
+    pageFormCheckFields($errors, $errorIdentifier, $fieldsData);
+}
+
+function pageFormCheckFields(array &$errors, string $errorIdentifier = 'page', array $fieldsData = FIELDS_DATA_PAGES): void
+{
+    global $mybb, $lang;
+
+    foreach ($fieldsData as $fieldKey => $fieldData) {
+        if (!isset($fieldData['formType'])) {
+            continue;
+        }
+
+        if ($fieldData['formType'] == 'textBox') {
+            $inputLength = \my_strlen($mybb->get_input($fieldKey));
+
+            if ($inputLength < 1 || $inputLength > $fieldData['size']) {
+                $errors[] = $lang->sprintf(
+                    $lang->{"ougc_pages_error_{$errorIdentifier}_invalid_{$fieldKey}"},
+                    \my_number_format($fieldData['size'])
+                );
+            }
+        } elseif ($fieldData['formType'] == 'groupSelect') {
+            if ($mybb->get_input("{$fieldKey}Select") === 'all') {
+                $mybb->input[$fieldKey] = -1;
+            } elseif ($mybb->get_input("{$fieldKey}Select") === 'custom') {
+                $mybb->input[$fieldKey] = \OUGCPages\Core\sanitizeIntegers(
+                    $mybb->get_input($fieldKey, \MyBB::INPUT_ARRAY),
+                    true
+                );
+            }
+        }
+
+        unset($fieldKey, $fieldData);
+    }
+}
+
+function categoryFormBuildFields(object &$formContainer, object &$formObject, array $basicSelectItems = [], string $errorIdentifier = 'category', array $fieldsData = FIELDS_DATA_CATEGORIES): void
+{
+    pageFormBuildFields($formContainer, $formObject, $basicSelectItems, $errorIdentifier, $fieldsData);
+}
+
+function pageFormBuildFields(object &$formContainer, object &$formObject, array $basicSelectItems = [], string $errorIdentifier = 'page', array $fieldsData = FIELDS_DATA_PAGES): void
+{
+    global $mybb, $lang;
+
+    foreach ($fieldsData as $fieldKey => $fieldData) {
+        if (!isset($fieldData['formType'])) {
+            continue;
+        }
+
+        $formContainer->output_row(
+            $lang->{"ougc_pages_form_{$errorIdentifier}_{$fieldKey}"},
+            $lang->{"ougc_pages_form_{$errorIdentifier}_{$fieldKey}_desc"},
+            call_user_func_array(function (string $fieldKey, string $formType, array $basicSelectItems = []) use (&$formObject): string {
+                global $mybb, $lang, $templates;
+
+                if ($formType == 'yesNo') {
+                    return $formObject->generate_yes_no_radio(
+                        $fieldKey,
+                        $mybb->get_input($fieldKey, \MyBB::INPUT_INT),
+                        true
+                    );
+                } else if ($formType == 'groupSelect') {
+                    $selectedItems = [];
+
+                    $multiSelectChecked = ['all' => '', 'custom' => '', 'none' => ''];
+
+                    if ($mybb->get_input($fieldKey, \MyBB::INPUT_INT) === -1) {
+                        $multiSelectChecked['all'] = 'checked="checked"';
+                    } elseif (!empty($mybb->get_input($fieldKey))) {
+                        $multiSelectChecked['custom'] = 'checked="checked"';
+
+                        $selectedItems = \OUGCPages\Core\sanitizeIntegers(explode(
+                            ',',
+                            $mybb->get_input($fieldKey)
+                        ));
+                    } else {
+                        $multiSelectChecked['none'] = 'checked="checked"';
+                    }
+
+                    \print_selection_javascript();
+
+                    $groupSelectField = $formObject->generate_group_select(
+                        "{$fieldKey}[]",
+                        $selectedItems,
+                        ['id' => $fieldKey, 'multiple' => true, 'size' => 5]
+                    );
+
+                    return eval($templates->render(
+                        \OUGCPages\Core\templateGetName('adminGroupSelect'),
+                        true,
+                        false
+                    ));
+                } else if ($formType == 'basicSelect') {
+                    return $formObject->generate_select_box(
+                        $fieldKey,
+                        $basicSelectItems[$fieldKey],
+                        $mybb->get_input($fieldKey, \MyBB::INPUT_INT),
+                        ['id' => $fieldKey]
+                    );
+                } else if ($formType == 'textArea') {
+                    return $formObject->generate_text_area(
+                        $fieldKey,
+                        $mybb->get_input($fieldKey),
+                        ['id' => 'template', 'class' => '', 'style' => 'width: 100%; height: 500px;']
+                    );
+                } else {
+                    return $formObject->generate_text_box(
+                        $fieldKey,
+                        $mybb->get_input($fieldKey),
+                        ['id' => $fieldKey]
+                    );
+                }
+            }, [$fieldKey, $fieldData['formType'], $basicSelectItems]),
+            '',
+            [],
+            ['id' => "row_{$fieldKey}"]
+        );
+
+        unset($fieldKey, $fieldData);
+    }
+}
+
+function categoryFormParseFields(array &$formData, array $fieldsData = FIELDS_DATA_CATEGORIES): void
+{
+    pageFormParseFields($formData, $fieldsData);
+}
+
+function pageFormParseFields(array &$formData, array $fieldsData = FIELDS_DATA_PAGES): void
+{
+    global $mybb;
+
+    foreach ($fieldsData as $fieldKey => $fieldData) {
+        if (!isset($fieldData['formType'])) {
+            continue;
+        }
+
+        if ($fieldData['formType'] == 'yesNo') {
+            $formData[$fieldKey] = $mybb->get_input($fieldKey, \MyBB::INPUT_INT);
+        } else {
+            $formData[$fieldKey] = $mybb->get_input($fieldKey);
+        }
+
+        unset($fieldKey, $fieldData);
+    }
+}
+
+function categoryFormSetFields(array &$objectData = [], array $fieldsData = FIELDS_DATA_CATEGORIES): void
+{
+    pageFormSetFields($objectData, $fieldsData);
+}
+
+function pageFormSetFields(array &$objectData = [], array $fieldsData = FIELDS_DATA_PAGES): void
+{
+    global $mybb;
+
+    foreach ($fieldsData as $fieldKey => $fieldData) {
+        if (!isset($fieldData['formType'])) {
+            continue;
+        }
+
+        if (!isset($mybb->input[$fieldKey])) {
+            if (isset($objectData[$fieldKey])) {
+                $mybb->input[$fieldKey] = $objectData[$fieldKey];
+            } else {
+                $mybb->input[$fieldKey] = '';
+            }
+        }
+
+        unset($fieldKey, $fieldData);
+    }
 }

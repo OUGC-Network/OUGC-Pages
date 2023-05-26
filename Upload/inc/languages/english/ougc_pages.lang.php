@@ -31,7 +31,7 @@ $l['setting_group_ougc_pages'] = 'OUGC Pages';
 
 // Messages
 $l['ougc_pages_error_invalidpage'] = 'The selected page seems to be invalid.';
-$l['ougc_pages_error_invalidçategory'] = 'The selected category seems to be invalid.';
+$l['ougc_pages_error_category_invalid'] = 'The selected category seems to be invalid.';
 
 // Categories
 $l['ougc_pages_category_list_empty'] = 'There are currently no pages in this category.';
