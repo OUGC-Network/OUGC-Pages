@@ -28,16 +28,9 @@
 
 namespace OUGCPages\ForumHooks;
 
-use const OUGCPages\Core\EXECUTION_HOOK_GLOBAL_END;
-use const OUGCPages\Core\EXECUTION_HOOK_GLOBAL_START;
-
 function fetch_wol_activity_end(&$activityObjects): array
 {
-    if ($activityObjects['activity'] != 'unknown') {
-        return $activityObjects;
-    }
-
-    if (my_strpos($activityObjects['location'], 'pages.php') === false) {
+    if ($activityObjects['activity'] !== 'unknown' || \my_strpos($activityObjects['location'], 'pages.php') === false) {
         return $activityObjects;
     }
 
@@ -46,71 +39,124 @@ function fetch_wol_activity_end(&$activityObjects): array
     return $activityObjects;
 }
 
-function build_friendly_wol_location_end(&$locationObjetcs): array|bool
+function build_friendly_wol_location_end(&$locationObjects): array|bool
 {
-    global $ougc_pages, $lang, $settings;
-    $ougc_pages->lang_load();
+    if ($locationObjects['user_activity']['activity'] !== 'ougc_pages') {
+        return $locationObjects;
+    }
 
-    if ($locationObjetcs['user_activity']['activity'] == 'ougc_pages') {
-        global $cache;
+    global $lang;
 
-        $pagecache = $cache->read('ougc_pages');
+    $pagesCache = \OUGCPages\Core\cacheGetPages();
 
-        $location = parse_url($locationObjetcs['user_activity']['location']);
-        $location['query'] = html_entity_decode($location['query']);
-        $location['query'] = explode('&', (string)$location['query']);
+    $categoriesCache = \OUGCPages\Core\cacheGetCategories();
 
-        if (empty($location['query'])) {
-            return false;
+    $location = \parse_url($locationObjects['user_activity']['location']);
+
+    if (empty($location['query'])) {
+        return $locationObjects;
+    }
+
+    $location['query'] = \html_entity_decode($location['query']);
+
+    $location['query'] = \explode('&', (string)$location['query']);
+
+    if (empty($location['query'])) {
+        return $locationObjects;
+    }
+
+    $isCategory = $isPage = false;
+
+    foreach ($location['query'] as $query) {
+        $param = explode('=', $query);
+
+        if ($param[0] === 'category') {
+            $isCategory = true;
+        } else if ($param[0] === 'page') {
+            $isPage = true;
         }
 
-        foreach ($location['query'] as $query) {
-            $param = explode('=', $query);
+        if ($isCategory || $isPage) {
+            $url = $param[1];
 
-            $type = $param[0];
-
-            if ($type == 'page' || $type == 'category') {
-                $url = $param[1];
-            }
-        }
-
-        if ($type == 'page' && !empty($pagecache['pages'][$url])) {
-            $page = $ougc_pages->get_page($pagecache['pages'][$url]);
-
-            if (!$page['wol']) {
-                $locationObjetcs['user_activity']['location'] = '/';
-                return $locationObjetcs;
-            }
-
-            $locationObjetcs['location_name'] = $lang->sprintf($lang->ougc_pages_wol, \OUGCPages\Core\pageGetLink($pagecache['pages'][$url]), htmlspecialchars_uni($page['name']));
-        }
-
-        if ($type == 'category') {
-            $category = null;
-            foreach ($pagecache['categories'] as $cid => $cat) {
-                if ($cat['url'] == $url) {
-                    $category = $cat;
-                    break;
-                }
-            }
-
-            if ($category !== null) {
-                $locationObjetcs['location_name'] = $lang->sprintf($lang->ougc_pages_wol_cat, $ougc_pages->get_category_link($cid), htmlspecialchars_uni($category['name']));
-            }
+            break;
         }
     }
 
-    return $locationObjetcs;
+    \OUGCPages\Core\loadlanguage();
+
+    if ($isCategory) {
+        $categoryData = \OUGCPages\Core\categoryGetByUrl($url);
+
+        if (!empty($categoryData)) {
+            $locationObjects['location_name'] = $lang->sprintf(
+                $lang->ougc_pages_wol_category,
+                \OUGCPages\Core\categoryGetLink($categoryData['cid']),
+                \htmlspecialchars_uni($categoryData['name'])
+            );
+        }
+    }
+
+    if ($isPage) {
+        $pageData = \OUGCPages\Core\pageGetByUrl($url);
+
+        if (!$pageData['wol']) {
+            $locationObjects['user_activity']['location'] = '/';
+
+            return $locationObjects;
+        }
+
+        if (!empty($pageData)) {
+            $locationObjects['location_name'] = $lang->sprintf(
+                $lang->ougc_pages_wol_page,
+                \OUGCPages\Core\pageGetLink($pageData['pid']),
+                \htmlspecialchars_uni($pageData['name'])
+            );
+        }
+    }
+
+    return $locationObjects;
 }
 
-function usercp_menu60(): bool // maybe later allow custom priorities
+function usercp_menu10(): void
 {
-    global $cache, $db, $ougc_pages, $templates, $mybb, $usercpmenu, $collapsed, $theme, $collapsedimg, $collapsed, $collapse;
+    if ((int)\OUGCPages\Core\getSetting('usercp_priority') !== 10) {
+        return;
+    }
+
+    usercp_menu40(true);
+}
+
+function usercp_menu20(): void
+{
+    if ((int)\OUGCPages\Core\getSetting('usercp_priority') !== 20) {
+        return;
+    }
+
+    usercp_menu40(true);
+}
+
+function usercp_menu30(): void
+{
+    if ((int)\OUGCPages\Core\getSetting('usercp_priority') !== 30) {
+        return;
+    }
+
+    usercp_menu40(true);
+}
+
+function usercp_menu40(bool $forceRun = false): void // maybe later allow custom priorities
+{
+    if (!$forceRun && (int)\OUGCPages\Core\getSetting('usercp_priority') !== 40) {
+        return;
+    }
+
+    global $cache, $db, $templates, $mybb, $usercpmenu, $collapsed, $theme, $collapsedimg, $collapsed, $collapse, $ucp_nav_home;
 
     $categoriesCache = \OUGCPages\Core\cacheGetCategories();
 
     if (empty($categoriesCache)) {
-        return false;
+        return;
     }
 
     foreach ($categoriesCache as $cid => $categoryData) {
@@ -160,47 +206,20 @@ function usercp_menu60(): bool // maybe later allow custom priorities
 
         $usercpmenu .= eval($templates->render('ougcpages_wrapper_ucp_nav'));
     }
-
-    return true;
 }
 
-function global_start(): true
+function global_start(): void
 {
-    if (
-        \OUGCPages\Core\executeStatusGet() !== \OUGCPages\Core\EXECUTION_STATUS_DISABLED &&
-        \OUGCPages\Core\executeHookGet() === \OUGCPages\Core\EXECUTION_HOOK_GLOBAL_START
-    ) {
-        \OUGCPages\Core\initExecute(
-            \OUGCPages\Core\executeGetCurrentPageID()
-        );
-    }
+    if (defined('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START')) {
 
-    return true;
+        \OUGCPages\Core\initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START);
+    }
 }
 
-function global_intermediate(): true
+function global_intermediate(): void
 {
-    if (\OUGCPages\Core\executeHookCheck(\OUGCPages\Core\EXECUTION_HOOK_GLOBAL_INTERMEDIATE)) {
-        \OUGCPages\Core\initExecute(
-            \OUGCPages\Core\executeGetCurrentPageID()
-        );
+    if (defined('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE')) {
+
+        \OUGCPages\Core\initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE);
     }
-
-    return true;
-}
-
-function global_end(): true
-{
-    \OUGCPages\Core\cacheUpdate();
-
-    if (
-        \OUGCPages\Core\executeStatusGet() !== \OUGCPages\Core\EXECUTION_STATUS_DISABLED &&
-        \OUGCPages\Core\executeHookGet() === \OUGCPages\Core\EXECUTION_HOOK_GLOBAL_END
-    ) {
-        \OUGCPages\Core\initExecute(
-            \OUGCPages\Core\executeGetCurrentPageID()
-        );
-    }
-
-    return true;
 }

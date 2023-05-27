@@ -41,7 +41,7 @@ $shutdown_queries = $shutdown_functions = [];
 require_once $workingDirectory . '/inc/init.php';
 
 if (!function_exists('OUGCPages\\Core\\initRun')) {
-    error_no_permission();
+    \error_no_permission();
 }
 
 if (isset($templatelist)) {
@@ -56,10 +56,20 @@ $templatelist .= 'ougcpages_category_list_item, ougcpages_category_list, ougcpag
 
 require_once $workingDirectory . '/global.php';
 
+\OUGCPages\Core\loadLanguage();
+
 \OUGCPages\Core\runHooks('ougc_pages_start');
 
-if (\OUGCPages\Core\executeHookCheck(\OUGCPages\Core\EXECUTION_HOOK_CORE_START)) {
+if (defined('OUGC_PAGES_STATUS_CATEGORY_INVALID')) {
+    \error($lang->ougc_pages_error_category_invalid);
+} else if (defined('OUGC_PAGES_STATUS_PAGE_INVALID')) {
+    \error($lang->ougc_pages_error_page_invalid);
+} else if (defined('OUGC_PAGES_STATUS_CATEGORY_NO_PERMISSION') || defined('OUGC_PAGES_STATUS_PAGE_NO_PERMISSION')) {
+    \error_no_permission();
+} else if (defined('OUGC_PAGES_STATUS_IS_CATEGORY') || defined('OUGC_PAGES_STATUS_IS_PAGE')) {
     \OUGCPages\Core\initShow();
 }
+
+\OUGCPages\Core\runHooks('ougc_pages_end');
 
 error_no_permission();

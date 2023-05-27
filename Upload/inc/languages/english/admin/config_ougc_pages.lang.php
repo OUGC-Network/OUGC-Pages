@@ -39,8 +39,8 @@ $l['setting_ougc_pages_seo_scheme_categories'] = 'Category URL Scheme';
 $l['setting_ougc_pages_seo_scheme_categories_desc'] = 'Enter the Category URL scheme. Leave empty to disable SEO URLs for Categories.';
 $l['setting_ougc_pages_perpage'] = 'Items Per Page';
 $l['setting_ougc_pages_perpage_desc'] = 'Maximum number of items to show per page in the ACP list.';
-//$l['setting_ougc_pages_usercp_priority'] = 'UserCP Nav Priority';
-//$l['setting_ougc_pages_usercp_priority_desc'] = 'The priority given to UserCP navigation categories.';
+$l['setting_ougc_pages_usercp_priority'] = 'UserCP Nav Priority';
+$l['setting_ougc_pages_usercp_priority_desc'] = 'The priority given to UserCP navigation categories.';
 
 // ACP
 $l['ougc_pages_manage'] = 'Manage Pages';
@@ -84,7 +84,7 @@ $l['ougc_pages_form_category_buildMenu_none'] = 'None';
 $l['ougc_pages_form_category_buildMenu_header'] = 'Header';
 $l['ougc_pages_form_category_buildMenu_footer'] = 'Footer';
 $l['ougc_pages_form_category_wrapucp'] = 'Wrap UserCP Menu';
-$l['ougc_pages_form_category_wrapucp_desc'] = 'If enabled, a section will be added to the UserCP for browsing this category and the category will be wrapped as if it was a UserCP section.';
+$l['ougc_pages_form_category_wrapucp_desc'] = 'If enabled, a section will be added to the UserCP for browsing this category and the category will be wrapped as if it was a UserCP section. Beware guest permission is allowed but expect errors if you do so.';
 
 $l['ougc_pages_form_page_cid'] = 'Category';
 $l['ougc_pages_form_page_cid_desc'] = 'Select the category this page belongs to.';
@@ -111,10 +111,10 @@ $l['ougc_pages_form_page_template'] = 'Page Content';
 $l['ougc_pages_form_page_template_desc'] = 'Insert the page HTML or PHP content below.';
 $l['ougc_pages_form_page_init'] = 'PHP Initialization Point';
 $l['ougc_pages_form_page_init_desc'] = 'Select the script section where this page should be loaded in when "Eval PHP Code" is enabled.<br />
-<strong>Initialization:</strong> Only  is loaded at this point. Very low resource consumption.<br />
-<strong>Global Start:</strong> Mainly only session and language is loaded at this point. Theme and templates are not available yet.<br />
-<strong>Global Intermediate:</strong> Theme and templates have been loaded. Header, welcome block, and footer are not available yet.<br />
-<span style="color: blue;"><strong>Global End:</strong> This is default and should guarantee the best integration. If unsure select this.</span>';
+<strong>Initialization:</strong> Not even all plugins are checked at this point. Very low resource consumption. Around 4-6 queries are ran by this point.<br />
+<strong>Global Start:</strong> Mainly only session and language have been loaded. Around 6-8 queries are ran by this point.<br />
+<strong>Global Intermediate:</strong> Theme and templates have been loaded without header, welcome block, or footer being available yet. Around 8-10 queries are ran by this point.<br />
+<span style="color: blue;"><strong>Global End:</strong> Default; if unsure select this. Probably the most compatibility for all forum features. Around 9-13 queries are ran by this point.</span>';
 $l['ougc_pages_form_page_init_init'] = 'Initialization';
 $l['ougc_pages_form_page_init_start'] = 'Global Start';
 $l['ougc_pages_form_page_init_intermediate'] = 'Global Intermediate';

@@ -27,11 +27,8 @@
  ****************************************************************************/
 
 // Die if IN_MYBB is not defined, for security reasons.
-use function OUGCPages\Admin\pluginInfo;
 
 defined('IN_MYBB') or die('Direct initialization of this file is not allowed.');
-
-\OUGCPages\Admin\pluginActivate();
 
 // Set url to use
 \OUGCPages\Core\urlSet('index.php?module=config-ougc_pages');
