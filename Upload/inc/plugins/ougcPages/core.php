@@ -860,39 +860,6 @@ function initShow(): never
     exit;
 }
 
-function permissionStatusGet(bool $setNewStatus = false, int $newStatus = PERMISSION_STATUS_ALLOW): int
-{
-    static $setStatus = PERMISSION_STATUS_ALLOW;
-
-    if ($setNewStatus) {
-        $setStatus = $newStatus;
-    }
-
-    return $setStatus;
-}
-
-function categoryCurrentSet(null|int $categoryID = null): null|int
-{
-    static $currentCategoryID = null;
-
-    if ($categoryID !== null) {
-        $currentCategoryID = (int)$categoryID;
-    }
-
-    return $currentCategoryID;
-}
-
-function categoryStatusGet(bool $setNewStatus = false, int $newStatus = CATEGORY_STATUS_VALID): int
-{
-    static $setStatus = CATEGORY_STATUS_VALID;
-
-    if ($setNewStatus) {
-        $setStatus = $newStatus;
-    }
-
-    return $setStatus;
-}
-
 function categoryInsert(array $categoryData = [], int $categoryID = 0, bool $update = false): int
 {
     global $db;
@@ -1049,17 +1016,6 @@ function categoryBuildSelect(): array
     }
 
     return $selectItems;
-}
-
-function pageStatusGet(bool $setNewStatus = false, int $newStatus = PAGE_STATUS_VALID): int
-{
-    static $setStatus = PAGE_STATUS_VALID;
-
-    if ($setNewStatus) {
-        $setStatus = $newStatus;
-    }
-
-    return $setStatus;
 }
 
 function pageInsert(array $pageData = [], int $pageID = 0, bool $update = false): int
