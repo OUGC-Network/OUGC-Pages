@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MyBB PluginLibrary XML-Export :: 2019-01-13T11:40:29+01:00 -->
+<!-- MyBB PluginLibrary XML-Export :: 2023-05-29T05:46:43+00:00 -->
 <array>
     <element>
         <key>name</key>
@@ -14,28 +14,28 @@
         <value>html-test-page</value>
     </element>
     <element>
-        <key>groups</key>
-        <value></value>
+        <key>allowedGroups</key>
+        <value>-1</value>
     </element>
     <element>
         <key>php</key>
-        <value>0</value>
+        <value type="INT">0</value>
     </element>
     <element>
         <key>wol</key>
-        <value>1</value>
+        <value type="INT">1</value>
     </element>
     <element>
         <key>visible</key>
-        <value>1</value>
+        <value type="INT">1</value>
     </element>
     <element>
         <key>wrapper</key>
-        <value>1</value>
+        <value type="INT">1</value>
     </element>
     <element>
         <key>init</key>
-        <value>0</value>
+        <value type="INT">4</value>
     </element>
     <element>
         <key>template</key>
@@ -57,7 +57,7 @@
     </element>
     <element>
         <key>versioncode</key>
-        <value type="INT">1819</value>
+        <value type="INT">1833</value>
     </element>
 </array>
         <!-- End of file. -->

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MyBB PluginLibrary XML-Export :: 2020-04-29T00:30:57+00:00 -->
+<!-- MyBB PluginLibrary XML-Export :: 2023-05-29T05:46:10+00:00 -->
 <array>
     <element>
         <key>name</key>
@@ -14,74 +14,131 @@
         <value>shoutbox</value>
     </element>
     <element>
-        <key>groups</key>
-        <value></value>
+        <key>allowedGroups</key>
+        <value>-1</value>
     </element>
     <element>
         <key>php</key>
-        <value>1</value>
+        <value type="INT">1</value>
     </element>
     <element>
         <key>wol</key>
-        <value>1</value>
+        <value type="INT">1</value>
     </element>
     <element>
         <key>visible</key>
-        <value>1</value>
+        <value type="INT">1</value>
     </element>
     <element>
         <key>wrapper</key>
-        <value>1</value>
+        <value type="INT">0</value>
     </element>
     <element>
         <key>init</key>
-        <value>0</value>
+        <value type="INT">4</value>
     </element>
     <element>
         <key>template</key>
         <value><![CDATA[<?php
 
-// 1 = DVZ Shoutbox, 2 = Miuna Shout box
-define('SHOUTBOX_TYPE', 1);
+if (!class_exists('dvz_shoutbox')) {
+    \error('This page is currently unavailable.');
+}
 
-if (SHOUTBOX_TYPE == 1) {
-    $templates->cache('dvz_shoutbox,dvz_shoutbox_panel');
+$templates->cache('dvz_shoutbox,dvz_shoutbox_panel');
 
-    $message = 'This page is currently unavailable.';
-    if (class_exists('dvz_shoutbox')) {
-        global $dvz_shoutbox;
+global $dvz_shoutbox;
 
-        dvz_shoutbox::load_window();
+dvz_shoutbox::load_window();
 
-        $message = $dvz_shoutbox;
-    }
-} else {
-    $templates->cache('templateShoutBox,templateShoutBoxGuest,codebutmiuna');
+$pageData['template'] = $dvz_shoutbox;
 
-    $message = 'This page is currently unavailable.';
-    if (function_exists('MiunaShout')) {
-        global $settings, $miunashout, $codebutmiuna;
+/*
+ *  Below code is pretty much a copy of initShow()
+*/
+// Load custom page language file if exists
+$lang->load("ougc_pages_{$categoryData['cid']}", false, true);
 
-        MiunaShout();
+if (!empty($pageData)) {
+    $lang->load("ougc_pages_{$pageData['pid']}", false, true);
+}
 
-        $message = $miunashout;
+$categoryData['name'] = \htmlspecialchars_uni($categoryData['name']);
+
+if ($categoryData['wrapucp']) {
+    $lang->load('usercp');
+
+    if ($mybb->user['uid'] && $mybb->usergroup['canusercp']) {
+        \add_breadcrumb($lang->nav_usercp, "usercp.php");
     }
 }
 
-// Set-up page
-$bu_tmpl = $page['template'];
-$page['template'] = $message;
-$content = ougc_pages_show(true);
-$page['template'] = $bu_tmpl;
+if (!$isPage || $categoryData['breadcrumb']) {
+    \add_breadcrumb($categoryData['name'], \OUGCPages\Core\categoryGetLink($categoryData['cid']));
+}
 
-eval('$page = "'.$templates->get('ougcpages_parser_test_page').'";');
-output_page($page);
+$navigation = ['previousPage' => '', 'nextPage' => ''];
+
+$lastEditedMessage = '';
+
+$title = $pageData['name'] = \htmlspecialchars_uni($pageData['name']);
+
+$description = $pageData['description'] = \htmlspecialchars_uni($pageData['description']);
+
+$canonicalUrl = \OUGCPages\Core\pageGetLink($pageID);
+
+\add_breadcrumb($pageData['name'], \OUGCPages\Core\pageGetLink($pageData['pid']));
+
+if ($categoryData['navigation']) {
+    if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['previousPageID'])) {
+        $previousPageLink = \OUGCPages\Core\pageGetLink($pagesCache[$pageID]['previousPageID']);
+        $previousPageName = \htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['previousPageID']]['name']);
+
+        $navigation['previousPage'] = eval($templates->render('ougcpages_navigation_previous'));
+    }
+    if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['nextPageID'])) {
+        $nextPageLink = \OUGCPages\Core\pageGetLink($pagesCache[$pageID]['nextPageID']);
+        $nextPageName = \htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['nextPageID']]['name']);
+
+        $navigation['nextPage'] = eval($templates->render('ougcpages_navigation_next'));
+    }
+}
+
+$templates->cache['ougcpages_temporary_tmpl'] = $pageData['template'];
+
+if (!empty($pageData['dateline'])) {
+    $editDateNormal = \my_date('normal', $pageData['dateline']);
+
+    $editDateRelative = \my_date('relative', $pageData['dateline']);
+
+    $lastEditedMessage = eval($templates->render('ougcpages_wrapper_edited'));
+}
+
+$content = eval($templates->render('ougcpages_temporary_tmpl'));
+
+if ($pageData['wrapper']) {
+    $content = eval($templates->render('ougcpages_wrapper'));
+}
+
+if ($categoryData['wrapucp']) {
+    global $usercpnav;
+
+    require_once MYBB_ROOT . 'inc/functions_user.php';
+
+    \usercp_menu();
+
+    $content = eval($templates->render('ougcpages_wrapper_ucp'));
+}
+
+$pageContent = eval($templates->render('ougcpages'));
+
+\output_page($pageContent);
 
 exit;]]></value>
     </element>
     <element>
         <key>versioncode</key>
-        <value type="INT">1820</value>
+        <value type="INT">1833</value>
     </element>
 </array>
         <!-- End of file. -->

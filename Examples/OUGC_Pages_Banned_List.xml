@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MyBB PluginLibrary XML-Export :: 2020-04-29T00:30:20+00:00 -->
+<!-- MyBB PluginLibrary XML-Export :: 2023-05-29T05:48:46+00:00 -->
 <array>
     <element>
         <key>name</key>
@@ -14,61 +14,58 @@
         <value>banned-list</value>
     </element>
     <element>
-        <key>groups</key>
-        <value></value>
+        <key>allowedGroups</key>
+        <value>-1</value>
     </element>
     <element>
         <key>php</key>
-        <value>1</value>
+        <value type="INT">1</value>
     </element>
     <element>
         <key>wol</key>
-        <value>1</value>
+        <value type="INT">1</value>
     </element>
     <element>
         <key>visible</key>
-        <value>1</value>
+        <value type="INT">1</value>
     </element>
     <element>
         <key>wrapper</key>
-        <value>0</value>
+        <value type="INT">0</value>
     </element>
     <element>
         <key>init</key>
-        <value>0</value>
+        <value type="INT">4</value>
     </element>
     <element>
         <key>template</key>
         <value><![CDATA[<?php
 
-$mybb->user['uid'] or error_no_permission();
-
 $lang->load('modcp');
 
-require_once MYBB_ROOT.'inc/class_parser.php';
+require_once MYBB_ROOT . 'inc/class_parser.php';
 $parser = new postParser;
 
 $templates->cache('ougcpages_banned_ban, ougcpages_banned_nobanned, ougcpages_banned');
 
-$templates->cache['ougcpages_banned_ban'] or $templates->cache['ougcpages_banned_ban'] = '<tr>
+isset($templates->cache['ougcpages_banned_ban']) or $templates->cache['ougcpages_banned_ban'] = '<tr>
 <td class="{$trow}">{$profile_link}</td>
 <td class="{$trow}">{$banned[\'reason\']}</td>
 <td class="{$trow}" align="center">{$banlength}<br /><span class="smalltext">{$timeremaining}</span></td>
 <td class="{$trow}" align="center">{$admin_profile}</td>
 </tr>';
-$templates->cache['ougcpages_banned_nobanned'] or $templates->cache['ougcpages_banned_nobanned'] = '<tr>
+isset($templates->cache['ougcpages_banned_nobanned']) or $templates->cache['ougcpages_banned_nobanned'] = '<tr>
 	<td class="trow1" align="center" colspan="4">{$lang->no_banned}</td>
 </tr>';
-$templates->cache['ougcpages_banned'] or $templates->cache['ougcpages_banned'] = '<html>
+isset($templates->cache['ougcpages_banned']) or $templates->cache['ougcpages_banned'] = '<html>
 <head>
-<title>{$mybb->settings[\'bbname\']} - {$page[\'name\']}</title>
+<title>{$mybb->settings[\'bbname\']} - {$pageData[\'name\']}</title>
 {$headerinclude}
 </head>
 <body>
 	{$header}
 	<table width="100%" border="0" align="center">
 		<tr>
-			{$modcp_nav}
 			<td valign="top">
 				<table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
 					<tr>
@@ -94,15 +91,15 @@ $templates->cache['ougcpages_banned'] or $templates->cache['ougcpages_banned'] =
 // Set up the array of ban times.
 $bantimes = fetch_ban_times();
 
-$category['name'] = htmlspecialchars_uni($category['name']);
+$categoryData['name'] = htmlspecialchars_uni($categoryData['name']);
 
-if ($category['breadcrumb']) {
-    add_breadcrumb($category['name'], $ougc_pages->get_category_link($category['cid']));
+if ($categoryData['breadcrumb']) {
+    add_breadcrumb($categoryData['name'], \OUGCPages\Core\categoryGetLink($categoryData['cid']));
 }
 
-$page['name'] = htmlspecialchars_uni($page['name']);
+$pageData['name'] = htmlspecialchars_uni($pageData['name']);
 
-add_breadcrumb($page['name'], $ougc_pages->get_page_link($page['pid']));
+\add_breadcrumb($pageData['name'], \OUGCPages\Core\pageGetLink($pageData['pid']));
 
 if ($mybb->settings['threadsperpage'] < 1) {
     $mybb->settings['threadsperpage'] = 20;
@@ -132,9 +129,11 @@ if ($pagenum) {
 $upper = $start + $perpage;
 
 $multipage = multipage($postcount, $perpage, $pagenum, '?PLACE_HOLDER');
-$multipage = str_replace(array('page=', '?PLACE_HOLDER'),
-    array('pagination=', $ougc_pages->get_page_link($page['pid'])),
-    $multipage);
+$multipage = str_replace(
+    ['page=', '?PLACE_HOLDER'],
+    ['pagination=', \OUGCPages\Core\pageGetLink($pageData['pid'])],
+    $multipage
+);
 
 switch ($mybb->get_input('sort')) {
     case 'username':
@@ -160,16 +159,12 @@ switch ($mybb->get_input('order')) {
         break;
 }
 
-$query = $db->query(
-    "
-	SELECT b.*, a.username AS adminuser, u.username
-	FROM ".TABLE_PREFIX."banned b
-	LEFT JOIN ".TABLE_PREFIX."users u ON (b.uid=u.uid)
-	LEFT JOIN ".TABLE_PREFIX."users a ON (b.admin=a.uid)
-	ORDER BY {$sort} {$order}
-	LIMIT {$start}, {$perpage}
-"
-);
+$query = $db->query("SELECT b.*, a.username AS adminuser, u.username
+    FROM " . TABLE_PREFIX . "banned b
+    LEFT JOIN " . TABLE_PREFIX . "users u ON (b.uid=u.uid)
+    LEFT JOIN " . TABLE_PREFIX . "users a ON (b.admin=a.uid)
+    ORDER BY {$sort} {$order}
+    LIMIT {$start}, {$perpage}");
 
 // Get the banned users
 $bannedusers = '';
@@ -194,7 +189,7 @@ while ($banned = $db->fetch_array($query)) {
         $banlength = $bantimes[$banned['bantime']];
         $remaining = $banned['lifted'] - TIME_NOW;
 
-        $timeremaining = nice_time($remaining, array('short' => 1, 'seconds' => false))."";
+        $timeremaining = nice_time($remaining, ['short' => 1, 'seconds' => false]) . "";
 
         if ($remaining < 3600) {
             $timeremaining = "<span style=\"color: red;\">({$timeremaining} {$lang->ban_remaining})</span>";
@@ -211,20 +206,20 @@ while ($banned = $db->fetch_array($query)) {
         }
     }
 
-    eval('$bannedusers .= "'.$templates->get('ougcpages_banned_ban').'";');
+    eval('$bannedusers .= "' . $templates->get('ougcpages_banned_ban') . '";');
 }
 
 if (!$bannedusers) {
-    eval('$bannedusers = "'.$templates->get('ougcpages_banned_nobanned').'";');
+    eval('$bannedusers = "' . $templates->get('ougcpages_banned_nobanned') . '";');
 }
 
-eval('$page = "'.$templates->get('ougcpages_banned').'";');
+eval('$page = "' . $templates->get('ougcpages_banned') . '";');
 output_page($page);
 exit;]]></value>
     </element>
     <element>
         <key>versioncode</key>
-        <value type="INT">1820</value>
+        <value type="INT">1833</value>
     </element>
 </array>
         <!-- End of file. -->

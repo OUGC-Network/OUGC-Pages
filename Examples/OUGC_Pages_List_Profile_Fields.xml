@@ -219,7 +219,7 @@ if (!$perpage) {
 
 if (is_array($pfcache)) {
     if (!is_object($parser)) {
-        require_once MYBB_ROOT.'inc/class_parser.php';
+        require_once MYBB_ROOT . 'inc/class_parser.php';
 
         $parser = new postParser;
     }
@@ -231,7 +231,7 @@ if (is_array($pfcache)) {
     if ((int)$groups_display != -1) {
         $gids = array_filter(array_unique(array_map('intval', explode(',', $groups_display))));
 
-        $where2 = ["u.usergroup IN ('".implode("','", $gids)."')"];
+        $where2 = ["u.usergroup IN ('" . implode("','", $gids) . "')"];
 
         switch ($db->type) {
             case 'pgsql':
@@ -251,7 +251,7 @@ if (is_array($pfcache)) {
                 break;
         }
 
-        $where[] = '('.implode(' OR ', $where2).')';
+        $where[] = '(' . implode(' OR ', $where2) . ')';
 
         unset($where2);
     }
@@ -352,7 +352,7 @@ if (is_array($pfcache)) {
                             $user_value = eval($templates->render('postbit_profilefield_multiselect'));
                         }
                     } else {
-                        $field_parser_options = array(
+                        $field_parser_options = [
                             "allow_html" => $field['allowhtml'],
                             "allow_mycode" => $field['allowmycode'],
                             "allow_smilies" => $field['allowsmilies'],
@@ -360,7 +360,7 @@ if (is_array($pfcache)) {
                             "allow_videocode" => $field['allowvideocode'],
                             #"nofollow_on" => 1,
                             "filter_badwords" => 1,
-                        );
+                        ];
 
                         if ($customfield['type'] == "textarea") {
                             $field_parser_options['me_username'] = $user['username'];
