@@ -83,7 +83,8 @@ const FIELDS_DATA_CATEGORIES = [
     ],
     'buildMenu' => [
         'type' => 'TINYINT',
-        'formType' => 'basicSelect',
+        //'formType' => 'basicSelect',
+        'formType' => 'yesNo',
         'unsigned' => true,
         'default' => 1,
         'cache' => true
@@ -175,17 +176,17 @@ const FIELDS_DATA_PAGES = [
         'unsigned' => true,
         'default' => 0
     ],
-    'template' => [
-        'type' => 'MEDIUMTEXT',
-        'formType' => 'textArea',
-        'null' => true
-    ],
     'init' => [
         'type' => 'TINYINT',
         'formType' => 'basicSelect',
         'unsigned' => true,
         'default' => \OUGCPages\Core\EXECUTION_HOOK_GLOBAL_END,
         'cache' => true
+    ],
+    'template' => [
+        'type' => 'MEDIUMTEXT',
+        'formType' => 'textArea',
+        'null' => true
     ],
     'dateline' => [
         'type' => 'INT',
@@ -273,7 +274,7 @@ function pluginActivate(): true
         $plugins['pages'] = pluginInfo()['versioncode'];
     }
 
-    VerifyStylesheet();
+    verifyStylesheet();
 
     /*~*~* RUN UPDATES START *~*~*/
 
@@ -313,7 +314,7 @@ function pluginActivate(): true
     $cache->update('ougc_plugins', $plugins);
 
     // Update administrator permissions
-    change_admin_permission('config', 'ougc_pages');
+    \change_admin_permission('config', 'ougc_pages');
 
     return true;
 }
@@ -323,7 +324,7 @@ function pluginDeactivate(): true
     \OUGCPages\Core\loadPluginLibrary();
 
     // Update administrator permissions
-    change_admin_permission('config', 'ougc_pages', 0);
+    \change_admin_permission('config', 'ougc_pages', 0);
 
     return true;
 }
@@ -376,7 +377,7 @@ function pluginUninstall(): true
     }
 
     // Remove administrator permissions
-    change_admin_permission('config', 'ougc_pages', -1);
+    \change_admin_permission('config', 'ougc_pages', -1);
 
     return true;
 }
@@ -487,6 +488,55 @@ function dbTables(): array
             'unique_key' => ['url' => 'url']
         ]
     ];
+
+    $tablesData = [];
+
+    foreach ([
+                 'ougc_pages_categories' => FIELDS_DATA_CATEGORIES,
+                 'ougc_pages' => FIELDS_DATA_PAGES,
+             ] as $tableName => $fieldsData) {
+        foreach ($fieldsData as $fieldName => $fieldData) {
+            $fieldDefinition = '';
+
+            if (!isset($fieldData['type'])) {
+                continue;
+            }
+
+            $fieldDefinition .= $fieldData['type'];
+
+            if (isset($fieldData['size'])) {
+                $fieldDefinition .= "({$fieldData['size']})";
+            }
+
+            if (isset($fieldData['unsigned'])) {
+                $fieldDefinition .= ' UNSIGNED';
+            }
+
+            if (!isset($fieldData['null'])) {
+                $fieldDefinition .= ' NOT';
+            }
+
+            $fieldDefinition .= ' NULL';
+
+            if (isset($fieldData['auto_increment'])) {
+                $fieldDefinition .= ' AUTO_INCREMENT';
+            }
+
+            if (isset($fieldData['default'])) {
+                $fieldDefinition .= " DEFAULT '{$fieldData['default']}'";
+            }
+
+            $tablesData[$tableName][$fieldName] = $fieldDefinition;
+        }
+
+        foreach ($fieldsData as $fieldName => $fieldData) {
+            if (isset($fieldData['primary_key'])) {
+                $tablesData[$tableName]['primary_key'] = $fieldName;
+            }
+        }
+    }
+
+    return $tablesData;
 }
 
 function verifyStylesheet($removeStylesheet = false): true
@@ -527,7 +577,7 @@ function verifyStylesheet($removeStylesheet = false): true
         require_once MYBB_ADMIN_DIR . 'inc/functions_themes.php';
 
         while ($tid = $db->fetch_field($dbQuery, 'tid')) {
-            update_theme_stylesheet_list($tid);
+            \update_theme_stylesheet_list($tid);
         }
     }
 

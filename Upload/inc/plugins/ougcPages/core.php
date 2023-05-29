@@ -29,20 +29,10 @@
 namespace OUGCPages\Core;
 
 const URL = 'index.php?module=config-ougc_pages';
+
 const QUERY_LIMIT = 10;
+
 const QUERY_START = 0;
-
-const PAGE_STATUS_VALID = 1;
-
-const PAGE_STATUS_INVALID = 0;
-
-const CATEGORY_STATUS_VALID = 1;
-
-const PERMISSION_STATUS_ALLOW = 1;
-
-const PERMISSION_STATUS_DISALLOW = 0;
-
-const EXECUTION_STATUS_DISABLED = 0; // pageID if not 0
 
 const EXECUTION_HOOK_INIT = 1;
 
@@ -51,8 +41,6 @@ const EXECUTION_HOOK_GLOBAL_START = 2;
 const EXECUTION_HOOK_GLOBAL_INTERMEDIATE = 3;
 
 const EXECUTION_HOOK_GLOBAL_END = 4;
-
-const EXECUTION_HOOK_CORE_START = 5;
 
 function loadLanguage(): true
 {
@@ -89,7 +77,7 @@ function loadPluginLibrary(bool $doCheck = true): bool
     }
 
     if (!$fileExists || $PL->version < pluginLibraryRequirements()->version) {
-        flash_message(
+        \flash_message(
             $lang->sprintf(
                 $lang->ougc_pages_pl_required,
                 pluginLibraryRequirements()->url,
@@ -98,7 +86,7 @@ function loadPluginLibrary(bool $doCheck = true): bool
             'error'
         );
 
-        admin_redirect('index.php?module=config-plugins');
+        \admin_redirect('index.php?module=config-plugins');
     }
 
     return true;
@@ -274,27 +262,16 @@ function parseUrl(string $urlString): string
     return \my_strtolower($urlString);
 }
 
-function importGetUrl(string $importName, string $importUrl = '', int $pageID = 0): string
+function importGetUrl(string $importName, string $importUrl = ''): string
 {
-    global $db;
-
     if (empty($importUrl)) {
         $importUrl = $importName;
     }
 
     $importUrl = parseUrl($importUrl);
 
-    $importUrlEscaped = $db->escape_string($importUrl);
-
-    $dbQuery = $db->simple_select(
-        'ougc_pages',
-        'pid',
-        "url='{$importUrlEscaped}' AND pid!='{$pageID}'",
-        ['limit' => 1]
-    );
-
-    if ($db->num_rows($dbQuery)) {
-        return importGetUrl('', "{$importUrl} - {$pageID}");
+    if (pageGetByUrl($importUrl)) {
+        return importGetUrl('', \uniqid());
     }
 
     return $importUrl;
@@ -311,7 +288,7 @@ function cacheUpdate(): true
         'pages' => [],
     ];
 
-    $whereClause = ["visible='1'"];
+    $whereClause = ["visible='1'", "allowedGroups!=''"];
 
     // Update categories
     $dbQuery = $db->simple_select(
@@ -349,23 +326,40 @@ function cacheUpdate(): true
             'ougc_pages',
             '*',
             implode(' AND ', $whereClause),
-            ['order_by' => 'disporder']
+            ['order_by' => 'cid, disporder']
         );
 
         while ($pageData = $db->fetch_array($dbQuery)) {
+            $pageID = (int)$pageData['pid'];
+            $categoryID = (int)$pageData['cid'];
+
             foreach (\OUGCPages\Admin\FIELDS_DATA_PAGES as $fieldKey => $fieldData) {
                 if (!isset($pageData[$fieldKey]) || empty($fieldData['cache'])) {
                     continue;
                 }
 
                 if (in_array($fieldData['type'], ['VARCHAR'])) {
-                    $cacheData['pages'][(int)$pageData['pid']][$fieldKey] = $pageData[$fieldKey];
+                    $cacheData['pages'][$pageID][$fieldKey] = $pageData[$fieldKey];
                 } else if (in_array($fieldData['type'], ['INT', 'SMALLINT', 'TINYINT'])) {
-                    $cacheData['pages'][(int)$pageData['pid']][$fieldKey] = (int)$pageData[$fieldKey];
+                    $cacheData['pages'][$pageID][$fieldKey] = (int)$pageData[$fieldKey];
+                }
+            }
+
+            $cacheData['pages'][$pageID]['previousPageID'] = $cacheData['pages'][$pageID]['nextPageID'] = 0;
+
+            if (isset($currentCategoryID) && $currentCategoryID === $categoryID) {
+                if (isset($previousPageID) && $cacheData['pages'][$previousPageID]['cid'] === $categoryID) {
+                    $cacheData['pages'][$previousPageID]['nextPageID'] = $pageID;
+
+                    $cacheData['pages'][$pageID]['previousPageID'] = $previousPageID;
                 }
             }
 
             unset($fieldKey, $fieldData);
+
+            $currentCategoryID = $categoryID;
+
+            $previousPageID = $pageID;
         }
 
         $db->free_result($dbQuery);
@@ -411,10 +405,15 @@ function redirect(string $redirectMessage = '', bool $isError = false): never
 
         \admin_redirect(urlBuild());
     } else {
-        \redirect(urlBuild(), $redirectMessage);
+        redirectBase(urlBuild(), $redirectMessage);
     }
 
     exit;
+}
+
+function redirectBase(string $url, string $message = '', string $title = '', bool $forceRedirect = false): void
+{
+    \redirect($url, $message, $title, $forceRedirect);
 }
 
 function logAction(int $objectID): true
@@ -469,7 +468,7 @@ function initExecute(int $pageID): never
     global $mybb, $lang, $db, $plugins, $cache, $parser, $settings;
     global $templates, $headerinclude, $header, $theme, $footer;
     global $templatelist, $session, $maintimer, $permissions;
-    global $ougc_pages, $category, $page, $plugins;
+    global $categoriesCache, $pagesCache, $isCategory, $isPage, $categoryID, $pageID, $categoryData, $pageData;
 
     runHooks('ougc_pages_execution_init');
 
@@ -499,14 +498,10 @@ function initSession(): true
 
 function initRun(): bool
 {
-    global $mybb;
-    global $templates, $templatelist, $ougc_pages;
-    global $session;
-    global $plugins, $navbits;
-    //global $category, $page, $pageData; TODO
+    global $mybb, $templatelist, $navbits;
 
-    //$page = &$pageData; // TODO
-    //$category = &$categoryData; // TODO
+    // we share this to the global scope for administrators to use but the plugin shouldn't rely on them a bit
+    global $categoriesCache, $pagesCache, $isCategory, $isPage, $categoryID, $pageID, $categoryData, $pageData;
 
     if (isset($templatelist)) {
         $templatelist .= ',';
@@ -515,6 +510,13 @@ function initRun(): bool
     }
 
     $templatelist .= '';
+
+    if (
+        defined('IN_ADMINCP') ||
+        (defined(THIS_SCRIPT) && THIS_SCRIPT !== 'pages.php')
+    ) {
+        return false;
+    }
 
     if (empty($navbits)) {
         $navbits = [
@@ -525,202 +527,184 @@ function initRun(): bool
         ];
     }
 
-    /*if (
-        defined( 'IN_ADMINCP' ) ||
-        ( defined( THIS_SCRIPT ) && THIS_SCRIPT == 'pages.php' )
-    ) {
-        return false;
-    }*/
+    $categoriesCache = cacheGetCategories();
 
-    // should be fixed as well
-    /*if (
-        strpos(getSetting('seo_scheme'), '?') !== false &&
-        isset($mybb->input['page']) &&
-        !empty($mybb->input['page']) &&
-        count((array)$mybb->input) > 1
-    ) {
-        foreach ($mybb->input as $inputKey => $inputValue) {
-            if ($inputKey == 'page') {
-                $mybb->input['page'] = $inputKey; // we assume second input to be the page
-
-                break;
-            }
-        }
-    }*/
-
-    $categoriesCache = \OUGCPages\Core\cacheGetCategories();
-
-    $pagesCache = \OUGCPages\Core\cacheGetPages();
-
-    $categoryID = $pageID = 0;
+    $pagesCache = cacheGetPages();
 
     $isCategory = $isPage = false;
 
-    if (isset($mybb->input['page'])) {
-        $isPage = true;
+    $categoryID = $pageID = 0;
 
-        foreach ($pagesCache as $pid => $pageData) {
-            if ($pageData['url'] === $mybb->get_input('page')) {
-                $pageID = $pid;
-                $categoryID = $pageData['cid'];
-                $categoryData = $categoriesCache[$categoryID];
+    $usingQuestionMark = \my_strpos(getSetting('seo_scheme_categories'), '?') !== false;
+
+    if (isset($mybb->input['category'])) {
+        $isCategory = true;
+
+        // should be improved but works, by now
+        if ($usingQuestionMark && count((array)$mybb->input) > 1) {
+            $guessPick = false;
+
+            foreach ($mybb->input as $inputKey => $inputValue) {
+                if ($inputKey == 'category') {
+                    $guessPick = true;
+
+                    continue;
+                }
+
+                if ($guessPick) {
+                    $mybb->input['category'] = $inputKey; // we assume second input to be the category
+
+                    break;
+                }
+            }
+        }
+
+        $categoryInput = \my_strtolower($mybb->get_input('category'));
+
+        foreach ($categoriesCache as $cid => $categoryData) {
+            if ($categoryData['url'] === $categoryInput) {
+                $categoryID = $cid;
+
                 break;
             }
         }
-    } else if (isset($mybb->input['category'])) {
-        $isCategory = true;
+    } else if (isset($mybb->input['page'])) {
+        $isPage = true;
 
-        foreach ($categoriesCache as $cid => $categoryData) {
-            if ($categoryData['url'] === $mybb->get_input('category')) {
-                $categoryID = $cid;
+        // should be improved but works, by now
+        if ($usingQuestionMark && count((array)$mybb->input) > 1) {
+            $guessPick = false;
+
+            foreach ($mybb->input as $inputKey => $inputValue) {
+                if ($inputKey == 'page') {
+                    $guessPick = true;
+
+                    continue;
+                }
+
+                if ($guessPick) {
+                    $mybb->input['page'] = $inputKey; // we assume second input to be the page
+
+                    break;
+                }
+            }
+        }
+
+        $pageInput = \my_strtolower($mybb->get_input('page'));
+
+        foreach ($pagesCache as $pid => $pageData) {
+            if ($pageData['url'] === $pageInput) {
+                $pageID = $pid;
+
+                $categoryID = $pageData['cid'];
+
+                $categoryData = $categoriesCache[$categoryID];
+
                 break;
             }
         }
     }
 
+    $categoryData = categoryGet($categoryID);
+
+    $pageData = pageGet($pageID);
+
     // maybe do some case-sensitive comparison and redirect to one unique case url
 
-    if (($isCategory && !$categoryID && !$categoryData) || ($isPage && !$categoryID && !$pageID && !$categoryData && !$pageData)) {
-        pageStatusSet(PAGE_STATUS_INVALID);
+    if (
+        ($isCategory && !$categoryID && !$categoryData) ||
+        ($isPage && !$categoryID && !$categoryData && !$pageID && !$pageData)
+    ) {
+        if ($isCategory) {
+            define('OUGC_PAGES_STATUS_CATEGORY_INVALID', true);
+        } else {
+            define('OUGC_PAGES_STATUS_PAGE_INVALID', true);
+        }
 
         return false;
     }
 
-    categoryCurrentSet($categoryID);
+    // url correction needs work, this covers the basics
+    $categoryUrl = categoryGetLinkBase($categoryID);
+
+    if ($isPage) {
+        $pageUrl = pageGetLinkBase($pageID);
+    }
+
+    $locationPath = \parse_url($_SERVER['REQUEST_URI'])['path'];
+
+    if ($usingQuestionMark) {
+
+        if ($isPage) {
+            $locationPath .= "?{$pageData['url']}";
+        } else {
+            $locationPath .= "?{$categoryData['url']}";
+        }
+    }
+
+    if ($isCategory && \my_strpos($locationPath, $categoryUrl) === false) {
+        $mybb->settings['redirects'] = 0;
+
+        redirectBase(categoryGetLink($categoryID));
+    } else if ($isPage && \my_strpos($locationPath, $pageUrl) === false) {
+        $mybb->settings['redirects'] = 0;
+
+        redirectBase(pageGetLink($pageID));
+    }
 
     $templatelist .= "ougcpages_category{$categoryID}, ougcpages_page{$pageID}";
 
     if ($categoryData['allowedGroups'] === '') {
-        permissionStatusSet(PERMISSION_STATUS_DISALLOW);
+        define('OUGC_PAGES_STATUS_CATEGORY_NO_PERMISSION', true);
 
         return false;
     } else if ((int)$categoryData['allowedGroups'] !== -1) {
         initSession();
 
-        if (!\is_member($categoryData['allowedGroups'])) {
-            permissionStatusSet(PERMISSION_STATUS_DISALLOW);
+        if (!\is_member($categoryData['allowedGroups'], $mybb->user)) {
+            define('OUGC_PAGES_STATUS_CATEGORY_NO_PERMISSION', true);
 
             return false;
         }
     }
 
-    if ($isPage) {
-        if ($pageData['allowedGroups'] === '') {
-            permissionStatusSet(PERMISSION_STATUS_DISALLOW);
+    if ($isCategory) {
+        define('OUGC_PAGES_STATUS_IS_CATEGORY', $categoryID);
+
+        return true;
+    }
+
+    define('OUGC_PAGES_STATUS_IS_PAGE', $pageID);
+
+    if ($pageData['allowedGroups'] === '') {
+        define('OUGC_PAGES_STATUS_PAGE_NO_PERMISSION', true);
+
+        return false;
+    } else if ((int)$pageData['allowedGroups'] !== -1) {
+        initSession();
+
+        if (!\is_member($pageData['allowedGroups'], $mybb->user)) {
+            define('OUGC_PAGES_STATUS_PAGE_NO_PERMISSION', true);
 
             return false;
-        } else if ((int)$pageData['allowedGroups'] !== -1) {
-            initSession();
-
-            if (!\is_member($pageData['allowedGroups'])) {
-                permissionStatusSet(PERMISSION_STATUS_DISALLOW);
-
-                return false;
-            }
-        }
-
-        /*
-        if (!empty($mybb->cache->cache['ougc_pages']['pages'][$mybb->get_input('page')])) {
-            if ($pageData = pageGetByUrl($mybb->get_input('page'))) {
-
-                if ($categoryData = categoryGet($categoryID)) {
-                    if (!$categoryData['visible']) {
-                        categoryStatusSet(PAGE_STATUS_INVALID);
-                    } else {
-                        categoryCurrentSet($categoryID);
-                    }
-                } else {
-                    categoryStatusSet(PAGE_STATUS_INVALID);
-                }
-            } else {
-                pageStatusSet(PAGE_STATUS_INVALID);
-            }
-        } else {
-            pageStatusSet(PAGE_STATUS_INVALID);
-        }*/
-    }/* else if (!empty($mybb->input['category'])) {
-        // should be fixed as well
-        if (strpos(getSetting('seo_scheme_categories'), '?') !== false && empty($mybb->input['category']) && count((array)$mybb->input) > 1) {
-            $pick = null;
-            foreach ($mybb->input as $k => $v) {
-                if ($k == 'category') {
-                    $pick = true;
-                    continue;
-                }
-
-                if ($pick === true) {
-                    $mybb->input['category'] = $k; // we assume second input to be the category
-                    break;
-                }
-            }
-            unset($pick);
-        }
-
-        if ($categoryData = categoryGetByUrl($mybb->get_input('category'))) {
-            if (!$categoryData['visible']) {
-                categoryStatusSet(PAGE_STATUS_INVALID);
-            } else {
-                categoryCurrentSet($categoryID);
-            }
-        } else {
-            categoryStatusSet(PAGE_STATUS_INVALID);
         }
     }
 
-    if (!empty($categoryData)) {
-        // Save three queries if no permission check is necessary
-        if ($categoryData['allowedGroups'] != '') {
-            initSession();
+    if (!$pageData['wol'] && !defined('NO_ONLINE')) {
+        define('NO_ONLINE', true);
+    }
 
-            if (!\is_member($categoryData['allowedGroups'])) {
-                permissionStatusSet(PERMISSION_STATUS_DISALLOW);
-            }
-        }
-    }*/
+    if ($pageData['php']) {
+        if ($pageData['init'] === EXECUTION_HOOK_INIT) {
+            initExecute($pageData['pid']);
+        } else if ($pageData['init'] === EXECUTION_HOOK_GLOBAL_START) {
+            define('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START', $pageData['pid']);
 
-    if ($isPage) {
-        $pageData = pageGet($pageID); // not all page data is cached
-
-        if (!$pageData['wol'] && !defined('NO_ONLINE')) {
-            define('NO_ONLINE', 1);
+        } else if ($pageData['init'] === EXECUTION_HOOK_GLOBAL_INTERMEDIATE) {
+            define('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE', $pageData['pid']);
         }
 
-        /*
-        // Save three queries if no permission check is necessary
-        if (permissionStatusGet() === PERMISSION_STATUS_ALLOW) {
-            if ($pageData['allowedGroups'] != '') {
-                initSession();
-
-                if (!is_member($pageData['allowedGroups'])) {
-                    permissionStatusSet(PERMISSION_STATUS_DISALLOW);
-                }
-            }
-        }*/
-
-        executeStatusSet($pageID);
-
-        if ($pageData['php'] && permissionStatusGet() === PERMISSION_STATUS_ALLOW) {
-            switch ((int)$pageData['init']) {
-                case EXECUTION_HOOK_INIT:
-                    executeHookSet(EXECUTION_HOOK_INIT);
-                    break;
-                case EXECUTION_HOOK_GLOBAL_START:
-                    executeHookSet(EXECUTION_HOOK_GLOBAL_START);
-                    break;
-                case EXECUTION_HOOK_GLOBAL_INTERMEDIATE:
-                    executeHookSet(EXECUTION_HOOK_GLOBAL_INTERMEDIATE);
-                    break;
-                default:
-                    executeHookSet(EXECUTION_HOOK_GLOBAL_END);
-                    break;
-            }
-
-            if (\OUGCPages\Core\executeHookCheck(EXECUTION_HOOK_INIT)) {
-                initExecute(executeGetCurrentPageID());
-            }
-        } else {
-            executeHookSet(EXECUTION_HOOK_CORE_START);
-        }
+        // we no longer load at 'global_end' (small lie), we instead load at 'ougc_pages_start' to make sure the page loads within the plugin's pages.php file
     }
 
     return true;
@@ -732,21 +716,33 @@ function initShow(): never
 
     loadLanguage();
 
-    if (pageStatusGet() === PAGE_STATUS_INVALID) {
-        \error($lang->ougc_pages_error_invalidpage);
+    $categoriesCache = cacheGetCategories();
+
+    $pagesCache = cacheGetPages();
+
+    $isCategory = $isPage = false;
+
+    $categoryID = $pageID = 0;
+
+    if (defined('OUGC_PAGES_STATUS_IS_CATEGORY')) {
+        $isCategory = true;
+
+        $categoryID = OUGC_PAGES_STATUS_IS_CATEGORY;
+
+        $categoryData = categoryGet($categoryID);
+    } else {
+        $isPage = true;
+
+        $pageID = OUGC_PAGES_STATUS_IS_PAGE;
+
+        $pageData = pageGet($pageID);
+
+        $categoryData = categoryGet($pageData['cid']);
+
+        if ($pageData['php']) {
+            initExecute($pageData['pid']);
+        }
     }
-
-    if (categoryStatusGet() === PAGE_STATUS_INVALID) {
-        error($lang->ougc_pages_error_invalidcategory);
-    }
-
-    if (permissionStatusGet() === PERMISSION_STATUS_DISALLOW) {
-        error_no_permission();
-    }
-
-    $categoryData = categoryGet(categoryCurrentGet());
-
-    $pageData = pageGet(executeGetCurrentPageID());
 
     // Load custom page language file if exists
     $lang->load("ougc_pages_{$categoryData['cid']}", false, true);
@@ -765,61 +761,59 @@ function initShow(): never
         }
     }
 
-    if ($categoryData['breadcrumb']) {
+    if (!$isPage || $categoryData['breadcrumb']) {
         \add_breadcrumb($categoryData['name'], categoryGetLink($categoryData['cid']));
     }
 
-    $navigation = ['previous' => '', 'next' => ''];
+    $navigation = ['previousPage' => '', 'nextPage' => ''];
+
+    $lastEditedMessage = '';
 
     if (!empty($pageData)) {
-        $title = $pageData['name'] = htmlspecialchars_uni($pageData['name']);
+        $title = $pageData['name'] = \htmlspecialchars_uni($pageData['name']);
 
-        $description = $pageData['description'] = htmlspecialchars_uni($pageData['description']);
+        $description = $pageData['description'] = \htmlspecialchars_uni($pageData['description']);
 
-        add_breadcrumb($pageData['name'], pageGetLink($pageData['pid']));
+        $canonicalUrl = pageGetLink($pageID);
 
-        /*if($categoryData['navigation'])
-        {
-            implode( ' AND ', $whereClause ) .= 'AND php!=\'1\' AND disporder';
-            $where = '<\''.(int)$pageData['disporder'].'\'';
-            $query = $db->simple_select('ougc_pages', 'pid', implode( ' AND ', $whereClause ).$where, array('order_by' => 'disporder, name', 'limit' => 1));
-            $previous_page_id = (int)$db->fetch_field($query, 'pid');
+        \add_breadcrumb($pageData['name'], pageGetLink($pageData['pid']));
 
-            if($previous_page_id)
-            {
-                $previous_link = pageGetLink($previous_page_id);
-                $navigation['previous'] = eval( $templates->render( 'ougcpages_navigation_previous' ) );
+        if ($categoryData['navigation']) {
+            if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['previousPageID'])) {
+                $previousPageLink = pageGetLink($pagesCache[$pageID]['previousPageID']);
+                $previousPageName = \htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['previousPageID']]['name']);
+
+                $navigation['previousPage'] = eval($templates->render('ougcpages_navigation_previous'));
             }
+            if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['nextPageID'])) {
+                $nextPageLink = pageGetLink($pagesCache[$pageID]['nextPageID']);
+                $nextPageName = \htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['nextPageID']]['name']);
 
-            $where = '>\''.(int)$pageData['disporder'].'\'';
-            $query = $db->simple_select('ougc_pages', 'pid', implode( ' AND ', $whereClause ).$where, array('order_by' => 'disporder, name', 'limit' => 1));
-            $next_page_id = (int)$db->fetch_field($query, 'pid');
-
-            if($next_page_id)
-            {
-                $next_link = pageGetLink($next_page_id);
-                $navigation['next'] = eval( $templates->render( 'ougcpages_navigation_next' ) );
+                $navigation['nextPage'] = eval($templates->render('ougcpages_navigation_next'));
             }
-        }*/
+        }
 
         $templates->cache['ougcpages_temporary_tmpl'] = $pageData['template'];
 
-        #TODO: Add "Las updated on DATELINE..." to page
+        if (!empty($pageData['dateline'])) {
+            $editDateNormal = \my_date('normal', $pageData['dateline']);
+
+            $editDateRelative = \my_date('relative', $pageData['dateline']);
+
+            $lastEditedMessage = eval($templates->render('ougcpages_wrapper_edited'));
+        }
 
         $content = eval($templates->render('ougcpages_temporary_tmpl'));
 
         if ($pageData['wrapper']) {
             $content = eval($templates->render('ougcpages_wrapper'));
         }
-
-        /*if($categoryData['navigation'])
-        {
-            $content = eval( $templates->render( 'ougcpages_navigation' ) );
-        }*/
     } else {
         $title = \htmlspecialchars_uni($categoryData['name']);
 
         $description = \htmlspecialchars_uni($categoryData['description']);
+
+        $canonicalUrl = categoryGetLink($categoryID);
 
         $pageCache = cacheGetPages();
 
@@ -877,32 +871,6 @@ function permissionStatusGet(bool $setNewStatus = false, int $newStatus = PERMIS
     return $setStatus;
 }
 
-function permissionStatusSet(int $newStatus = PERMISSION_STATUS_ALLOW): int
-{
-    return permissionStatusGet(true, $newStatus);
-}
-
-function executeStatusGet(bool $setNewStatus = false, int $newStatus = EXECUTION_STATUS_DISABLED): int
-{
-    static $cachedStatus = EXECUTION_STATUS_DISABLED;
-
-    if ($setNewStatus) {
-        $cachedStatus = $newStatus;
-    }
-
-    return $cachedStatus;
-}
-
-function executeStatusSet(int $newStatus): int
-{
-    return executeStatusGet(true, $newStatus);
-}
-
-function executeGetCurrentPageID(): int
-{
-    return executeStatusGet();
-}
-
 function categoryCurrentSet(null|int $categoryID = null): null|int
 {
     static $currentCategoryID = null;
@@ -914,35 +882,6 @@ function categoryCurrentSet(null|int $categoryID = null): null|int
     return $currentCategoryID;
 }
 
-function categoryCurrentGet(): int
-{
-    return categoryCurrentSet();
-}
-
-function executeHookGet(bool $setNewHook = false, int $newHook = EXECUTION_HOOK_GLOBAL_END): int
-{
-    static $cachedHook = EXECUTION_HOOK_GLOBAL_END;
-
-    if ($setNewHook) {
-        $cachedHook = $newHook;
-    }
-
-    return $cachedHook;
-}
-
-function executeHookSet(int $newHook): int
-{
-    return executeHookGet(true, $newHook);
-}
-
-function executeHookCheck(int $ifHook): bool
-{
-    return (
-        \OUGCPages\Core\executeStatusGet() !== \OUGCPages\Core\EXECUTION_STATUS_DISABLED &&
-        \OUGCPages\Core\executeHookGet() === $ifHook
-    );
-}
-
 function categoryStatusGet(bool $setNewStatus = false, int $newStatus = CATEGORY_STATUS_VALID): int
 {
     static $setStatus = CATEGORY_STATUS_VALID;
@@ -952,11 +891,6 @@ function categoryStatusGet(bool $setNewStatus = false, int $newStatus = CATEGORY
     }
 
     return $setStatus;
-}
-
-function categoryStatusSet(int $newStatus = CATEGORY_STATUS_VALID): int
-{
-    return categoryStatusGet(true, $newStatus);
 }
 
 function categoryInsert(array $categoryData = [], int $categoryID = 0, bool $update = false): int
@@ -1001,39 +935,45 @@ function categoryUpdate(array $data = [], int $cid = 0): int
     return categoryInsert($data, $cid, true);
 }
 
-function categoryDelete(int $categoryID): int
+function categoryDelete(int $categoryID): bool
 {
     global $db;
 
     $db->delete_query('ougc_pages_categories', "cid='{$categoryID}'");
 
-    return $categoryID;
+    $db->delete_query('ougc_pages', "cid='{$categoryID}'");
+
+    return true;
 }
 
-function categoryGet(int $cid, bool|string $url = false): array
+function categoryGet(int $categoryID, string $categoryUrl = ''): array
 {
-    global $cache;
-
     static $cacheObject = [];
 
-    if (!isset($cacheObject[$cid])) {
+    if (!isset($cacheObject[$categoryID])) {
         global $db;
-        $cacheObject[$cid] = [];
 
-        $where = ($url === false ? 'cid=\'' . $cid . '\'' : 'url=\'' . $db->escape_string($url) . '\'');
+        $cacheObject[$categoryID] = [];
 
-        $query = $db->simple_select('ougc_pages_categories', '*', $where);
-        $category = $db->fetch_array($query);
+        $whereConditions = ['1=1'];
 
-        if (isset($category['cid'])) {
-            $cacheObject[$cid] = $category;
+        if ($categoryUrl === '') {
+            $whereConditions[] = "cid='{$categoryID}'";
+        } else {
+            $whereConditions[] = "url='{$db->escape_string($categoryUrl)}'";
+        }
+
+        $categoryData = categoryQuery(['*'], $whereConditions, ['limit' => 1]);
+
+        if ($categoryData && isset($categoryData[0]['cid'])) {
+            $cacheObject[$categoryID] = $categoryData[0];
         }
     }
 
-    return $cacheObject[$cid];
+    return $cacheObject[$categoryID];
 }
 
-function categoryQuery(array $fieldList = ['*'], array $whereConditions = ['1=1'], array $queryOptions = []): bool|array
+function categoryQuery(array $fieldList = ['*'], array $whereConditions = ['1=1'], array $queryOptions = []): array
 {
     global $db;
 
@@ -1054,7 +994,7 @@ function categoryQuery(array $fieldList = ['*'], array $whereConditions = ['1=1'
         return $returnObjects;
     }
 
-    return false;
+    return [];
 }
 
 function categoryGetByUrl(bool|string $url): array
@@ -1062,20 +1002,33 @@ function categoryGetByUrl(bool|string $url): array
     return categoryGet(0, $url);
 }
 
-function categoryGetLink(int $cid): string
+function categoryGetLink(int $categoryID): string
 {
-    global $db, $settings;
+    global $settings;
 
-    $query = $db->simple_select('ougc_pages_categories', 'url', 'cid=\'' . $cid . '\'');
-    $url = $db->fetch_field($query, 'url');
+    return $settings['bburl'] . '/' . \htmlspecialchars_uni(categoryGetLinkBase($categoryID));
+}
 
-    if ($settings['ougc_pages_seo'] && \my_strpos($settings['ougc_pages_seo_scheme_categories'], '{url}') !== false) {
-        $url = str_replace('{url}', $url, $settings['ougc_pages_seo_scheme_categories']);
-    } else {
-        $url = 'pages.php?category=' . $url;
+function categoryGetLinkBase(int $categoryID): string
+{
+    static $cacheObject = [];
+
+    if (!isset($cacheObject[$categoryID])) {
+        $cacheObject[$categoryID] = '';
+
+        $categoriesCache = cacheGetCategories();
+
+        if (!empty($categoriesCache[$categoryID]['url'])) {
+            if (getSetting('seo') && \my_strpos(getSetting('seo_scheme_categories'), '{url}') !== false) {
+                $cacheObject[$categoryID] = str_replace('{url}', $categoriesCache[$categoryID]['url'], getSetting('seo_scheme_categories'));
+            } else {
+                $cacheObject[$categoryID] = "pages.php?page={$categoriesCache[$categoryID]['url']}";
+            }
+        }
+        // maybe get from DB otherwise ...
     }
 
-    return $settings['bburl'] . '/' . \htmlspecialchars_uni($url);
+    return $cacheObject[$categoryID];
 }
 
 function categoryBuildLink(string $categoryName, int $categoryID): string
@@ -1092,7 +1045,7 @@ function categoryBuildSelect(): array
     $selectItems = [];
 
     foreach (categoryQuery(['cid', 'name'], ['1=1'], ['order_by' => 'name']) as $categoryData) {
-        $selectItems[$categoryData['cid']] = htmlspecialchars_uni($categoryData['name']);
+        $selectItems[$categoryData['cid']] = \htmlspecialchars_uni($categoryData['name']);
     }
 
     return $selectItems;
@@ -1109,38 +1062,21 @@ function pageStatusGet(bool $setNewStatus = false, int $newStatus = PAGE_STATUS_
     return $setStatus;
 }
 
-function pageStatusSet(int $newStatus = PAGE_STATUS_VALID): int
-{
-    return pageStatusGet(true, $newStatus);
-}
-
 function pageInsert(array $pageData = [], int $pageID = 0, bool $update = false): int
 {
     global $db;
 
     $insertData = [];
 
-    if (!$update) {
-        foreach (['allowedGroups', 'template'] as $columnKey) {
-            if (!isset($pageData[$columnKey])) {
-                $insertData[$columnKey] = '';
-            }
+    foreach (\OUGCPages\Admin\FIELDS_DATA_PAGES as $fieldKey => $fieldData) {
+        if (!isset($pageData[$fieldKey])) {
+            continue;
         }
 
-        if (!isset($pageData['dateline'])) {
-            $insertData['dateline'] = \TIME_NOW;
-        }
-    }
-
-    foreach (['name', 'description', 'url', 'allowedGroups', 'template'] as $columnKey) {
-        if (isset($pageData[$columnKey])) {
-            $insertData[$columnKey] = $db->escape_string($pageData[$columnKey]);
-        }
-    }
-
-    foreach (['cid', 'php', 'wol', 'disporder', 'visible', 'wrapper', 'init', 'dateline'] as $columnKey) {
-        if (isset($pageData[$columnKey])) {
-            $insertData[$columnKey] = (int)$pageData[$columnKey];
+        if (in_array($fieldData['type'], ['VARCHAR', 'MEDIUMTEXT'])) {
+            $insertData[$fieldKey] = $db->escape_string($pageData[$fieldKey]);
+        } else if (in_array($fieldData['type'], ['INT', 'SMALLINT', 'TINYINT'])) {
+            $insertData[$fieldKey] = (int)$pageData[$fieldKey];
         }
     }
 
@@ -1179,28 +1115,34 @@ function pageDelete(int $pageID): int
     return $pageID;
 }
 
-function pageGet(int $pageID, bool|string $url = false): array
+function pageGet(int $pageID, string $pageUrl = ''): array
 {
     static $cacheObject = [];
 
     if (!isset($cacheObject[$pageID])) {
         global $db;
+
         $cacheObject[$pageID] = [];
 
-        $where = ($url === false ? 'pid=\'' . (int)$pageID . '\'' : 'url=\'' . $db->escape_string($url) . '\'');
+        $whereConditions = ['1=1'];
 
-        $query = $db->simple_select('ougc_pages', '*', $where);
-        $page = $db->fetch_array($query);
+        if ($pageUrl === '') {
+            $whereConditions[] = "pid='{$pageID}'";
+        } else {
+            $whereConditions[] = "url='{$db->escape_string($pageUrl)}'";
+        }
 
-        if (isset($page['pid'])) {
-            $cacheObject[$pageID] = $page;
+        $pageData = pageQuery(['*'], $whereConditions, ['limit' => 1]);
+
+        if ($pageData && isset($pageData[0]['pid'])) {
+            $cacheObject[$pageID] = $pageData[0];
         }
     }
 
     return $cacheObject[$pageID];
 }
 
-function pageQuery(array $fieldList = ['*'], array $whereConditions = ['1=1'], array $queryOptions = []): bool|array
+function pageQuery(array $fieldList = ['*'], array $whereConditions = ['1=1'], array $queryOptions = []): array
 {
     global $db;
 
@@ -1221,12 +1163,18 @@ function pageQuery(array $fieldList = ['*'], array $whereConditions = ['1=1'], a
         return $returnObjects;
     }
 
-    return false;
+    return [];
 }
 
 function pageGetTemplate(int $pageID): string
 {
+    global $templates;
+
     $pageData = pageGet($pageID);
+
+    if (!empty($pageData['classicTemplate']) && isset($templates->cache["ougcpages_page{$pageID}"])) {
+        return $templates->cache["ougcpages_page{$pageID}"];
+    }
 
     if (!isset($pageData['template'])) {
         return '';
@@ -1235,25 +1183,38 @@ function pageGetTemplate(int $pageID): string
     return $pageData['template'];
 }
 
-function pageGetByUrl(bool|string $url): array
+function pageGetByUrl(string $url): array
 {
     return pageGet(0, $url);
 }
 
 function pageGetLink(int $pageID): string
 {
-    global $db, $settings;
+    global $settings;
 
-    $query = $db->simple_select('ougc_pages', 'url', 'pid=\'' . $pageID . '\'');
-    $url = $db->fetch_field($query, 'url');
+    return $settings['bburl'] . '/' . \htmlspecialchars_uni(pageGetLinkBase($pageID));
+}
 
-    if ($settings['ougc_pages_seo'] && my_strpos($settings['ougc_pages_seo_scheme'], '{url}') !== false) {
-        $url = str_replace('{url}', $url, $settings['ougc_pages_seo_scheme']);
-    } else {
-        $url = 'pages.php?page=' . $url;
+function pageGetLinkBase(int $pageID): string
+{
+    static $cacheObject = [];
+
+    if (!isset($cacheObject[$pageID])) {
+        $cacheObject[$pageID] = '';
+
+        $pagesCache = cacheGetPages();
+
+        if (!empty($pagesCache[$pageID]['url'])) {
+            if (getSetting('seo') && \my_strpos(getSetting('seo_scheme'), '{url}') !== false) {
+                $cacheObject[$pageID] = str_replace('{url}', $pagesCache[$pageID]['url'], getSetting('seo_scheme'));
+            } else {
+                $cacheObject[$pageID] = "pages.php?page={$pagesCache[$pageID]['url']}";
+            }
+        }
+        // maybe get from DB otherwise ...
     }
 
-    return $settings['bburl'] . '/' . htmlspecialchars_uni($url);
+    return $cacheObject[$pageID];
 }
 
 function pageBuildLink(string $pageName, int $pageID): string

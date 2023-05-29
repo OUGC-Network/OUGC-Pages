@@ -85,88 +85,6 @@ function ougc_pages_uninstall(): true
     return \OUGCPages\Admin\pluginUninstall();
 }
 
-// PluginLibrary dependency check & load
-function pluginLibraryRequirements(): bool
-{
-    die('pluginLibraryRequirements');
-    return \OUGCPages\Core\loadPluginLibrary();
-}
-
-// Add menu to ACP
-function ougc_pages_config_menu(array &$args): array
-{
-    die('ougc_pages_config_menu');
-    return \OUGCPages\adminHooks\admin_config_menu($args);
-}
-
-// Add action handler to config module
-function ougc_pages_config_action_handler(array &$args): array
-{
-    die('ougc_pages_config_action_handler');
-    return \OUGCPages\adminHooks\admin_config_action_handler($args);
-}
-
-// Insert plugin into the admin permissions page
-function ougc_pages_config_permissions(array &$args): array
-{
-    die('ougc_pages_config_permissions');
-    return \OUGCPages\adminHooks\admin_config_permissions($args);
-}
-
-// Show a flash message if plug-in requires updating
-function ougc_pages_output_header(): true
-{
-    die('ougc_pages_output_header');
-    return \OUGCPages\adminHooks\admin_page_output_header();
-}
-
-// Cache manager
-function update_ougc_pages()
-{
-    die('update_ougc_pages');
-    return \OUGCPages\Core\cacheUpdate();
-}
-
-// WOL support
-function ougc_pages_fetch_wol_activity_end(array &$args): array
-{
-    die('ougc_pages_fetch_wol_activity_end');
-    return \OUGCPages\ForumHooks\fetch_wol_activity_end($args);
-}
-
-function ougc_pages_build_friendly_wol_location_end(array &$args): array|bool
-{
-    die('ougc_pages_build_friendly_wol_location_end');
-    return \OUGCPages\ForumHooks\build_friendly_wol_location_end($args);
-}
-
-// Show the page
-function ougc_pages_show(): never
-{
-    die('ougc_pages_show');
-    \OUGCPages\Core\initShow();
-}
-
-// Execute PHP pages
-function ougc_pages_execute(): never
-{
-    die('ougc_pages_execute');
-    \OUGCPages\Core\initExecute();
-}
-
-// Initialize the plugin magic
-function ougc_pages_init(): bool
-{
-    die('ougc_pages_init');
-    return \OUGCPages\Core\initRun();
-}
-
-function ougc_pages_usercp_menu(): true
-{
-    die('ougc_pages_usercp_menu');
-    return \OUGCPages\ForumHooks\usercp_menu40();
-}
-
 // control_object by Zinga Burga from MyBBHacks ( mybbhacks.zingaburga.com ), 1.62
 if (!function_exists('control_object')) {
     function control_object(&$obj, $code)
@@ -267,9 +185,3 @@ if (!function_exists('ougc_getpreview')) {
         return htmlspecialchars_uni($message);
     }
 }
-
-require_once OUGC_PAGES_ROOT . '/class.php';
-
-$GLOBALS['ougc_pages'] = new OUGC_Pages;
-
-//\OUGCPages\Core\initRun();

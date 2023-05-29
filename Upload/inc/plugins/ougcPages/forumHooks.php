@@ -210,6 +210,16 @@ function usercp_menu40(bool $forceRun = false): void // maybe later allow custom
 
 function global_start(): void
 {
+    global $templatelist;
+
+    if (isset($templatelist)) {
+        $templatelist .= ',';
+    } else {
+        $templatelist = '';
+    }
+
+    $templatelist .= 'ougcpages_menu_item, ougcpages_menu, ougcpages_menu_css';
+
     if (defined('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START')) {
 
         \OUGCPages\Core\initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START);
@@ -220,6 +230,69 @@ function global_intermediate(): void
 {
     if (defined('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE')) {
 
+        global $templates, $templatelist;
+
+        $templates->cache($templatelist);
+
         \OUGCPages\Core\initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE);
     }
+}
+
+function pre_output_page(string &$pageContents): string
+{
+    if (\my_strpos($pageContents, '<!--OUGC_PAGES_FOOTER-->') === false) {
+        return $pageContents;
+    }
+
+    global $mybb, $templates;
+
+    $categoriesCache = \OUGCPages\Core\cacheGetCategories();
+
+    $pagesCache = \OUGCPages\Core\cacheGetPages();
+
+    $menuList = '';
+
+    foreach ($categoriesCache as $categoryID => $categoryData) {
+        if (!$categoryData['buildMenu']) {
+            continue;
+        }
+
+        if ((int)$categoryData['allowedGroups'] !== -1 && !\is_member($categoryData['allowedGroups'])) {
+            continue;
+        }
+
+        $categoryName = \htmlspecialchars_uni($categoryData['name']);
+
+        $menuItems = '';
+
+        foreach ($pagesCache as $pageID => $pageData) {
+            if ($categoryID !== $pageData['cid']) {
+                continue;
+            }
+
+            if (empty($pageData['menuItem']) || (int)$pageData['allowedGroups'] !== -1 && !\is_member($pageData['allowedGroups'])) {
+                continue;
+            }
+
+            $pageName = \htmlspecialchars_uni($pageData['name']);
+
+            $pageUrl = \OUGCPages\Core\pageGetLinkBase($pageID);
+
+            $menuItems .= eval($templates->render('ougcpages_menu_item'));
+        }
+
+        if (!$menuItems) {
+            continue;
+        }
+
+        $menuList .= eval($templates->render('ougcpages_menu'));
+    }
+
+    if ($menuList) {
+        $menuList .= eval($templates->render('ougcpages_menu_css'));
+    }
+
+    $pageContents = \str_replace('<!--OUGC_PAGES_FOOTER-->', $menuList, $pageContents);
+
+    return $pageContents;
 }

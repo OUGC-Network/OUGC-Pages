@@ -66,13 +66,12 @@ if ($mybb->get_input('manage') == 'pages') {
         \OUGCPages\Core\redirect($lang->ougc_pages_error_category_invalid, true);
     }
 
-    $page->add_breadcrumb_item(\strip_tags($categoryData['name']));
-
     // Set url to use
     \OUGCPages\Core\urlSet(
         \OUGCPages\Core\urlBuild(['manage' => 'pages', 'cid' => $categoryData['cid']])
     );
 
+    $page->add_breadcrumb_item(\strip_tags($categoryData['name']), \OUGCPages\Core\urlBuild());
 
     $moduleTabs['pageView'] = [
         'title' => $lang->ougc_pages_manage,
@@ -577,10 +576,14 @@ if ($mybb->get_input('manage') == 'pages') {
 
                 $pageName = \htmlspecialchars_uni($pageData['name']);
 
-                $pageLink = \OUGCPages\Core\pageBuildLink(
-                    $lang->ougc_pages_page_view,
-                    $pageData['pid']
-                );
+                $pageLink = '---';
+
+                if ($pageData['visible'] && $pageData['allowedGroups'] !== '') {
+                    $pageLink = \OUGCPages\Core\pageBuildLink(
+                        $lang->ougc_pages_page_view,
+                        $pageData['pid']
+                    );
+                }
 
                 $tableObject->construct_cell(eval($templates->render(
                     \OUGCPages\Core\templateGetName('adminPageName'),
@@ -749,15 +752,15 @@ if ($mybb->get_input('manage') == 'pages') {
         $moduleTabs[$formContainerTitle]['description']
     );
 
-    $basicSelectItems = [
-        'buildMenu' => [
-            0 => $lang->ougc_pages_form_category_buildMenu_none,
-            1 => $lang->ougc_pages_form_category_buildMenu_header,
-            2 => $lang->ougc_pages_form_category_buildMenu_footer
-        ]
-    ];
+    /*$basicSelectItems = [
+      'buildMenu' => [
+           0 => $lang->ougc_pages_form_category_buildMenu_none,
+           1 => $lang->ougc_pages_form_category_buildMenu_header,
+           2 => $lang->ougc_pages_form_category_buildMenu_footer
+       ]
+   ];*/
 
-    \OUGCPages\Admin\categoryFormBuildFields($formContainer, $formObject, $basicSelectItems);
+    \OUGCPages\Admin\categoryFormBuildFields($formContainer, $formObject/*, $basicSelectItems*/);
 
     $formContainer->end();
 
@@ -877,10 +880,14 @@ if ($mybb->get_input('manage') == 'pages') {
 
             $categoryName = \htmlspecialchars_uni($categoryData['name']);
 
-            $categoryLink = \OUGCPages\Core\categoryBuildLink(
-                $lang->ougc_pages_category_view,
-                $categoryData['cid']
-            );
+            $categoryLink = '---';
+
+            if ($categoryData['visible'] && $categoryData['allowedGroups'] !== '') {
+                $categoryLink = \OUGCPages\Core\categoryBuildLink(
+                    $lang->ougc_pages_category_view,
+                    $categoryData['cid']
+                );
+            }
 
             $tableObject->construct_cell(eval($templates->render(
                 \OUGCPages\Core\templateGetName('adminCategoryName'),
