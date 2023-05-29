@@ -268,10 +268,12 @@ function importGetUrl(string $importName, string $importUrl = ''): string
         $importUrl = $importName;
     }
 
-    $importUrl = parseUrl($importUrl);
+    global $db;
 
-    if (pageGetByUrl($importUrl)) {
-        return importGetUrl('', \uniqid());
+    $existingPage = pageQuery(['pid'], ["url='{$db->escape_string($importUrl)}'"], ['limit' => 1]);
+
+    if (!empty($existingPage[0]) && !empty($existingPage[0]['pid'])) {
+        return importGetUrl('', \uniqid($importUrl));
     }
 
     return $importUrl;
