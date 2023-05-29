@@ -30,16 +30,14 @@
 $l['setting_group_ougc_pages'] = 'OUGC Pages';
 
 // Messages
-$l['ougc_pages_error_invalidpage'] = 'La pagina seleccionada parece ser invalida.';
-$l['ougc_pages_error_invalidçategory'] = 'La categoria seleccionada parece ser invalida.';
+$l['ougc_pages_error_page_invalid'] = 'La pagina seleccionada no existe.';
+$l['ougc_pages_error_category_invalid'] = 'La categoria seleccionada no existe.';
 
 // Categories
 $l['ougc_pages_category_list_empty'] = 'Actualmente no hay paginas en esta categoria.';
 
-// Navigation
-$l['ougc_pages_navigation_previous'] = 'Anterior';
-$l['ougc_pages_navigation_next'] = 'Siguiente';
-
 // WOL
-$l['ougc_pages_wol'] = 'Viendo la pagina <a href="{1}">{2}</a>.';
-$l['ougc_pages_wol_cat'] = 'Viendo la categoria <a href="{1}">{2}</a>.';
+$l['ougc_pages_wol_page'] = 'Viendo la pagina <a href="{1}">{2}</a>.';
+$l['ougc_pages_wol_category'] = 'Viendo la categoria <a href="{1}">{2}</a>.';
+
+$l['ougc_pages_page_edited'] = 'Ultima edicion';

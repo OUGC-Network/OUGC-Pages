@@ -28,103 +28,148 @@
 
 // Plugin API
 $l['setting_group_ougc_pages'] = 'OUGC Pages';
-$l['setting_group_ougc_pages_desc'] = 'Crea paginas adicionales directamente desde tu ACP.';
+$l['setting_group_ougc_pages_desc'] = 'Crea páginas adicionales directamente desde tu ACP.';
 
 // Settings
-$l['setting_ougc_pages_portal'] = 'Usar Script del Portal';
-$l['setting_ougc_pages_portal_desc'] = 'Selecciona si quieres mostrar las paginas dentro del portal.';
 $l['setting_ougc_pages_seo'] = 'Usar Enlaces Amigables SEO';
-$l['setting_ougc_pages_seo_desc'] = 'Activa la opcion para usar enlaces amigables al SEO.';
-$l['setting_ougc_pages_seo_scheme'] = 'Esquema de URL de Pagina';
-$l['setting_ougc_pages_seo_scheme_desc'] = 'Escribe el esquema del enlace de las paginas. Deja vacio para deshabilitar los enlaces SEO para las paginas.';
-$l['setting_ougc_pages_seo_scheme_categories'] = 'Esquema de URL de Categorias';
-$l['setting_ougc_pages_seo_scheme_categories_desc'] = 'Escribe el esquema del enlace de las categorias. Deja vacio para deshabilitar los enlaces SEO para las categorias.';
-$l['setting_ougc_pages_perpage'] = 'Objetos por Pagina';
-$l['setting_ougc_pages_perpage_desc'] = 'Maximo numero de objetos a mostrar por pagina en el ACP.';
-$l['setting_ougc_pages_usercp_priority'] = 'UserCP Nav Priority';
-$l['setting_ougc_pages_usercp_priority_desc'] = 'La prioridad para los paneles de navegacion agregado al panel de usuarios.';
+$l['setting_ougc_pages_seo_desc'] = 'Activa la opción para usar enlaces amigables al SEO.';
+$l['setting_ougc_pages_seo_scheme'] = 'Esquema de URL de Página';
+$l['setting_ougc_pages_seo_scheme_desc'] = 'Escribe el esquema del enlace de las páginas. Deja vacío para deshabilitar los enlaces SEO para las páginas.';
+$l['setting_ougc_pages_seo_scheme_categories'] = 'Esquema de URL de Categorías';
+$l['setting_ougc_pages_seo_scheme_categories_desc'] = 'Escribe el esquema del enlace de las categorías. Deja vacío para deshabilitar los enlaces SEO para las categorías.';
+$l['setting_ougc_pages_perpage'] = 'Objetos por Página';
+$l['setting_ougc_pages_perpage_desc'] = 'Máximo numero de objetos a mostrar por página en el ACP.';
+$l['setting_ougc_pages_usercp_priority'] = 'Prioridad en Navegación del UserCP';
+$l['setting_ougc_pages_usercp_priority_desc'] = 'La prioridad para los paneles de navegación agregado al panel de usuarios.';
 
 // ACP
-$l['ougc_pages_manage'] = 'Administrar Paginas';
-$l['ougc_pages_manage_desc'] = 'Esta seccion te permite adminsitrar tus paginas personalizadas.';
-$l['ougc_pages_tab_add'] = 'Agregar Pagina';
-$l['ougc_pages_tab_add_desc'] = 'Aqui puedes agregar una pagina nueva.';
-$l['ougc_pages_tab_import'] = 'Importar Pagina';
-$l['ougc_pages_tab_import_desc'] = 'Utiliza esta seccion para importar nuevas paginas.';
-$l['ougc_pages_tab_edit'] = 'Editar Pagina';
-$l['ougc_pages_tab_edit_desc'] = 'Aqui puedes editar una pagina existente.';
-$l['ougc_pages_tab_edit_cat'] = 'Editar Categoria';
-$l['ougc_pages_tab_edit_cat_desc'] = 'Aqui puedes editar una categoria existente.';
-$l['ougc_pages_tab_cat'] = 'Categorias';
-$l['ougc_pages_tab_cat_desc'] = 'Esta seccion te permite adminsitrar tus categorias.';
-$l['ougc_pages_tab_cat_add'] = 'Agregar Categoria';
-$l['ougc_pages_tab_cat_add_desc'] = 'Aqui puedes agregar una categoria.';
-$l['ougc_pages_view_empty'] = 'Actualmente no hay paginas para mostrar.';
-$l['ougc_pages_form_category'] = 'Categoria';
-$l['ougc_pages_form_category_desc'] = 'Selecciona la categoria asignada a esta pagina.';
-$l['ougc_pages_form_name'] = 'Nombre';
-$l['ougc_pages_form_name_desc'] = 'Escribe el nombre de la pagina o categoria.';
-$l['ougc_pages_form_description'] = 'Descripcion';
-$l['ougc_pages_form_description_desc'] = 'Escribe la descripcion de la pagina o categoria.';
-$l['ougc_pages_form_url'] = 'Unique URL';
-$l['ougc_pages_form_url_desc'] = 'Escribe la identificacion de URL unica de la pagina o categoria.';
+$l['ougc_pages_manage'] = 'Administrar Páginas';
+$l['ougc_pages_manage_desc'] = 'Esta sección te permite administrar las páginas de esta categoría.';
+
+$l['ougc_pages_tab_category'] = 'Categorías';
+$l['ougc_pages_tab_category_desc'] = 'Esta sección te permite administrar tus categorías.';
+$l['ougc_pages_tab_category_add'] = 'Nueva Categoría';
+$l['ougc_pages_tab_category_add_desc'] = 'Aquí puedes agregar una nueva categoría.';
+$l['ougc_pages_tab_category_edit'] = 'Editar Categoría';
+$l['ougc_pages_tab_category_edit_desc'] = 'Aquí puedes editar una categoría.';
+$l['ougc_pages_tab_page_add'] = 'Nueva Página';
+$l['ougc_pages_tab_page_add_desc'] = 'Aquí puedes agregar una nueva página.';
+$l['ougc_pages_tab_page_edit'] = 'Editar Página';
+$l['ougc_pages_tab_page_edit_desc'] = 'Aquí puedes editar una página.';
+$l['ougc_pages_tab_page_import'] = 'Importar Página';
+$l['ougc_pages_tab_page_import_desc'] = 'Aquí puedes importar una página.';
+
 $l['ougc_pages_form_import'] = 'Archivo Local';
-$l['ougc_pages_form_import_desc'] = 'Selecciona un archivo XML para importar tu pagina desde tu maquina.';
-$l['ougc_pages_form_import_url'] = 'URL de Archivo';
-$l['ougc_pages_form_import_url_desc'] = 'Escribe la direccion web del archivo XML para importar tu pagina.';
-$l['ougc_pages_form_import_ignore_version'] = 'Inorar Compatibilidad';
-$l['ougc_pages_form_import_ignore_version_desc'] = 'Selecciona si esta pagina debe ser importada ignorando la version del plugin para la cual fue creada.';
-$l['ougc_pages_form_category'] = 'Categoria';
-$l['ougc_pages_form_disabled'] = 'Deshabilitado';
-$l['ougc_pages_form_disabled_desc'] = 'Deshabilitado';
-$l['ougc_pages_form_visible'] = 'Activar';
-$l['ougc_pages_form_visible_desc'] = 'Esta categoria o pagina sera visible';
-$l['ougc_pages_form_breadcrumb'] = 'Mostrar en Breadcrumb';
-$l['ougc_pages_form_breadcrumb_desc'] = 'Esta categoria se mostrara en el rastro de breadcrumb del foro.';
-$l['ougc_pages_form_wrapucp'] = 'Agregar al UserCP';
-$l['ougc_pages_form_wrapucp_desc'] = 'Selecciona si quieres mostrar esta categoria como parte del panel de control de usuario.';
-/*$l['ougc_pages_form_navigation'] = 'Show Navigation';
-$l['ougc_pages_form_navigation_desc'] = 'Whether if to show a previous/next pagination in this category in pages.';*/
-$l['ougc_pages_form_wol'] = 'Mostrar en Pagina Online';
-$l['ougc_pages_form_wol_desc'] = 'Selecciona si quieres mostrar esta ubicacion en la pagina de usuarios en linea.';
-$l['ougc_pages_form_wrapper'] = 'Usar el Template Wrapper';
-$l['ougc_pages_form_wrapper_desc'] = 'El contenido de tu pagina sera embuelto en un template global.';
-$l['ougc_pages_form_php'] = 'Codigo PHP';
-$l['ougc_pages_form_php_desc'] = 'Selecciona si quieres procesar esta pagina como una pagina de PHP o de lo contrario utilizar el sistema de templates de MyBB.';
-$l['ougc_pages_form_execution'] = 'Nivel de Ejecución';
-$l['ougc_pages_form_execution_desc'] = 'Selecciona el la prioridad de ejecucion para paginas PHP.';
-$l['ougc_pages_form_execution_init'] = 'Inicialización';
-$l['ougc_pages_form_execution_start'] = 'Global Start';
-$l['ougc_pages_form_execution_intermediate'] = 'Global Intermediate';
-$l['ougc_pages_form_execution_end'] = 'Predeterminado "Global End"';
-$l['ougc_pages_form_template'] = 'Template';
-$l['ougc_pages_form_template_desc'] = 'Escribe tu pagina abajo.';
-$l['ougc_pages_form_disporder'] = 'Orden';
-$l['ougc_pages_form_disporder_desc'] = 'Orden en el cual mostrar esta categoria o pagina.';
-$l['ougc_pages_form_groups'] = 'Grupos Autorizados';
-$l['ougc_pages_form_groups_desc'] = 'Selecciona los grupos que pueden ver esta categoria o pagina. Deja sin seleccionar para autorizar a todos los grupos.';
-$l['ougc_pages_button_disponder'] = 'Actualizar Orden';
-$l['ougc_pages_button_submit'] = 'Guardar y Regresar';
-$l['ougc_pages_button_submit_continue'] = 'Guardar y Continuar';
-$l['ougc_pages_form_export'] = 'Exportar';
-$l['ougc_pages_view_page'] = 'Ver';
+$l['ougc_pages_form_import_desc'] = 'Selecciona el archivo XML a importar desde tu dispositivo.';
+$l['ougc_pages_form_import_url'] = 'URL del Archivo';
+$l['ougc_pages_form_import_url_desc'] = 'Inserta la URL del archivo XML a importar.';
+$l['ougc_pages_form_import_ignore_version'] = 'Ignorar la Compatibilidad de Version';
+$l['ougc_pages_form_import_ignore_version_desc'] = 'Selecciona esta opción para importar una página sin importar la version para la cual fue generada.';
+
+$l['ougc_pages_form_category_name'] = 'Nombre de la Categoría';
+$l['ougc_pages_form_category_name_desc'] = 'Nombre a mostrar para esta categoría.';
+$l['ougc_pages_form_category_description'] = 'Descripción de la Categoría';
+$l['ougc_pages_form_category_description_desc'] = 'Inserta la descripción para esta categoría.';
+$l['ougc_pages_form_category_url'] = 'URL Única';
+$l['ougc_pages_form_category_url_desc'] = 'Inserta la URL única que identifica a esta categoría.';
+$l['ougc_pages_form_category_allowedGroups'] = 'Visible para Grupos';
+$l['ougc_pages_form_category_allowedGroups_desc'] = 'Selecciona los grupos que pueden navegar esta categoría.';
+$l['ougc_pages_form_category_breadcrumb'] = 'Mostrar en Navegación';
+$l['ougc_pages_form_category_breadcrumb_desc'] = 'Activa para mostrar esta categoría en la navegación de páginas.';
+$l['ougc_pages_form_category_displayNavigation'] = 'Mostrar Navegación';
+$l['ougc_pages_form_category_displayNavigation_desc'] = 'Activa para mostrar una navegación entre páginas cuando se navega esta categoría.';
+$l['ougc_pages_form_category_buildMenu'] = 'Construir Menu';
+$l['ougc_pages_form_category_buildMenu_desc'] = 'Activa para construir un menu despegable para esta categoría en el encabezado de la página.';
+//$l['ougc_pages_form_category_buildMenu_none'] = 'Ninguno';
+//$l['ougc_pages_form_category_buildMenu_header'] = 'Encabezado';
+//$l['ougc_pages_form_category_buildMenu_footer'] = 'Pie de página';
+$l['ougc_pages_form_category_wrapucp'] = 'Envolver en Menu del UserCP';
+$l['ougc_pages_form_category_wrapucp_desc'] = 'Se se activa, se agregara una sección al menu del UserCP para navegar las páginas de esta categoría. Considera los conflictos si los invitados pueden navegar esta categoria.';
+
+$l['ougc_pages_form_page_cid'] = 'Categoría';
+$l['ougc_pages_form_page_cid_desc'] = 'Selección la categoría a la cual esta página pertenece.';
+$l['ougc_pages_form_page_name'] = 'Nombre de la Página';
+$l['ougc_pages_form_page_name_desc'] = 'Nombre a mostrar para esta página.';
+$l['ougc_pages_form_page_description'] = 'Descripción de la Página';
+$l['ougc_pages_form_page_description_desc'] = 'Inserta la descripción para esta página.';
+$l['ougc_pages_form_page_url'] = 'URL Única';
+$l['ougc_pages_form_page_url_desc'] = 'Inserta la URL única que identifica a esta página.';
+$l['ougc_pages_form_page_allowedGroups'] = 'Visible para Grupos';
+$l['ougc_pages_form_page_allowedGroups_desc'] = 'Selecciona los grupos que pueden ver esta página.';
+$l['ougc_pages_form_page_menuItem'] = 'Agregar a Menu';
+$l['ougc_pages_form_page_menuItem_desc'] = 'Si "Construir Menu" esta activo para esta categoría, se agregara un enlace para esta página en el menu.';
+$l['ougc_pages_form_page_wrapper'] = 'Envolver en Plantilla';
+$l['ougc_pages_form_page_wrapper_desc'] = 'Si se activa, el contenido de páginas no-PHP serán envueltas dentro de la plantilla <code>ougcpages_wrapper</code>.';
+$l['ougc_pages_form_page_wol'] = 'Mostrar en la Lista de Usuarios Online';
+$l['ougc_pages_form_page_wol_desc'] = 'Si se desactiva, la actividad dentro de esta página se mostrara como "Ubicación desconocida" enlazando a la página de inicio.';
+$l['ougc_pages_form_page_php'] = 'Evaluar Código PHP';
+$l['ougc_pages_form_page_php_desc'] = 'Si se activa, esta página será interpretada como código PHP. Desactiva para usar contenido HTML.';
+$l['ougc_pages_form_page_classicTemplate'] = 'Usar Plantilla de Estilo';
+$l['ougc_pages_form_page_classicTemplate_desc'] = 'Si se desactiva, el "Contenido de Página" será ignorado y una plantilla del estilo será usada en su lugar. El nombre para esta plantilla será en el formato <code>ougcpages_pagePID</code>, por ejemplo: <code>ougcpages_page18</code>';
+//$l['ougc_pages_form_page_classicTemplate_desc_plus'] = '<br /><strong>Nombre de plantilla:</strong> <code>{1}</code>';
+$l['ougc_pages_form_page_template'] = 'Contenido de Página';
+$l['ougc_pages_form_page_template_desc'] = 'Inserta el contenido HTML o PHP para esta página abajo.';
+$l['ougc_pages_form_page_init'] = 'Punto de Inicialización de PHP.';
+$l['ougc_pages_form_page_init_desc'] = 'Selecciona la sección de ejecución en que se cargará esta página cuando "Evaluar Código PHP" está activo.<br />
+<strong>Inicialización:</strong> Ni siquiera todos los complementos han sido cargados en este punto. Aproximadamente 4-6 consultas SQL se han ejecutado en este punto.<br />
+<strong>Global (Inicial):</strong> Principalmente solo la sesión y el idioma han sido cargados. Aproximadamente 6-8 consultas SQL se han ejecutado en este punto.<br />
+<strong>Global (Intermedio):</strong> El estilo y los templates han sido cargados, pero sin el encabezado, el bloque de bienvenida, ni el pie de página. Aproximadamente 8-10 consultas SQL se han ejecutado en este punto.<br />
+<span style="color: blue;"><strong>Global (Final):</strong> Predeterminado; selecciona esta opción si tienes dudas. Ofrece la mayor compatibilidad con todas las características del foro. Aproximadamente 9-13 consultas SQL se han ejecutado en este punto.</span>';
+$l['ougc_pages_form_page_init_init'] = 'Inicialización';
+$l['ougc_pages_form_page_init_start'] = 'Global (Inicial)';
+$l['ougc_pages_form_page_init_intermediate'] = 'Global (Intermedio)';
+$l['ougc_pages_form_page_init_end'] = 'Global (Final)';
+
+$l['ougc_pages_category_name'] = 'Nombre';
+$l['ougc_pages_category_order'] = 'Orden de Visualización';
+$l['ougc_pages_category_status'] = 'Estado';
+$l['ougc_pages_category_enabled'] = 'Habilitado';
+$l['ougc_pages_category_disabled'] = 'Deshabilitado';
+$l['ougc_pages_category_empty'] = 'No hay elementos para mostrar.';
+$l['ougc_pages_page_export'] = 'Exportar';
+
+$l['ougc_pages_button_update_order'] = 'Actualizar Orden';
+$l['ougc_pages_button_continue'] = 'Guardar y Continuar';
+$l['ougc_pages_button_submit'] = 'Guardar';
+$l['ougc_pages_button_import'] = 'Importar Archivo';
+
+$l['ougc_pages_category_view'] = 'Ver Categoría';
+$l['ougc_pages_page_view'] = 'Ver Página';
 
 // ACP Module: Messages
-$l['ougc_pages_error_update'] = 'OUGC Pages requiere ser actualizado. Por favor desactiva y activa de vuelta el plugin.';
-$l['ougc_pages_error_add'] = 'Hubo un error al crear tu categoria.';
-$l['ougc_pages_error_invalidname'] = 'El nombre escrito es invalido.';
-$l['ougc_pages_error_invaliddescription'] = 'La descripcion escrita es invalida.';
-$l['ougc_pages_error_invalidcategory'] = 'La categoria seleccionada es invalida.';
-$l['ougc_pages_error_invalidurl'] = 'La URL debe de ser unica entre todas las paginas o es invalida.';
-$l['ougc_pages_error_invalidimport'] = 'El contenido de la pagina es invalido.';
-$l['ougc_pages_error_invalidversion'] = 'El contenido de la pagina parece ser de una version invalida.';
-$l['ougc_pages_success_add'] = 'La categoria o pagina se creo exitosamente.';
-$l['ougc_pages_success_edit'] = 'La categoria o pagina fue editada exitosamente.';
-$l['ougc_pages_success_delete'] = 'La categoria o pagina se borro exitosamente.';
+$l['ougc_pages_error_category_invalid'] = 'La categoría seleccionada es invalida.';
+$l['ougc_pages_error_category_invalid_name'] = 'El nombre de la categoría debe ser entre 1 y {1} caracteres.';
+$l['ougc_pages_error_category_invalid_description'] = 'La descripción de la categoría debe ser entre 1 y {1} caracteres.';
+$l['ougc_pages_error_category_invalid_url'] = 'La URL de la categoría debe ser entre 1 y {1} caracteres.';
+$l['ougc_pages_error_category_duplicated_url'] = 'La URL seleccionada esta en uso por otra categoría.';
+
+$l['ougc_pages_error_page_invalid'] = 'La página seleccionada es invalida.';
+$l['ougc_pages_error_page_invalid_name'] = 'El nombre de la página debe ser entre 1 y {1} caracteres.';
+$l['ougc_pages_error_page_invalid_description'] = 'La descripción de la página debe ser entre 1 y {1} caracteres.';
+$l['ougc_pages_error_page_invalid_url'] = 'La URL de la página debe ser entre 1 y {1} caracteres.';
+$l['ougc_pages_error_page_duplicated_url'] = 'La URL seleccionada esta en uso por otra página.';
+$l['ougc_pages_error_page_invalid_template'] = 'El contenido de la página parece ser invalido para páginas no-PHP.';
+
+$l['ougc_pages_error_import_invalid'] = 'El contenido del archivo parece ser invalido.';
+$l['ougc_pages_error_import_invalid_version'] = 'El contenido del archivo parece ser de una version incompatible.';
+
+$l['ougc_pages_success_category_add'] = 'La categoría fue creada exitosamente.';
+$l['ougc_pages_success_category_updated'] = 'La categoría fue actualizada exitosamente.';
+$l['ougc_pages_success_category_updated_order'] = 'El orden de visualización de las categorías fue actualizado exitosamente.';
+$l['ougc_pages_success_category_enabled'] = 'La categoría fue habilitada exitosamente.';
+$l['ougc_pages_success_category_disabled'] = 'La categoría fue deshabilitada exitosamente.';
+$l['ougc_pages_success_category_deleted'] = 'La categoría fue borrada exitosamente.';
+
+$l['ougc_pages_success_page_add'] = 'La página fue creada exitosamente.';
+$l['ougc_pages_success_page_updated'] = 'La página fue actualizada exitosamente.';
+$l['ougc_pages_success_page_updated_order'] = 'El orden de visualización de las páginas fue actualizado exitosamente.';
+$l['ougc_pages_success_page_enabled'] = 'La página fue habilitada exitosamente.';
+$l['ougc_pages_success_page_disabled'] = 'La página fue deshabilitada exitosamente.';
+$l['ougc_pages_success_page_deleted'] = 'La página fue borrada exitosamente.';
+$l['ougc_pages_success_imported'] = 'La página fue importada exitosamente.';
 
 // Admin Permissions
-$l['ougc_pages_config_permissions'] = 'Puede administrar las paginas.';
+$l['ougc_pages_config_permissions'] = '¿Puede administrar páginas?';
 
 // PluginLibrary
-$l['ougc_pages_pl_required'] = 'Este plugin requiere de <a href="{1}">PluginLibrary</a> version {2} o mayor para funcionar.';
-$l['ougc_pages_pl_old'] = 'Este plugin requiere de <a href="{1}">PluginLibrary</a> version {2} o mayor para funcionar.'; // DEPRECATED
+$l['ougc_pages_pl_required'] = 'Este complemento requiere la version {2} de <a href="{1}">PluginLibrary</a> para funcionar.';

@@ -82,8 +82,10 @@ function admin_config_action_handler(&$handlerActions): array
     return $handlerActions;
 }
 
-function admin_load()
+function admin_load(): void
 {
+    \OUGCPages\Admin\pluginActivate();
+
     global $modules_dir, $run_module, $action_file, $run_module, $page, $modules_dir_backup, $run_module_backup, $action_file_backup;
 
     if ($run_module != 'config' || $page->active_action != 'ougc_pages') {

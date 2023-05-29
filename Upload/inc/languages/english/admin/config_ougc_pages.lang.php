@@ -79,10 +79,10 @@ $l['ougc_pages_form_category_breadcrumb_desc'] = 'Toggle to display this categor
 $l['ougc_pages_form_category_displayNavigation'] = 'Show Navigation';
 $l['ougc_pages_form_category_displayNavigation_desc'] = 'Toggle to show a previous/next pagination when browsing pages in this category.';
 $l['ougc_pages_form_category_buildMenu'] = 'Build Menu';
-$l['ougc_pages_form_category_buildMenu_desc'] = 'Select if you want to build a dropdown menu for this category.';
-$l['ougc_pages_form_category_buildMenu_none'] = 'None';
-$l['ougc_pages_form_category_buildMenu_header'] = 'Header';
-$l['ougc_pages_form_category_buildMenu_footer'] = 'Footer';
+$l['ougc_pages_form_category_buildMenu_desc'] = 'Toggle to build a dropdown menu for this category in the header.';
+//$l['ougc_pages_form_category_buildMenu_none'] = 'None';
+//$l['ougc_pages_form_category_buildMenu_header'] = 'Header';
+//$l['ougc_pages_form_category_buildMenu_footer'] = 'Footer';
 $l['ougc_pages_form_category_wrapucp'] = 'Wrap UserCP Menu';
 $l['ougc_pages_form_category_wrapucp_desc'] = 'If enabled, a section will be added to the UserCP for browsing this category and the category will be wrapped as if it was a UserCP section. Beware guest permission is allowed but expect errors if you do so.';
 
@@ -103,10 +103,10 @@ $l['ougc_pages_form_page_wrapper_desc'] = 'If enabled, the contents of non-PHP p
 $l['ougc_pages_form_page_wol'] = 'Show In Who Is Online (WOL) List';
 $l['ougc_pages_form_page_wol_desc'] = 'If disabled, activity within this page will be displayed as "Uknown location" pointing to the home page.';
 $l['ougc_pages_form_page_php'] = 'Eval PHP Code';
-$l['ougc_pages_form_page_php_desc'] = 'If enabled, this page wil be parsed as plain PHP code. Disable to use HTML content instead.';
+$l['ougc_pages_form_page_php_desc'] = 'If enabled, this page wilL be parsed as plain PHP code. Disable to use HTML content instead.';
 $l['ougc_pages_form_page_classicTemplate'] = 'Use Theme Template';
 $l['ougc_pages_form_page_classicTemplate_desc'] = 'If enabled, the "Page Content" below will be ignored and a theme template will be used instead. The name for the template should follow the format <code>ougcpages_pagePID</code>, for example: <code>ougcpages_page18</code>';
-$l['ougc_pages_form_page_classicTemplate_desc_plus'] = '<br /><strong>Template name:</strong> <code>{1}</code>';
+//$l['ougc_pages_form_page_classicTemplate_desc_plus'] = '<br /><strong>Template name:</strong> <code>{1}</code>';
 $l['ougc_pages_form_page_template'] = 'Page Content';
 $l['ougc_pages_form_page_template_desc'] = 'Insert the page HTML or PHP content below.';
 $l['ougc_pages_form_page_init'] = 'PHP Initialization Point';
@@ -114,7 +114,7 @@ $l['ougc_pages_form_page_init_desc'] = 'Select the script section where this pag
 <strong>Initialization:</strong> Not even all plugins are checked at this point. Very low resource consumption. Around 4-6 queries are ran by this point.<br />
 <strong>Global Start:</strong> Mainly only session and language have been loaded. Around 6-8 queries are ran by this point.<br />
 <strong>Global Intermediate:</strong> Theme and templates have been loaded without header, welcome block, or footer being available yet. Around 8-10 queries are ran by this point.<br />
-<span style="color: blue;"><strong>Global End:</strong> Default; if unsure select this. Probably the most compatibility for all forum features. Around 9-13 queries are ran by this point.</span>';
+<span style="color: blue;"><strong>Global End:</strong> Default; if unsure select this. Has the most compatibility for all forum features. Around 9-13 queries are ran by this point.</span>';
 $l['ougc_pages_form_page_init_init'] = 'Initialization';
 $l['ougc_pages_form_page_init_start'] = 'Global Start';
 $l['ougc_pages_form_page_init_intermediate'] = 'Global Intermediate';
@@ -165,7 +165,7 @@ $l['ougc_pages_success_page_updated'] = 'The page was updated successfully.';
 $l['ougc_pages_success_page_updated_order'] = 'The display order of the pages was updated successfully.';
 $l['ougc_pages_success_page_enabled'] = 'The page was enabled successfully.';
 $l['ougc_pages_success_page_disabled'] = 'The page was disabled successfully.';
-$l['ougc_pages_success_page_deleted'] = 'The category was deleted successfully.';
+$l['ougc_pages_success_page_deleted'] = 'The page was deleted successfully.';
 $l['ougc_pages_success_imported'] = 'The page was imported successfully.';
 
 // Admin Permissions
