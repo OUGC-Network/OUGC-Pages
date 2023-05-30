@@ -39,7 +39,7 @@ function fetch_wol_activity_end(&$activityObjects): array
     return $activityObjects;
 }
 
-function build_friendly_wol_location_end(&$locationObjects): array|bool
+function build_friendly_wol_location_end(&$locationObjects): array
 {
     if ($locationObjects['user_activity']['activity'] !== 'ougc_pages') {
         return $locationObjects;

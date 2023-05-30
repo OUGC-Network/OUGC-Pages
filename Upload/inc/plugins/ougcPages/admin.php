@@ -33,25 +33,28 @@ const FIELDS_DATA_CATEGORIES = [
         'type' => 'INT',
         'unsigned' => true,
         'auto_increment' => true,
-        'primary_key' => true,
+        'primary_key' => true
     ],
     'name' => [
         'type' => 'VARCHAR',
         'formType' => 'textBox',
         'size' => 100,
-        'cache' => true
+        'cache' => true,
+        'required' => true
     ],
     'description' => [
         'type' => 'VARCHAR',
         'formType' => 'textBox',
-        'size' => 255
+        'size' => 255,
+        'required' => true
     ],
     'url' => [
         'type' => 'VARCHAR',
         'formType' => 'textBox',
         'size' => 100,
         'unique' => true,
-        'cache' => true
+        'cache' => true,
+        'required' => true
     ],
     'allowedGroups' => [
         'type' => 'VARCHAR',
@@ -115,19 +118,22 @@ const FIELDS_DATA_PAGES = [
         'type' => 'VARCHAR',
         'formType' => 'textBox',
         'size' => 100,
-        'cache' => true
+        'cache' => true,
+        'required' => true
     ],
     'description' => [
         'type' => 'VARCHAR',
         'formType' => 'textBox',
-        'size' => 255
+        'size' => 255,
+        'required' => true
     ],
     'url' => [
         'type' => 'VARCHAR',
         'formType' => 'textBox',
         'size' => 100,
         'unique' => true,
-        'cache' => true
+        'cache' => true,
+        'required' => true
     ],
     'allowedGroups' => [
         'type' => 'VARCHAR',
@@ -218,7 +224,7 @@ function pluginInfo(): array
     ];
 }
 
-function pluginActivate(): true
+function pluginActivate(): void
 {
     global $PL, $lang, $cache, $db;
 
@@ -294,6 +300,8 @@ function pluginActivate(): true
                 'allowedGroups',
                 dbTables()['ougc_pages']['allowedGroups']
             );
+
+            $db->update_query('ougc_pages', ['allowedGroups' => -1], "allowedGroups=''");
         }
         if ($db->field_exists('groups', 'ougc_pages_categories')) {
             $db->rename_column(
@@ -302,6 +310,8 @@ function pluginActivate(): true
                 'allowedGroups',
                 dbTables()['ougc_pages_categories']['allowedGroups']
             );
+
+            $db->update_query('ougc_pages_categories', ['allowedGroups' => -1], "allowedGroups=''");
         }
     }
 
@@ -316,17 +326,15 @@ function pluginActivate(): true
     // Update administrator permissions
     \change_admin_permission('config', 'ougc_pages');
 
-    return true;
+    \OUGCPages\Core\cacheUpdate();
 }
 
-function pluginDeactivate(): true
+function pluginDeactivate(): void
 {
     \OUGCPages\Core\loadPluginLibrary();
 
     // Update administrator permissions
     \change_admin_permission('config', 'ougc_pages', 0);
-
-    return true;
 }
 
 function pluginIsInstalled(): bool
@@ -346,7 +354,7 @@ function pluginIsInstalled(): bool
     return $pluginIsInstalled;
 }
 
-function pluginUninstall(): true
+function pluginUninstall(): void
 {
     global $db, $PL, $cache;
 
@@ -378,12 +386,10 @@ function pluginUninstall(): true
 
     // Remove administrator permissions
     \change_admin_permission('config', 'ougc_pages', -1);
-
-    return true;
 }
 
 
-function dbVerifyTables(): true
+function dbVerifyTables(): void
 {
     global $db;
 
@@ -420,11 +426,9 @@ function dbVerifyTables(): true
     }
 
     dbVerifyIndexes();
-
-    return true;
 }
 
-function dbVerifyIndexes(): true
+function dbVerifyIndexes(): void
 {
     global $db;
 
@@ -443,8 +447,6 @@ function dbVerifyIndexes(): true
             }
         }
     }
-
-    return true;
 }
 
 
@@ -539,7 +541,7 @@ function dbTables(): array
     return $tablesData;
 }
 
-function verifyStylesheet($removeStylesheet = false): true
+function verifyStylesheet($removeStylesheet = false): void
 {
     global $db;
 
@@ -580,8 +582,6 @@ function verifyStylesheet($removeStylesheet = false): true
             \update_theme_stylesheet_list($tid);
         }
     }
-
-    return true;
 }
 
 function categoryFormCheckFields(array &$errors, string $errorIdentifier = 'category', array $fieldsData = FIELDS_DATA_CATEGORIES): void
@@ -611,10 +611,9 @@ function pageFormCheckFields(array &$errors, string $errorIdentifier = 'page', a
             if ($mybb->get_input("{$fieldKey}Select") === 'all') {
                 $mybb->input[$fieldKey] = -1;
             } elseif ($mybb->get_input("{$fieldKey}Select") === 'custom') {
-                $mybb->input[$fieldKey] = \OUGCPages\Core\sanitizeIntegers(
-                    $mybb->get_input($fieldKey, \MyBB::INPUT_ARRAY),
-                    true
-                );
+                $mybb->input[$fieldKey] = implode(',', \OUGCPages\Core\sanitizeIntegers(
+                    $mybb->get_input($fieldKey, \MyBB::INPUT_ARRAY)
+                ));
             }
         }
 
@@ -636,8 +635,14 @@ function pageFormBuildFields(object &$formContainer, object &$formObject, array 
             continue;
         }
 
+        $requiredMark = '';
+
+        if (!empty($fieldData['required'])) {
+            $requiredMark = " <em>*</em>";
+        }
+
         $formContainer->output_row(
-            $lang->{"ougc_pages_form_{$errorIdentifier}_{$fieldKey}"},
+            $lang->{"ougc_pages_form_{$errorIdentifier}_{$fieldKey}"} . $requiredMark,
             $lang->{"ougc_pages_form_{$errorIdentifier}_{$fieldKey}_desc"},
             call_user_func_array(function (string $fieldKey, string $formType, array $basicSelectItems = []) use (&$formObject): string {
                 global $mybb, $lang, $templates;

@@ -42,7 +42,7 @@ const EXECUTION_HOOK_GLOBAL_INTERMEDIATE = 3;
 
 const EXECUTION_HOOK_GLOBAL_END = 4;
 
-function loadLanguage(): true
+function loadLanguage(): void
 {
     global $lang;
 
@@ -53,8 +53,6 @@ function loadLanguage(): true
             $lang->load('ougc_pages');
         }
     }
-
-    return true;
 }
 
 function pluginLibraryRequirements(): object
@@ -92,7 +90,7 @@ function loadPluginLibrary(bool $doCheck = true): bool
     return true;
 }
 
-function addHooks(string $namespace): true
+function addHooks(string $namespace): void
 {
     global $plugins;
 
@@ -116,8 +114,6 @@ function addHooks(string $namespace): true
             $plugins->add_hook($hookName, $callable, $priority);
         }
     }
-
-    return true;
 }
 
 function runHooks(string $hookName): bool
@@ -147,19 +143,13 @@ function getSetting(string $settingKey = ''): string
     return defined($string) ? constant($string) : (string)$mybb->settings['ougc_pages_' . $settingKey];
 }
 
-function sanitizeIntegers(array $dataObject, bool $implodeResult = false): array|string
+function sanitizeIntegers(array $dataObject): array
 {
     foreach ($dataObject as $objectKey => &$objectValue) {
         $objectValue = (int)$objectValue;
     }
 
-    $dataObject = array_filter($dataObject);
-
-    if ($implodeResult) {
-        $dataObject = implode(',', $dataObject);
-    }
-
-    return $dataObject;
+    return array_filter($dataObject);
 }
 
 function getQueryLimit(int $newLimit = 0): int
@@ -203,11 +193,9 @@ function url(string $newUrl = ''): string
     return $setUrl;
 }
 
-function urlSet(string $newUrl): true
+function urlSet(string $newUrl): void
 {
     url($newUrl);
-
-    return true;
 }
 
 function urlGet(): string
@@ -279,7 +267,7 @@ function importGetUrl(string $importName, string $importUrl = ''): string
     return $importUrl;
 }
 
-function cacheUpdate(): true
+function cacheUpdate(): void
 {
     require_once OUGC_PAGES_ROOT . '/admin.php';
 
@@ -368,8 +356,6 @@ function cacheUpdate(): true
     }
 
     $cache->update('ougc_pages', $cacheData);
-
-    return true;
 }
 
 function cacheGetPages(): array
@@ -418,13 +404,11 @@ function redirectBase(string $url, string $message = '', string $title = '', boo
     \redirect($url, $message, $title, $forceRedirect);
 }
 
-function logAction(int $objectID): true
+function logAction(int $objectID): void
 {
     if ($objectID) {
         \log_admin_action($objectID);
     }
-
-    return true;
 }
 
 function multipageBuild(int $itemsCount, string $paginationUrl = ''/*, bool $checkUrl = false*/): string
@@ -483,7 +467,7 @@ function initExecute(int $pageID): never
     exit;
 }
 
-function initSession(): true
+function initSession(): void
 {
     global $session;
 
@@ -494,8 +478,6 @@ function initSession(): true
 
         $session->init();
     }
-
-    return true;
 }
 
 function initRun(): bool
@@ -966,9 +948,9 @@ function categoryQuery(array $fieldList = ['*'], array $whereConditions = ['1=1'
     return [];
 }
 
-function categoryGetByUrl(bool|string $url): array
+function categoryGetByUrl(string $categoryUrl): array
 {
-    return categoryGet(0, $url);
+    return categoryGet(0, $categoryUrl);
 }
 
 function categoryGetLink(int $categoryID): string

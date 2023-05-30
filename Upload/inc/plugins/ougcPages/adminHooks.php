@@ -116,7 +116,7 @@ function admin_config_permissions(&$permissionActions): array
     return $permissionActions;
 }
 
-function admin_page_output_header(): true
+function admin_page_output_header(): void
 {
     global $cache;
 
@@ -140,16 +140,14 @@ function admin_page_output_header(): true
             'type' => 'error'
         ];
     }
-
-    return true;
 }
 
-function admin_config_settings_start(): true
+function admin_config_settings_start(): void
 {
-    return \OUGCPages\Core\loadLanguage();
+    \OUGCPages\Core\loadLanguage();
 }
 
-function admin_config_settings_change(): true
+function admin_config_settings_change(): void
 {
-    return \OUGCPages\Core\loadLanguage();
+    \OUGCPages\Core\loadLanguage();
 }

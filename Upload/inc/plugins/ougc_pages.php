@@ -56,21 +56,21 @@ function ougc_pages_info(): array
 }
 
 // _activate() routine
-function ougc_pages_activate(): true
+function ougc_pages_activate(): void
 {
-    return \OUGCPages\Admin\pluginActivate();
+    \OUGCPages\Admin\pluginActivate();
 }
 
 // _deactivate() routine
-function ougc_pages_deactivate(): true
+function ougc_pages_deactivate(): void
 {
-    return \OUGCPages\Admin\pluginDeactivate();
+    \OUGCPages\Admin\pluginDeactivate();
 }
 
 // _install() routine
-function ougc_pages_install(): true
+function ougc_pages_install(): void
 {
-    return \OUGCPages\Admin\pluginUninstall();
+    \OUGCPages\Admin\pluginUninstall();
 }
 
 // _is_installed() routine
@@ -80,9 +80,15 @@ function ougc_pages_is_installed(): bool
 }
 
 // _uninstall() routine
-function ougc_pages_uninstall(): true
+function ougc_pages_uninstall(): void
 {
-    return \OUGCPages\Admin\pluginUninstall();
+    \OUGCPages\Admin\pluginUninstall();
+}
+
+// Tools -> Cache update helper
+function update_ougc_pages()
+{
+    \OUGCPages\Core\cacheUpdate();
 }
 
 // control_object by Zinga Burga from MyBBHacks ( mybbhacks.zingaburga.com ), 1.62
