@@ -227,6 +227,10 @@ _Administrator Control Panel_.
 	- _back end_; used when adding or editing a page
 - `ougcpages_adminGroupSelect`
 	- _back end_; used when adding or editing a category or page
+- `ougcpages_category_link`
+	- _back end_; used for building a category link
+- `ougcpages_page_link`
+	- _back end_; used for building a page link
 - `ougcpages_adminPageName`
 	- _back end_; used when viewing pages in a category
 - `ougcpages_category_list`
