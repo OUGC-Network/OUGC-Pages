@@ -7,7 +7,7 @@
     </element>
     <element>
         <key>description</key>
-        <value>Shows how to use the MyBB parser within a page.</value>
+        <value>Basic PHP page that uses the MyBB parser meant to serve as reference.</value>
     </element>
     <element>
         <key>url</key>

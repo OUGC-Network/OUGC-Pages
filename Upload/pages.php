@@ -56,9 +56,9 @@ $templatelist .= 'ougcpages_category_list_item, ougcpages_category_list, ougcpag
 
 require_once $workingDirectory . '/global.php';
 
-\OUGCPages\Core\loadLanguage();
+\OUGCPages\Core\runHooks('oucPagesStart');
 
-\OUGCPages\Core\runHooks('ougc_pages_start');
+\OUGCPages\Core\loadLanguage();
 
 if (defined('OUGC_PAGES_STATUS_CATEGORY_INVALID')) {
     \error($lang->ougc_pages_error_category_invalid);

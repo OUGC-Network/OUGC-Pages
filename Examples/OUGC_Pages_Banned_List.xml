@@ -7,7 +7,7 @@
     </element>
     <element>
         <key>description</key>
-        <value>Lists all banned accounts.</value>
+        <value>Displays a list of banned accounts.</value>
     </element>
     <element>
         <key>url</key>

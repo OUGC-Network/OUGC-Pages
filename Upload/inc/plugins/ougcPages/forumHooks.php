@@ -221,6 +221,9 @@ function global_start(): void
     $templatelist .= 'ougcpages_menu_item, ougcpages_menu, ougcpages_menu_css';
 
     if (defined('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START')) {
+        $templates->cache($templatelist);
+
+        \OUGCPages\Core\runHooks('ougcPagesExecutionGlobalStart');
 
         \OUGCPages\Core\initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START);
     }
@@ -229,12 +232,18 @@ function global_start(): void
 function global_intermediate(): void
 {
     if (defined('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE')) {
-
-        global $templates, $templatelist;
-
-        $templates->cache($templatelist);
+        \OUGCPages\Core\runHooks('ougcPagesExecutionGlobalIntermediate');
 
         \OUGCPages\Core\initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE);
+    }
+}
+
+function oucPagesStart(): void
+{
+    if (defined('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_END')) {
+        \OUGCPages\Core\runHooks('ougcPagesExecutionGlobalEnd');
+
+        \OUGCPages\Core\initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_END);
     }
 }
 
@@ -244,7 +253,7 @@ function pre_output_page(string &$pageContents): string
         return $pageContents;
     }
 
-    global $mybb, $templates;
+    global $templates;
 
     $categoriesCache = \OUGCPages\Core\cacheGetCategories();
 

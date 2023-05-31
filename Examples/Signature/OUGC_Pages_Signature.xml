@@ -3,11 +3,11 @@
 <array>
     <element>
         <key>name</key>
-        <value>Signature</value>
+        <value>Forum stats signature</value>
     </element>
     <element>
         <key>description</key>
-        <value>Forum stats signature.</value>
+        <value>A dynamically generated signature image that displays stats about your forum.</value>
     </element>
     <element>
         <key>url</key>

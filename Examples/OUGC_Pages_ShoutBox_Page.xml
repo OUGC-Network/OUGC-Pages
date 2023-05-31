@@ -7,7 +7,7 @@
     </element>
     <element>
         <key>description</key>
-        <value>Show your shoutbox in a separate page. Requires DVZ Shoutbox or Miuna Shout Box installed.</value>
+        <value>Displays the DVZ Shoutbox in a custom PHP page.</value>
     </element>
     <element>
         <key>url</key>

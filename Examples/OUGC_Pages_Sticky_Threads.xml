@@ -7,7 +7,7 @@
     </element>
     <element>
         <key>description</key>
-        <value>Shows a list with all forum sticky threads.</value>
+        <value>Displays a list with all sticky threads.</value>
     </element>
     <element>
         <key>url</key>

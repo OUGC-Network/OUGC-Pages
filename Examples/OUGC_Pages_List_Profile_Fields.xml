@@ -7,7 +7,7 @@
     </element>
     <element>
         <key>description</key>
-        <value>List users profile fields values.</value>
+        <value>Displays a list of users and their custom profile fields values.</value>
     </element>
     <element>
         <key>url</key>

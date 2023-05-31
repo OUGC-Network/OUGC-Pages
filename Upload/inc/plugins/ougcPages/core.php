@@ -116,7 +116,7 @@ function addHooks(string $namespace): void
     }
 }
 
-function runHooks(string $hookName): bool
+function runHooks(string $hookName, &$pluginArguments = ''): bool
 {
     global $plugins;
 
@@ -124,7 +124,7 @@ function runHooks(string $hookName): bool
         return false;
     }
 
-    $plugins->run_hooks($hookName);
+    $plugins->run_hooks($hookName, $pluginArguments);
 
     return true;
 }
@@ -456,11 +456,9 @@ function initExecute(int $pageID): never
     global $templatelist, $session, $maintimer, $permissions;
     global $categoriesCache, $pagesCache, $isCategory, $isPage, $categoryID, $pageID, $categoryData, $pageData;
 
-    runHooks('ougc_pages_execution_init');
+    runHooks('ougcPagesExecutionInit');
 
-    if (getSetting('disable_eval')) {
-        echo pageGetTemplate($pageID);
-    } else {
+    if (getSetting('disable_eval') === false) {
         eval('?>' . pageGetTemplate($pageID));
     }
 
@@ -686,6 +684,8 @@ function initRun(): bool
 
         } else if ($pageData['init'] === EXECUTION_HOOK_GLOBAL_INTERMEDIATE) {
             define('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE', $pageData['pid']);
+        } else if ($pageData['init'] === EXECUTION_HOOK_GLOBAL_END) {
+            define('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_END', $pageData['pid']);
         }
 
         // we no longer load at 'global_end' (small lie), we instead load at 'ougc_pages_start' to make sure the page loads within the plugin's pages.php file
@@ -722,10 +722,6 @@ function initShow(): never
         $pageData = pageGet($pageID);
 
         $categoryData = categoryGet($pageData['cid']);
-
-        if ($pageData['php']) {
-            initExecute($pageData['pid']);
-        }
     }
 
     // Load custom page language file if exists
@@ -844,46 +840,50 @@ function initShow(): never
     exit;
 }
 
-function categoryInsert(array $categoryData = [], int $categoryID = 0, bool $update = false): int
+function categoryInsert(array $inputData = [], int $categoryID = 0, bool $doUpdate = false): int
 {
     global $db;
 
-    $insertData = [];
+    $categoryData = [];
 
     foreach (\OUGCPages\Admin\FIELDS_DATA_CATEGORIES as $fieldKey => $fieldData) {
-        if (!isset($categoryData[$fieldKey])) {
+        if (!isset($inputData[$fieldKey])) {
             continue;
         }
 
         if (in_array($fieldData['type'], ['VARCHAR', 'MEDIUMTEXT'])) {
-            $insertData[$fieldKey] = $db->escape_string($categoryData[$fieldKey]);
+            $categoryData[$fieldKey] = $db->escape_string($inputData[$fieldKey]);
         } else if (in_array($fieldData['type'], ['INT', 'SMALLINT', 'TINYINT'])) {
-            $insertData[$fieldKey] = (int)$categoryData[$fieldKey];
+            $categoryData[$fieldKey] = (int)$inputData[$fieldKey];
         }
     }
 
     unset($fieldKey, $fieldData);
 
-    $insertID = $categoryID;
+    if ($categoryData) {
 
-    if ($insertData) {
-        if ($update) {
-            $db->update_query('ougc_pages_categories', $insertData, "cid='{$categoryID}'");
+        $pluginArguments = [
+            'categoryID' => &$categoryID,
+            'categoryData' => &$categoryData
+        ];
 
-            runHooks('ouc_pages_update_category');
+        if ($doUpdate) {
+            $db->update_query('ougc_pages_categories', $categoryData, "cid='{$categoryID}'");
+
+            runHooks('oucPagesCategoryUpdateEnd', $pluginArguments);
         } else {
-            $insertID = (int)$db->insert_query('ougc_pages_categories', $insertData);
+            $categoryID = (int)$db->insert_query('ougc_pages_categories', $categoryData);
 
-            runHooks('ouc_pages_insert_category');
+            runHooks('oucPagesCategoryInsertEnd', $pluginArguments);
         }
     }
 
-    return $insertID;
+    return $categoryID;
 }
 
-function categoryUpdate(array $data = [], int $cid = 0): int
+function categoryUpdate(array $inputData = [], int $categoryID = 0): int
 {
-    return categoryInsert($data, $cid, true);
+    return categoryInsert($inputData, $categoryID, true);
 }
 
 function categoryDelete(int $categoryID): bool
@@ -893,6 +893,8 @@ function categoryDelete(int $categoryID): bool
     $db->delete_query('ougc_pages_categories', "cid='{$categoryID}'");
 
     $db->delete_query('ougc_pages', "cid='{$categoryID}'");
+
+    runHooks('oucPagesCategoryDeleteEnd', $categoryID);
 
     return true;
 }
@@ -1002,48 +1004,49 @@ function categoryBuildSelect(): array
     return $selectItems;
 }
 
-function pageInsert(array $pageData = [], int $pageID = 0, bool $update = false): int
+function pageInsert(array $inputData = [], int $pageID = 0, bool $doUpdate = false): int
 {
     global $db;
 
-    $insertData = [];
+    $pageData = [];
 
     foreach (\OUGCPages\Admin\FIELDS_DATA_PAGES as $fieldKey => $fieldData) {
-        if (!isset($pageData[$fieldKey])) {
+        if (!isset($inputData[$fieldKey])) {
             continue;
         }
 
         if (in_array($fieldData['type'], ['VARCHAR', 'MEDIUMTEXT'])) {
-            $insertData[$fieldKey] = $db->escape_string($pageData[$fieldKey]);
+            $pageData[$fieldKey] = $db->escape_string($inputData[$fieldKey]);
         } else if (in_array($fieldData['type'], ['INT', 'SMALLINT', 'TINYINT'])) {
-            $insertData[$fieldKey] = (int)$pageData[$fieldKey];
+            $pageData[$fieldKey] = (int)$inputData[$fieldKey];
         }
     }
 
-    $insertID = $pageID;
+    if ($pageData) {
+        $pageData['dateline'] = \TIME_NOW;
 
-    if ($insertData) {
-        global $plugins;
+        $pluginArguments = [
+            'pageID' => &$pageID,
+            'pageData' => &$pageData
+        ];
 
-        $insertData['dateline'] = \TIME_NOW;
+        if ($doUpdate) {
+            $db->update_query('ougc_pages', $pageData, "pid='{$pageID}'");
 
-        if ($update) {
-            $db->update_query('ougc_pages', $insertData, 'pid=\'' . $insertID . '\'');
-
-            runHooks('ouc_pages_update_page');
+            runHooks('oucPagesPageUpdateEnd', $pluginArguments);
         } else {
-            $insertID = (int)$db->insert_query('ougc_pages', $insertData);
+            $pageID = (int)$db->insert_query('ougc_pages', $pageData);
 
-            runHooks('ouc_pages_insert_page');
+            runHooks('oucPagesPageInsertEnd', $pluginArguments);
         }
     }
 
-    return $insertID;
+    return $pageID;
 }
 
-function pageUpdate(array $data = [], int $pageID = 0): int
+function pageUpdate(array $inputData = [], int $pageID = 0): int
 {
-    return pageInsert($data, $pageID, true);
+    return pageInsert($inputData, $pageID, true);
 }
 
 function pageDelete(int $pageID): int
@@ -1051,6 +1054,8 @@ function pageDelete(int $pageID): int
     global $db;
 
     $db->delete_query('ougc_pages', "pid='{$pageID}'");
+
+    runHooks('oucPagesPageDeleteEnd', $pageID);
 
     return $pageID;
 }

@@ -7,7 +7,7 @@
     </element>
     <element>
         <key>description</key>
-        <value>Update specific profile fields.</value>
+        <value>Allow users to update their custom profile fields.</value>
     </element>
     <element>
         <key>url</key>

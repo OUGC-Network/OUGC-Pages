@@ -84,7 +84,7 @@ $l['ougc_pages_form_category_buildMenu_desc'] = 'Activa para construir un menu d
 //$l['ougc_pages_form_category_buildMenu_header'] = 'Encabezado';
 //$l['ougc_pages_form_category_buildMenu_footer'] = 'Pie de página';
 $l['ougc_pages_form_category_wrapucp'] = 'Envolver en Menu del UserCP';
-$l['ougc_pages_form_category_wrapucp_desc'] = 'Se se activa, se agregara una sección al menu del UserCP para navegar las páginas de esta categoría. Considera los conflictos si los invitados pueden navegar esta categoria.';
+$l['ougc_pages_form_category_wrapucp_desc'] = 'Se se activa, se agregara una sección al menu del UserCP para navegar las páginas de esta categoría. Considera los conflictos si los invitados pueden navegar esta categoría.';
 
 $l['ougc_pages_form_page_cid'] = 'Categoría';
 $l['ougc_pages_form_page_cid_desc'] = 'Selección la categoría a la cual esta página pertenece.';

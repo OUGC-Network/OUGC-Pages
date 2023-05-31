@@ -46,6 +46,7 @@ const FIELDS_DATA_CATEGORIES = [
         'type' => 'VARCHAR',
         'formType' => 'textBox',
         'size' => 255,
+        'cache' => true,
         'required' => true
     ],
     'url' => [
@@ -76,13 +77,15 @@ const FIELDS_DATA_CATEGORIES = [
         'type' => 'TINYINT',
         'formType' => 'yesNo',
         'unsigned' => true,
-        'default' => 1
+        'default' => 1,
+        'cache' => true
     ],
     'displayNavigation' => [
         'type' => 'TINYINT',
         'formType' => 'yesNo',
         'unsigned' => true,
-        'default' => 1
+        'default' => 1,
+        'cache' => true
     ],
     'buildMenu' => [
         'type' => 'TINYINT',
@@ -125,6 +128,7 @@ const FIELDS_DATA_PAGES = [
         'type' => 'VARCHAR',
         'formType' => 'textBox',
         'size' => 255,
+        'cache' => true,
         'required' => true
     ],
     'url' => [
@@ -162,25 +166,29 @@ const FIELDS_DATA_PAGES = [
         'type' => 'TINYINT',
         'formType' => 'yesNo',
         'unsigned' => true,
-        'default' => 1
+        'default' => 1,
+        'cache' => true
     ],
     'wol' => [
         'type' => 'TINYINT',
         'formType' => 'yesNo',
         'unsigned' => true,
-        'default' => 1
+        'default' => 1,
+        'cache' => true
     ],
     'php' => [
         'type' => 'TINYINT',
         'formType' => 'yesNo',
         'unsigned' => true,
-        'default' => 0
+        'default' => 0,
+        'cache' => true
     ],
     'classicTemplate' => [
         'type' => 'TINYINT',
         'formType' => 'yesNo',
         'unsigned' => true,
-        'default' => 0
+        'default' => 0,
+        'cache' => true
     ],
     'init' => [
         'type' => 'TINYINT',
@@ -197,7 +205,8 @@ const FIELDS_DATA_PAGES = [
     'dateline' => [
         'type' => 'INT',
         'unsigned' => true,
-        'default' => 0
+        'default' => 0,
+        'cache' => true
     ]
 ];
 
@@ -285,15 +294,19 @@ function pluginActivate(): void
     /*~*~* RUN UPDATES START *~*~*/
 
     if ($plugins['pages'] <= 1819) {
-        $db->update_query('ougc_pages', ['visible' => 0], "groups=''");
-        $db->update_query('ougc_pages_categories', ['visible' => ''], "groups=''");
+        if ($db->table_exists('ougc_pages')) {
+            $db->update_query('ougc_pages', ['visible' => 0], "groups=''");
+            $db->update_query('ougc_pages', ['groups' => 0], "groups='-1'");
+        }
 
-        $db->update_query('ougc_pages', ['groups' => 0], "groups='-1'");
-        $db->update_query('ougc_pages_categories', ['groups' => ''], "groups='-1'");
+        if ($db->table_exists('ougc_pages_categories')) {
+            $db->update_query('ougc_pages_categories', ['visible' => ''], "groups=''");
+            $db->update_query('ougc_pages_categories', ['groups' => ''], "groups='-1'");
+        }
     }
 
     if ($plugins['pages'] <= 1833) {
-        if ($db->field_exists('groups', 'ougc_pages')) {
+        if ($db->table_exists('ougc_pages') && $db->field_exists('groups', 'ougc_pages')) {
             $db->rename_column(
                 'ougc_pages',
                 'groups',
@@ -303,7 +316,8 @@ function pluginActivate(): void
 
             $db->update_query('ougc_pages', ['allowedGroups' => -1], "allowedGroups=''");
         }
-        if ($db->field_exists('groups', 'ougc_pages_categories')) {
+
+        if ($db->table_exists('ougc_pages_categories') && $db->field_exists('groups', 'ougc_pages_categories')) {
             $db->rename_column(
                 'ougc_pages_categories',
                 'groups',
@@ -638,7 +652,7 @@ function pageFormBuildFields(object &$formContainer, object &$formObject, array 
         $requiredMark = '';
 
         if (!empty($fieldData['required'])) {
-            $requiredMark = " <em>*</em>";
+            $requiredMark = ' <em>*</em>';
         }
 
         $formContainer->output_row(
