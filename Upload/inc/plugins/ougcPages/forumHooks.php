@@ -223,7 +223,7 @@ function global_start(): void
     if (defined('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START')) {
         $templates->cache($templatelist);
 
-        \OUGCPages\Core\runHooks('ougcPagesExecutionGlobalStart');
+        \OUGCPages\Core\runHooks('ExecutionGlobalStart');
 
         \OUGCPages\Core\initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START);
     }
@@ -232,7 +232,7 @@ function global_start(): void
 function global_intermediate(): void
 {
     if (defined('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE')) {
-        \OUGCPages\Core\runHooks('ougcPagesExecutionGlobalIntermediate');
+        \OUGCPages\Core\runHooks('ExecutionGlobalIntermediate');
 
         \OUGCPages\Core\initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE);
     }
@@ -241,7 +241,7 @@ function global_intermediate(): void
 function oucPagesStart(): void
 {
     if (defined('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_END')) {
-        \OUGCPages\Core\runHooks('ougcPagesExecutionGlobalEnd');
+        \OUGCPages\Core\runHooks('ExecutionGlobalEnd');
 
         \OUGCPages\Core\initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_END);
     }

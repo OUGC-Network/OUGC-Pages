@@ -124,7 +124,8 @@ function runHooks(string $hookName, &$pluginArguments = ''): bool
         return false;
     }
 
-    $plugins->run_hooks($hookName, $pluginArguments);
+    //$plugins->run_hooks('oucPages' . $hookName, $pluginArguments);
+    $plugins->run_hooks('oucpages' . strtolower($hookName), $pluginArguments);
 
     return true;
 }
@@ -134,13 +135,13 @@ function templateGetName(string $templateSuffix): string
     return "ougcpages_{$templateSuffix}";
 }
 
-function getSetting(string $settingKey = ''): string
+function getSetting(string $settingKey = ''): ?string
 {
     global $mybb;
 
-    $string = 'OUGC_PAGES_' . strtoupper($settingKey);
+    $settingConstant = 'OUGC_PAGES_' . strtoupper($settingKey);
 
-    return defined($string) ? constant($string) : (string)$mybb->settings['ougc_pages_' . $settingKey];
+    return defined($settingConstant) ? constant($settingConstant) : (string)$mybb->settings['ougc_pages_' . $settingKey];
 }
 
 function sanitizeIntegers(array $dataObject): array
@@ -456,9 +457,9 @@ function initExecute(int $pageID): never
     global $templatelist, $session, $maintimer, $permissions;
     global $categoriesCache, $pagesCache, $isCategory, $isPage, $categoryID, $pageID, $categoryData, $pageData;
 
-    runHooks('ougcPagesExecutionInit');
+    runHooks('ExecutionInit');
 
-    if (getSetting('disable_eval') === false) {
+    if (!getSetting('disable_eval')) {
         eval('?>' . pageGetTemplate($pageID));
     }
 
@@ -681,7 +682,6 @@ function initRun(): bool
             initExecute($pageData['pid']);
         } else if ($pageData['init'] === EXECUTION_HOOK_GLOBAL_START) {
             define('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START', $pageData['pid']);
-
         } else if ($pageData['init'] === EXECUTION_HOOK_GLOBAL_INTERMEDIATE) {
             define('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE', $pageData['pid']);
         } else if ($pageData['init'] === EXECUTION_HOOK_GLOBAL_END) {
@@ -870,11 +870,11 @@ function categoryInsert(array $inputData = [], int $categoryID = 0, bool $doUpda
         if ($doUpdate) {
             $db->update_query('ougc_pages_categories', $categoryData, "cid='{$categoryID}'");
 
-            runHooks('oucPagesCategoryUpdateEnd', $pluginArguments);
+            runHooks('CategoryUpdateEnd', $pluginArguments);
         } else {
             $categoryID = (int)$db->insert_query('ougc_pages_categories', $categoryData);
 
-            runHooks('oucPagesCategoryInsertEnd', $pluginArguments);
+            runHooks('CategoryInsertEnd', $pluginArguments);
         }
     }
 
@@ -894,7 +894,7 @@ function categoryDelete(int $categoryID): bool
 
     $db->delete_query('ougc_pages', "cid='{$categoryID}'");
 
-    runHooks('oucPagesCategoryDeleteEnd', $categoryID);
+    runHooks('CategoryDeleteEnd', $categoryID);
 
     return true;
 }
@@ -1035,11 +1035,11 @@ function pageInsert(array $inputData = [], int $pageID = 0, bool $doUpdate = fal
         if ($doUpdate) {
             $db->update_query('ougc_pages', $pageData, "pid='{$pageID}'");
 
-            runHooks('oucPagesPageUpdateEnd', $pluginArguments);
+            runHooks('PageUpdateEnd', $pluginArguments);
         } else {
             $pageID = (int)$db->insert_query('ougc_pages', $pageData);
 
-            runHooks('oucPagesPageInsertEnd', $pluginArguments);
+            runHooks('PageInsertEnd', $pluginArguments);
         }
     }
 
@@ -1057,7 +1057,7 @@ function pageDelete(int $pageID): int
 
     $db->delete_query('ougc_pages', "pid='{$pageID}'");
 
-    runHooks('oucPagesPageDeleteEnd', $pageID);
+    runHooks('PageDeleteEnd', $pageID);
 
     return $pageID;
 }

@@ -249,7 +249,7 @@ if ($mybb->get_input('manage') == 'pages') {
 
         $page->output_footer();
     } else if ($mybb->get_input('action') == 'delete') {
-        if (!($pageData = \OUGCPages\Core\categoryGet($mybb->get_input('pid', \MyBB::INPUT_INT)))) {
+        if (!($pageData = \OUGCPages\Core\pageGet($mybb->get_input('pid', \MyBB::INPUT_INT)))) {
             \OUGCPages\Core\redirect($lang->ougc_pages_error_page_invalid, true);
         }
 
