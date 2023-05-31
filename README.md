@@ -30,6 +30,7 @@
 	- [Database Entity Relationship](#db_er_model)
 	- [Install](#install)
 	- [Update](#update)
+	- [Template Modifications](#template_modifications)
 - [Settings](#settings)
 	- [Disable PHP Pages](#settings_disable_php)
 	- [Configure Friendly Urls](#settings_friendly_urls)
@@ -151,6 +152,15 @@ Follow the next steps in order to update your copy of this plugin.
 2. Follow step 1 and 2 from the [Install](#install) section.
 3. Browse to _Configuration » Plugins_ and activate this plugin by clicking _Activate_.
 4. Browse to _Configuration » Manage Pages_ to create page categories and pages.
+
+### Template Modifications <a name = "template_modifications"></a>
+
+The building of category menus requires that you edit the `header` template for each of your themes.
+
+1. Open the `header` template for editing.
+2. Find `<li><a href="{$mybb->settings['bburl']}/misc.php?action=help" class="help">{$lang->toplinks_help}</a></li>`.
+3. Add `<!--OUGC_PAGES_FOOTER-->` right after.
+4. Save the template.
 
 [Go up to Table of Contents](#table_of_contents)
 
@@ -440,24 +450,9 @@ Provides a list of available variables, functions, and methods for plugins to us
 - `ougcPagesExecutionGlobalIntermediate`
 - `ougcPagesExecutionGlobalEnd`
 - `oucPagesCategoryInsertEnd` Array object is passed by reference with the following variables:
-	- `(array) categoryID` inserted category identifier.
-	- `(array) pcategoryData` array containing category data
-		- `(string) name`
-		- `(string) description`
-		- `(string) url`
-		- `(string) allowedGroups`
-			- `-1` for all groups
-			- CSV for allowed groups
-			- empty for none
-		- `(int) disporder`
-		- `(int) visible`
-		- `(int) breadcrumb`
-		- `(int) displayNavigation`
-		- `(int) buildMenu`
-		- `(int) wrapucp`
 - `oucPagesCategoryUpdateEnd` Array object is passed by reference with the following variables:
-	- `(array) categoryID` current category identifier.
-	- `(array) categoryData` array containing category data
+	- `(array) categoryID` inserted/updated category identifier.
+	- `(array) categoryData` array containing category data (not always available)
 		- `(string) name`
 		- `(string) description`
 		- `(string) url`
@@ -472,31 +467,11 @@ Provides a list of available variables, functions, and methods for plugins to us
 		- `(int) buildMenu`
 		- `(int) wrapucp`
 - `oucPagesCategoryDeleteEnd` Variable passed by reference:
-	- `(int) $categoryID` current page identifier.
+	- `(int) $categoryID` deleted page identifier.
 - `oucPagesPageInsertEnd` Array object is passed by reference with the following variables:
-	- `(array) pageID` inserted page identifier.
-	- `(array) pageData` array containing page data
-		- `(int) cid`
-		- `(string) name`
-		- `(string) description`
-		- `(string) url`
-		- `(string) allowedGroups`
-			- `-1` for all groups
-			- CSV for allowed groups
-			- empty for none
-		- `(int) disporder`
-		- `(int) visible`
-		- `(int) menuItem`
-		- `(int) wrapper`
-		- `(int) wol`
-		- `(int) php`
-		- `(int) classicTemplate`
-		- `(int) init`
-		- `(string) template`
-		- `(int) dateline`
 - `oucPagesPageUpdateEnd` Array object is passed by reference with the following variables:
-	- `(array) pageID` current page identifier.
-	- `(array) pageData` array containing page data
+	- `(array) pageID` inserted/updated page identifier.
+	- `(array) pageData` array containing page data (not always available)
 		- `(int) cid`
 		- `(string) name`
 		- `(string) description`
@@ -516,7 +491,7 @@ Provides a list of available variables, functions, and methods for plugins to us
 		- `(string) template`
 		- `(int) dateline`
 - `oucPagesPageDeleteEnd` Variable passed by reference:
-	- `(int) $pageID` current page identifier.
+	- `(int) $pageID` deleted page identifier.
 - `oucPagesStart`
 - `oucPagesEnd`
 
@@ -529,15 +504,15 @@ Provides a list of available variables, functions, and methods for plugins to us
 - `cacheGetCategories(): array { ... }`
 - `initExecute(int $pageID): never { ... }`
 - `initSession(): void { ... }`
-- `categoryInsert(array $categoryData = [], int $categoryID = 0, bool $update = false): int { ... }`
-- `categoryUpdate(array $data = [], int $cid = 0): int { ... }`
+- `categoryInsert(array $inputData = [], int $categoryID = 0, bool $doUpdate = false): int { ... }`
+- `categoryUpdate(array $inputData = [], int $categoryID = 0): int { ... }`
 - `categoryDelete(int $categoryID): bool { ... }`
 - `categoryGet(int $categoryID, string $categoryUrl = ''): array { ... }`
 - `categoryQuery(array $fieldList = ['*'], array $whereConditions = ['1=1'], array $queryOptions = []): array { ... }`
 - `categoryGetByUrl(string $categoryUrl): array { ... }`
 - `categoryGetLink(int $categoryID): string { ... }`
-- `pageInsert(array $pageData = [], int $pageID = 0, bool $update = false): int { ... }`
-- `pageUpdate(array $data = [], int $pageID = 0): int { ... }`
+- `pageInsert(array $inputData = [], int $pageID = 0, bool $doUpdate = false): int { ... }`
+- `pageUpdate(array $inputData = [], int $pageID = 0): int { ... }`
 - `pageDelete(int $pageID): int { ... }`
 - `pageGet(int $pageID, string $pageUrl = ''): array { ... }`
 - `pageQuery(array $fieldList = ['*'], array $whereConditions = ['1=1'], array $queryOptions = []): array { ... }`
