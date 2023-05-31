@@ -46,7 +46,6 @@
     - [Constants](#plugin_constants)
 - [Built Using](#built_using)
 - [Authors](#authors)
-- [Contributing](../CONTRIBUTING.md)
 - [Acknowledgments](#acknowledgement)
 - [Support & Feedback](#support)
 
@@ -72,7 +71,7 @@ The following information will assist you into getting a copy of this plugin up 
 
 A setup that meets the following requirements is necessary to use this plugin.
 
-- [MyBB](https://docs.mybb.com/1.8/install/) >= 1.8.30
+- [MyBB](https://mybb.com/) >= 1.8.30
 - PHP >= 7.4
 - [MyBB-PluginLibrary](https://github.com/frostschutz/MyBB-PluginLibrary) >= 13
 
@@ -146,7 +145,7 @@ erDiagram
 Follow the next steps in order to install a copy of this plugin on your forum.
 
 1. Download the latest package from the [MyBB Extend](https://community.mybb.com/mods.php?action=view&pid=6) site or
-   from the [repository releases](./releases/latest).
+   from the [repository releases](https://github.com/OUGC-Network/OUGC-Pages/releases/latest).
 2. Upload the contents of the _Upload_ folder to your MyBB root directory.
 3. Browse to _Configuration » Plugins_ and install this plugin by clicking _Install & Activate_.
 4. Browse to _Configuration » Manage Pages_ to create page categories and pages.
@@ -378,24 +377,41 @@ The following is a description of the control panel module form fields.
 The download package ships with nine example pages that can be used as production pages or as a reference for designing
 custom pages.
 
-- **Forum stats signature** ([see file](../Examples/Signature/OUGC_Pages_Signature.xml)) A dynamically generated
+- **Forum stats signature
+  ** ([see file](https://github.com/OUGC-Network/OUGC-Pages/blob/master/Examples/Signature/OUGC_Pages_Signature.xml)) A
+  dynamically generated
   signature
   image that displays stats about your forum.
-- **Banned List** ([see file](../Examples/OUGC_Pages_Banned_List.xml)) Displays a list of banned accounts.
-- **HTML Test Page** ([see file](../Examples/OUGC_Pages_HTML_Test_Page.xml)) Plain HTML page meant to serve as
+- **Banned List
+  ** ([see file](https://github.com/OUGC-Network/OUGC-Pages/blob/master/Examples/OUGC_Pages_Banned_List.xml)) Displays a
+  list of banned accounts.
+- **HTML Test Page
+  ** ([see file](https://github.com/OUGC-Network/OUGC-Pages/blob/master/Examples/OUGC_Pages_HTML_Test_Page.xml)) Plain
+  HTML page meant to serve as
   reference.
-- **List Profile Fields** ([see file](../Examples/OUGC_Pages_List_Profile_Fields.xml)) Displays a list of users and
+- **List Profile Fields
+  ** ([see file](https://github.com/OUGC-Network/OUGC-Pages/blob/master/Examples/OUGC_Pages_List_Profile_Fields.xml))
+  Displays a list of users and
   their
   custom profile fields values.
-- **New Thread** ([see file](../Examples/OUGC_Pages_New_Thread.xml)) A new thread page meant to serve as reference.
-- **PHP Test Page** ([see file](../Examples/OUGC_Pages_PHP_Test_Page.xml)) Basic PHP page that uses the MyBB parser
+- **New Thread** ([see file](https://github.com/OUGC-Network/OUGC-Pages/blob/master/Examples/OUGC_Pages_New_Thread.xml))
+  A new thread page meant to serve as reference.
+- **PHP Test Page
+  ** ([see file](https://github.com/OUGC-Network/OUGC-Pages/blob/master/Examples/OUGC_Pages_PHP_Test_Page.xml)) Basic
+  PHP page that uses the MyBB parser
   meant to
   serve as reference.
-- **Profile Fields** ([see file](../Examples/OUGC_Pages_Profile_Fields.xml)) Allow users to update their custom profile
+- **Profile Fields
+  ** ([see file](https://github.com/OUGC-Network/OUGC-Pages/blob/master/Examples/OUGC_Pages_Profile_Fields.xml)) Allow
+  users to update their custom profile
   fields.
-- **ShoutBox Page** ([see file](../Examples/OUGC_Pages_ShoutBox_Page.xml)) Displays the DVZ Shoutbox in a custom PHP
+- **ShoutBox Page
+  ** ([see file](https://github.com/OUGC-Network/OUGC-Pages/blob/master/Examples/OUGC_Pages_ShoutBox_Page.xml)) Displays
+  the DVZ Shoutbox in a custom PHP
   page.
-- **Sticky Threads** ([see file](../Examples/OUGC_Pages_Sticky_Threads.xml)) Displays a list with all sticky threads.
+- **Sticky Threads
+  ** ([see file](https://github.com/OUGC-Network/OUGC-Pages/blob/master/Examples/OUGC_Pages_Sticky_Threads.xml))
+  Displays a list with all sticky threads.
 
 ### Third Party Support <a name="third_party"></a>
 
@@ -586,20 +602,28 @@ Provides a list of available variables, functions, and methods for plugins to us
 - `pageGetByUrl(string $url): array { ... }`
 - `pageGetLink(int $pageID): string { ... }`
 
-### List of available methods at the `OUGCPages\Core` namespace: <a name="plugin_constants"></a>
+### List of available constants
 
-The following is a list of constants defined dynamically, `defined()`should be used to verify they are defined.
+The following is a list of constants are defined dynamically, `defined()`should be used to make sure they are defined.
 
-- `OUGC_PAGES_STATUS_IS_CATEGORY` `int` defined as the category identifier when trying to view a valid category
-- `OUGC_PAGES_STATUS_IS_PAGE` `int` defined as the page identifier when trying to view a valid page
-- `OUGC_PAGES_STATUS_CATEGORY_INVALID` `bool` defined as `true` when trying to view an invalid category
-- `OUGC_PAGES_STATUS_CATEGORY_NO_PERMISSION` `bool` defined as `true` when permission to view a category is denied
-- `OUGC_PAGES_STATUS_PAGE_INVALID` `bool` defined as `true` when trying to view an invalid page
-- `OUGC_PAGES_STATUS_PAGE_NO_PERMISSION` `bool` defined as `true` when permission to view a page is denied
-- `OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START` `int` defined as the page identifier when trying to view a valid page
-  which `php` value is `1` and `init` value is `2`
-- `OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE` `int` defined as the page identifier when trying to view a valid
-  page which `php` value is `1` and `init` value is `3`
+- `OUGC_PAGES_STATUS_IS_CATEGORY`
+    - `int` defined as the category identifier when trying to view a valid category
+- `OUGC_PAGES_STATUS_IS_PAGE`
+    - `int` defined as the page identifier when trying to view a valid page
+- `OUGC_PAGES_STATUS_CATEGORY_INVALID`
+    - `bool` defined as `true` when trying to view an invalid category
+- `OUGC_PAGES_STATUS_CATEGORY_NO_PERMISSION`
+    - `bool` defined as `true` when permission to view a category is denied
+- `OUGC_PAGES_STATUS_PAGE_INVALID`
+    - `bool` defined as `true` when trying to view an invalid page
+- `OUGC_PAGES_STATUS_PAGE_NO_PERMISSION`
+    - `bool` defined as `true` when permission to view a page is denied
+- `OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START`
+    - `int` defined as the page identifier when trying to view a valid page which `php` value is `1` and `init` value
+      is `2`
+- `OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE`
+    - `int` defined as the page identifier when trying to view a valid page which `php` value is `1` and `init` value
+      is `3`
 
 [Go up to Table of Contents](#table_of_contents)
 
@@ -615,7 +639,7 @@ The following is a list of constants defined dynamically, `defined()`should be u
 
 - [@Omar G](https://github.com/Sama34) - Idea & Initial work
 
-See also the list of [contributors](./contributors) who participated in this
+See also the list of [contributors](https://github.com/OUGC-Network/OUGC-Pages/contributors) who participated in this
 project.
 
 [Go up to Table of Contents](#table_of_contents)
