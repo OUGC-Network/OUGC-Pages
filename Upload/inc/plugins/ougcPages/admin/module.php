@@ -639,17 +639,6 @@ if ($mybb->get_input('manage') == 'pages') {
                 $tableObject->construct_row();
             }
 
-            /* while ($pages = $db->fetch_array($dbQuery)) {
-                 $edit_link = \OUGCPages\Core\urlBuild(['action' => 'edit', 'pid' => $pages['pid']]);
-                 $pages['name'] = htmlspecialchars_uni($pages['name']);
-
-                 $pages['visible'] or $pages['name'] = '<em>' . $pages['name'] . '</em>';
-
-                 $tableObject->construct_cell('<a href="' . $edit_link . '"><strong>' . $pages['name'] . '</strong></a> <span style="font-size: 90%">(' . \OUGCPages\Core\pageBuildLink($lang->ougc_pages_view_page, $pages['pid']) . ')</span>');
-                 $tableObject->construct_cell($form->generate_text_box('disporder[' . $pages['pid'] . ']', (int)$pages['disporder'], ['style' => 'text-align: center; width: 30px;']), ['class' => 'align_center']);
-                 $tableObject->construct_cell('<a href="' . \OUGCPages\Core\urlBuild(['action' => 'update', 'pid' => $pages['pid'], 'my_post_key' => $mybb->post_code]) . '"><img src="styles/default/images/icons/bullet_o' . (!$pages['visible'] ? 'ff' : 'n') . '.png" alt="" title="' . (!$pages['visible'] ? $lang->ougc_pages_form_disabled : $lang->ougc_pages_form_visible) . '" /></a>', ['class' => 'align_center']);
-             }*/
-
             $tableObject->output($moduleTabs['categoryView']['title']);
 
             $formObject->output_submit_wrapper([

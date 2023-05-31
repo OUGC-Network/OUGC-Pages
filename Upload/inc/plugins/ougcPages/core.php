@@ -986,11 +986,13 @@ function categoryGetLinkBase(int $categoryID): string
 
 function categoryBuildLink(string $categoryName, int $categoryID): string
 {
+    global $templates;
+
     $categoryLink = categoryGetLink($categoryID);
 
     $categoryName = \htmlspecialchars_uni($categoryName);
 
-    return "<a href=\"{$categoryLink}\">{$categoryName}</a>";
+    return eval($templates->render('ougcpages_category_link'));
 }
 
 function categoryBuildSelect(): array
@@ -1164,9 +1166,11 @@ function pageGetLinkBase(int $pageID): string
 
 function pageBuildLink(string $pageName, int $pageID): string
 {
+    global $templates;
+
     $pageLink = pageGetLink($pageID);
 
     $pageName = \htmlspecialchars_uni($pageName);
 
-    return "<a href=\"{$pageLink}\">{$pageName}</a>";
+    return eval($templates->render('ougcpages_page_link'));
 }
