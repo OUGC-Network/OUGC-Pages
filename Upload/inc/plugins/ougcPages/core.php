@@ -588,11 +588,25 @@ function initRun(): bool
         }
     }
 
-    $categoryData = categoryGet($categoryID);
+    //$categoryData = categoryGet($categoryID);
+    $categoryData = isset($categoriesCache[$categoryID]) ? $categoriesCache[$categoryID] : [];
 
-    $pageData = pageGet($pageID);
+    //$pageData = pageGet($pageID);
+    $pageData = isset($pagesCache[$pageID]) ? $pagesCache[$pageID] : [];
 
     // maybe do some case-sensitive comparison and redirect to one unique case url
+
+    if ($isPage && $pageID) {
+        $template = pageQuery(['template'], ["pid='{$pageID}'"], ['limit' => 1]);
+
+        if (isset($template[0]) && isset($template[0]['template'])) {
+            $pageData['template'] = $template[0]['template'];
+
+            unset($template);
+        } else {
+            unset($isPage, $pageID);
+        }
+    }
 
     if (
         ($isCategory && !$categoryID && !$categoryData) ||
@@ -614,10 +628,10 @@ function initRun(): bool
         $pageUrl = pageGetLinkBase($pageID);
     }
 
-    $locationPath = \parse_url($_SERVER['REQUEST_URI'])['path'];
+    $locationPath = $_SERVER['REQUEST_URI'];
+    //$locationPath = \parse_url($_SERVER['REQUEST_URI'])['path'];
 
     if ($usingQuestionMark) {
-
         if ($isPage) {
             $locationPath .= "?{$pageData['url']}";
         } else {
@@ -679,13 +693,13 @@ function initRun(): bool
 
     if ($pageData['php']) {
         if ($pageData['init'] === EXECUTION_HOOK_INIT) {
-            initExecute($pageData['pid']);
+            initExecute($pageID);
         } else if ($pageData['init'] === EXECUTION_HOOK_GLOBAL_START) {
-            define('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START', $pageData['pid']);
+            define('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START', $pageID);
         } else if ($pageData['init'] === EXECUTION_HOOK_GLOBAL_INTERMEDIATE) {
-            define('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE', $pageData['pid']);
+            define('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE', $pageID);
         } else if ($pageData['init'] === EXECUTION_HOOK_GLOBAL_END) {
-            define('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_END', $pageData['pid']);
+            define('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_END', $pageID);
         }
 
         // we no longer load at 'global_end' (small lie), we instead load at 'ougc_pages_start' to make sure the page loads within the plugin's pages.php file
@@ -975,7 +989,7 @@ function categoryGetLinkBase(int $categoryID): string
             if (getSetting('seo') && \my_strpos(getSetting('seo_scheme_categories'), '{url}') !== false) {
                 $cacheObject[$categoryID] = str_replace('{url}', $categoriesCache[$categoryID]['url'], getSetting('seo_scheme_categories'));
             } else {
-                $cacheObject[$categoryID] = "pages.php?page={$categoriesCache[$categoryID]['url']}";
+                $cacheObject[$categoryID] = "pages.php?category={$categoriesCache[$categoryID]['url']}";
             }
         }
         // maybe get from DB otherwise ...
