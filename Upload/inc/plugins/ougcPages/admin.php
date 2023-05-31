@@ -466,45 +466,6 @@ function dbVerifyIndexes(): void
 
 function dbTables(): array
 {
-    return [
-        'ougc_pages' => [
-            'pid' => "int UNSIGNED NOT NULL AUTO_INCREMENT",
-            'cid' => "int UNSIGNED NOT NULL DEFAULT '0'",
-            'name' => "varchar(100) NOT NULL DEFAULT ''",
-            'description' => "varchar(255) NOT NULL DEFAULT ''",
-            'url' => "varchar(100) NOT NULL DEFAULT ''",
-            'allowedGroups' => "varchar(100) NOT NULL DEFAULT ''",
-            'php' => "tinyint(1) NOT NULL DEFAULT '0'",
-            'wol' => "tinyint(1) NOT NULL DEFAULT '1'",
-            'disporder' => "tinyint(5) NOT NULL DEFAULT '0'",
-            'visible' => "tinyint(1) NOT NULL DEFAULT '1'",
-            'menuItem' => "tinyint(1) NOT NULL DEFAULT '1'",
-            'wrapper' => "tinyint(1) NOT NULL DEFAULT '1'",
-            'classicTemplate' => "tinyint(1) NOT NULL DEFAULT '1'",
-            'template' => "MEDIUMTEXT NOT NULL",
-            'init' => "tinyint(1) NOT NULL DEFAULT '4'",
-            'dateline' => "int(10) NOT NULL DEFAULT '0'",
-            'primary_key' => "pid",
-            'unique_key' => ['url' => 'url']
-        ],
-        'ougc_pages_categories' => [
-            'cid' => "int UNSIGNED NOT NULL AUTO_INCREMENT",
-            'name' => "varchar(100) NOT NULL DEFAULT ''",
-            'description' => "varchar(255) NOT NULL DEFAULT ''",
-            'url' => "varchar(100) NOT NULL DEFAULT ''",
-            'allowedGroups' => "text NOT NULL",
-            'disporder' => "tinyint(5) NOT NULL DEFAULT '0'",
-            'visible' => "tinyint(1) NOT NULL DEFAULT '1'",
-            'breadcrumb' => "tinyint(1) NOT NULL DEFAULT '1'",
-            'displayNavigation' => "tinyint(1) NOT NULL DEFAULT '1'",
-            'buildMenu' => "tinyint(1) NOT NULL DEFAULT '1'",
-            //'classicTemplate' => "tinyint(1) NOT NULL DEFAULT '1'", // TODO
-            'wrapucp' => "tinyint(1) NOT NULL DEFAULT '0'",
-            'primary_key' => "cid",
-            'unique_key' => ['url' => 'url']
-        ]
-    ];
-
     $tablesData = [];
 
     foreach ([
