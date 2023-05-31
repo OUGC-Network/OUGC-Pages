@@ -21,7 +21,7 @@
     <br> 
 </p>
 
-## 📝 Table of Contents <a name = "table_of_contents"></a>
+## 📜 Table of Contents <a name = "table_of_contents"></a>
 
 - [About](#about)
 - [Getting Started](#getting_started)
@@ -50,7 +50,7 @@
 - [Acknowledgments](#acknowledgement)
 - [Support & Feedback](#support)
 
-## 🧐 About <a name = "about"></a>
+## 🚀 About <a name = "about"></a>
 
 OUGC Pages is a versatile and feature-rich PHP plugin designed for MyBB forum administrators. It empowers administrators
 to effortlessly create, manage, and customize unlimited HTML or PHP pages within their forum. With this plugin,
@@ -64,7 +64,7 @@ MyBB forums.
 
 [Go up to Table of Contents](#table_of_contents)
 
-## 🏁 Getting Started <a name = "getting_started"></a>
+## 📍 Getting Started <a name = "getting_started"></a>
 
 The following information will assist you into getting a copy of this plugin up and running on your forum.
 
@@ -76,7 +76,7 @@ A setup that meets the following requirements is necessary to use this plugin.
 - PHP >= 7.4
 - [MyBB-PluginLibrary](https://github.com/frostschutz/MyBB-PluginLibrary) >= 13
 
-### 🔧 File structure <a name = "file_structure"></a>
+### File structure <a name = "file_structure"></a>
 
   ```
    .
@@ -99,7 +99,7 @@ A setup that meets the following requirements is necessary to use this plugin.
    └── pages.php
    ```
 
-### 🔧 Database Entity Relationship <a name = "db_er_model"></a>
+### Database Entity Relationship <a name = "db_er_model"></a>
 
 ---
 title: Categories and Pages Entity Relationship
@@ -151,7 +151,7 @@ Follow the next steps in order to install a copy of this plugin on your forum.
 3. Browse to _Configuration » Plugins_ and install this plugin by clicking _Install & Activate_.
 4. Browse to _Configuration » Manage Pages_ to create page categories and pages.
 
-### 🔧 Updating <a name = "update"></a>
+### Updating <a name = "update"></a>
 
 Follow the next steps in order to update your copy of this plugin.
 
@@ -162,7 +162,7 @@ Follow the next steps in order to update your copy of this plugin.
 
 [Go up to Table of Contents](#table_of_contents)
 
-## 🚀 Settings <a name = "settings"></a>
+## 🛠 Settings <a name = "settings"></a>
 
 Below you can find a description of the plugin settings.
 
@@ -217,7 +217,7 @@ rewrite ^/((?i)page-([^./]+))$ /pages.php?page=$2;
 
 [Go up to Table of Contents](#table_of_contents)
 
-## 🚀 Templates <a name = "templates"></a>
+## 📐 Templates <a name = "templates"></a>
 
 The following is a list of templates available for this plugin. Uncommon in plugins, we use some templates exclusively
 for the Administrator Control Panel.
@@ -267,11 +267,11 @@ for the Administrator Control Panel.
 
 [Go up to Table of Contents](#table_of_contents)
 
-## 🎈 Usage <a name="usage"></a>
+## 📖 Usage <a name="usage"></a>
 
 The following is a description of the control panel module form fields.
 
-### 🎈 Categories: Main <a name="usage_categories"></a>
+### Categories: Main <a name="usage_categories"></a>
 
 - **Display Order** `text`
     - _The display order for each category._
@@ -279,7 +279,7 @@ The following is a description of the control panel module form fields.
 - **Status** `text`
     - _Toggle category enabled status._
 
-### 🎈 Categories: Add or Edit
+### Categories: Add or Edit
 
 - **Category Name** `text`
     - _Display name for this category._
@@ -306,7 +306,7 @@ The following is a description of the control panel module form fields.
     - _If enabled, a section will be added to the UserCP for browsing this category and the category will be wrapped as
       if it was a UserCP section. Beware of errors if you allow guest access._
 
-### 🎈 Pages: Main <a name="usage_categories"></a>
+### Pages: Main <a name="usage_pages"></a>
 
 - **Display Order** `text`
     - _The display order for each category._
@@ -314,7 +314,7 @@ The following is a description of the control panel module form fields.
 - **Status** `text`
     - _Toggle category enabled status._
 
-### 🎈 Pages: Add or Edit <a name="usage_pages"></a>
+### Pages: Add or Edit
 
 - **Category** `select`
     - _Select the category this page belongs to._
@@ -330,10 +330,6 @@ The following is a description of the control panel module form fields.
 
 - **Viewable for Groups** `select` Default: `all`
     - _Select the groups that are allowed to see this page._
-
-All groups
-Select groups
-None
 
 - **Add to Menu** `yesNo` Default: `yes`
     - _If "Build Menu" is enabled for this category, add link to this page in it._
@@ -366,7 +362,7 @@ None
 - **Page Content** `text`
     - _Insert the page HTML or PHP content below._
 
-### 🎈 Pages: Import <a name="usage_categories"></a>
+### Pages: Import <a name="usage_categories"></a>
 
 - **Local File** `file`
     - _Select the XML file to import from your computer._
@@ -377,7 +373,7 @@ None
 - **Ignore Version Compatibility** `yesNo` Default: `yes`
     - _Should this page be imported regardless of the version of OUGC Pages or Page Manager it was created for?._
 
-### 🎈 Example Pages <a name="example_pages"></a>
+### Example Pages <a name="example_pages"></a>
 
 The download package ships with nine example pages that can be used as production pages or as a reference for designing
 custom pages.
@@ -401,7 +397,7 @@ custom pages.
   page.
 - **Sticky Threads** ([see file](../Examples/OUGC_Pages_Sticky_Threads.xml)) Displays a list with all sticky threads.
 
-### 🎈 Third Party Support <a name="third_party"></a>
+### Third Party Support <a name="third_party"></a>
 
 Below is a list and short description of any compatibility with third party MyBB plugins.
 
@@ -411,7 +407,7 @@ Below is a list and short description of any compatibility with third party MyBB
 
 [Go up to Table of Contents](#table_of_contents)
 
-## 🎈 Plugins <a name="plugins"></a>
+## 🧩 Plugins <a name="plugins"></a>
 
 Provides a list of available variables, functions, and methods for plugins to use.
 
@@ -607,7 +603,7 @@ The following is a list of constants defined dynamically, `defined()`should be u
 
 [Go up to Table of Contents](#table_of_contents)
 
-## ⛏️ Built Using <a name = "built_using"></a>
+## ⛏ Built Using <a name = "built_using"></a>
 
 - [MyBB](https://mybb.com/) - Web Framework
 - [MyBB PluginLibrary](https://github.com/frostschutz/MyBB-PluginLibrary) - A collection of useful functions for MyBB
