@@ -83,6 +83,39 @@ A setup that meets the following requirements is necessary to use this plugin.
    .
    ├── inc
    │ ├── plugins
+   │ │ ├── ougc
+   │ │ │ ├── Pages
+   │ │ │ │ ├── admin
+   │ │ │ │ │ ├── module.php
+   │ │ │ │ ├── templates
+   │ │ │ │ │ ├── .html
+   │ │ │ │ │ ├── adminCategoryName.html
+   │ │ │ │ │ ├── adminCategoryStatus.html
+   │ │ │ │ │ ├── adminCodeMirror.html
+   │ │ │ │ │ ├── adminCodeMirrorFooter.html
+   │ │ │ │ │ ├── adminGroupSelect.html
+   │ │ │ │ │ ├── adminPageName.html
+   │ │ │ │ │ ├── category_link.html
+   │ │ │ │ │ ├── category_list.html
+   │ │ │ │ │ ├── category_list_empty.html
+   │ │ │ │ │ ├── category_list_item.html
+   │ │ │ │ │ ├── menu.html
+   │ │ │ │ │ ├── menu_css.html
+   │ │ │ │ │ ├── menu_item.html
+   │ │ │ │ │ ├── navigation.html
+   │ │ │ │ │ ├── navigation_next.html
+   │ │ │ │ │ ├── navigation_previous.html
+   │ │ │ │ │ ├── page_link.html
+   │ │ │ │ │ ├── wrapper.html
+   │ │ │ │ │ ├── wrapper_edited.html
+   │ │ │ │ │ ├── wrapper_ucp.html
+   │ │ │ │ │ ├── wrapper_ucp_nav.html
+   │ │ │ │ │ ├── wrapper_ucp_nav_item.html
+   │ │ │ │ ├── admin.php
+   │ │ │ │ ├── adminHooks.php
+   │ │ │ │ ├── core.php
+   │ │ │ │ ├── forumHooks.php
+   │ │ │ │ ├── settings.json
    │ │ ├── ougc_pages.php
    │ ├── languages
    │ │ ├── espanol
