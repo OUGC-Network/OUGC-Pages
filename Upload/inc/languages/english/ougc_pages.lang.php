@@ -4,11 +4,11 @@
  *
  *    OUGC Pages plugin (/inc/languages/english/ougc_pages.lang.php)
  *    Author: Omar Gonzalez
- *    Copyright: © 2014 - 2020 Omar Gonzalez
+ *    Copyright: © 2014 Omar Gonzalez
  *
  *    Website: https://ougc.network
  *
- *    Create additional pages directly from the ACP.
+ *    Create additional HTML or PHP pages directly from the Administrator Control Panel.
  *
  ***************************************************************************
  ****************************************************************************
@@ -30,16 +30,14 @@
 $l['setting_group_ougc_pages'] = 'OUGC Pages';
 
 // Messages
-$l['ougc_pages_error_invalidpage'] = 'The selected page seems to be invalid.';
-$l['ougc_pages_error_invalidçategory'] = 'The selected category seems to be invalid.';
+$l['ougc_pages_error_page_invalid'] = 'The page you are trying to see doesn\'t exist.';
+$l['ougc_pages_error_category_invalid'] = 'The page category you are trying to see doesn\'t exist.';
 
 // Categories
 $l['ougc_pages_category_list_empty'] = 'There are currently no pages in this category.';
 
-// Navigation
-$l['ougc_pages_navigation_previous'] = 'Previous';
-$l['ougc_pages_navigation_next'] = 'Next';
-
 // WOL
-$l['ougc_pages_wol'] = 'Viewing the <a href="{1}">{2}</a> page.';
-$l['ougc_pages_wol_cat'] = 'Viewing the <a href="{1}">{2}</a> category page.';
+$l['ougc_pages_wol_page'] = 'Viewing page <a href="{1}">{2}</a>.';
+$l['ougc_pages_wol_category'] = 'Viewing page category <a href="{1}">{2}</a>.';
+
+$l['ougc_pages_page_edited'] = 'Last edited';

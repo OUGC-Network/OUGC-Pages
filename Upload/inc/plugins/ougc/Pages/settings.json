@@ -1,0 +1,22 @@
+{
+  "seo": {
+    "optionscode": "yesno",
+    "value": 0
+  },
+  "seo_scheme": {
+    "optionscode": "text",
+    "value": "page-{url}"
+  },
+  "seo_scheme_categories": {
+    "optionscode": "text",
+    "value": "category-{url}"
+  },
+  "perpage": {
+    "optionscode": "numeric",
+    "value": 20
+  },
+  "usercp_priority": {
+    "optionscode": "select\n10=10\n20=20\n30=30\n40=40",
+    "value": 40
+  }
+}

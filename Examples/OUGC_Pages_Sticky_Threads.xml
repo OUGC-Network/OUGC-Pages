@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MyBB PluginLibrary XML-Export :: 2020-04-29T00:31:02+00:00 -->
+<!-- MyBB PluginLibrary XML-Export :: 2023-05-29T05:48:26+00:00 -->
 <array>
     <element>
         <key>name</key>
@@ -7,67 +7,81 @@
     </element>
     <element>
         <key>description</key>
-        <value>Shows a list with all forum sticky threads.</value>
+        <value>Displays a list with all sticky threads.</value>
     </element>
     <element>
         <key>url</key>
         <value>sticky-threads</value>
     </element>
     <element>
-        <key>groups</key>
-        <value></value>
+        <key>allowedGroups</key>
+        <value>-1</value>
     </element>
     <element>
         <key>php</key>
-        <value>1</value>
+        <value type="INT">1</value>
     </element>
     <element>
         <key>wol</key>
-        <value>1</value>
+        <value type="INT">1</value>
     </element>
     <element>
         <key>visible</key>
-        <value>1</value>
+        <value type="INT">1</value>
     </element>
     <element>
         <key>wrapper</key>
-        <value>1</value>
+        <value type="INT">0</value>
     </element>
     <element>
         <key>init</key>
-        <value>0</value>
+        <value type="INT">4</value>
     </element>
     <element>
         <key>template</key>
         <value><![CDATA[<?php
 
-$mybb->usergroup['canview'] or error_no_permission();
+define('OUGC_PAGES_PROFILE_FIELDS', '1,2,3'); // -1 for all, comma separated for specifics
 
-$category['visible'] or error($lang->ougc_pages_error_invalidçategory);
+// Load custom page language file if exists
+$lang->load("ougc_pages_{$categoryID}", false, true);
 
-// Save three queries if no permission check is necessary
-
-if ($category['groups'] != '') {
-    $ougc_pages->init_session();
-
-    is_member($category['groups']) or error_no_permission();
+if (!empty($pageData)) {
+    $lang->load("ougc_pages_{$pageID}", false, true);
 }
+
+$categoryData['name'] = \htmlspecialchars_uni($categoryData['name']);
+
+if ($categoryData['wrapucp']) {
+    $lang->load('usercp');
+
+    if ($mybb->user['uid'] && $mybb->usergroup['canusercp']) {
+        \add_breadcrumb($lang->nav_usercp, "usercp.php");
+    }
+}
+
+if (!$isPage || $categoryData['breadcrumb']) {
+    \add_breadcrumb($categoryData['name'], \ougc\Pages\Core\categoryGetLink($categoryID));
+}
+
+$navigation = ['previousPage' => '', 'nextPage' => ''];
+
+$lastEditedMessage = '';
+
+$title = $pageData['name'] = \htmlspecialchars_uni($pageData['name']);
+
+$description = $pageData['description'] = \htmlspecialchars_uni($pageData['description']);
+
+$canonicalUrl = \ougc\Pages\Core\pageGetLink($pageID);
+
+\add_breadcrumb($pageData['name'], \ougc\Pages\Core\pageGetLink($pageID));
 
 $lang->load("forumdisplay");
 
-require_once MYBB_ROOT."inc/functions_post.php";
-require_once MYBB_ROOT."inc/functions_search.php";
-require_once MYBB_ROOT."inc/class_parser.php";
+require_once MYBB_ROOT . "inc/functions_post.php";
+require_once MYBB_ROOT . "inc/functions_search.php";
+require_once MYBB_ROOT . "inc/class_parser.php";
 $parser = new postParser;
-
-$category['name'] = htmlspecialchars_uni($category['name']);
-
-if ($category['breadcrumb']) {
-    add_breadcrumb($category['name'], $ougc_pages->get_category_link($category['cid']));
-}
-
-$page['name'] = htmlspecialchars_uni($page['name']);
-add_breadcrumb($page['name'], $ougc_pages->get_page_link($page['pid']));
 
 // Read some caches we will be using
 $forumcache = $cache->read("forums");
@@ -93,8 +107,8 @@ if ($mybb->usergroup['issupermod'] == 1) {
     $unapproved_where = "t.visible>=-1";
 } elseif ($db->num_rows($query)) {
     // Normal moderators
-    $unapprove_forums = array();
-    $deleted_forums = array();
+    $unapprove_forums = [];
+    $deleted_forums = [];
     $unapproved_where = '(t.visible = 1';
     while ($moderator = $db->fetch_array($query)) {
         if ($moderator['canviewunapprove'] == 1) {
@@ -107,10 +121,10 @@ if ($mybb->usergroup['issupermod'] == 1) {
     }
 
     if (!empty($unapprove_forums)) {
-        $unapproved_where .= " OR (t.visible = 0 AND t.fid IN(".implode(',', $unapprove_forums)."))";
+        $unapproved_where .= " OR (t.visible = 0 AND t.fid IN(" . implode(',', $unapprove_forums) . "))";
     }
     if (!empty($deleted_forums)) {
-        $unapproved_where .= " OR (t.visible = -1 AND t.fid IN(".implode(',', $deleted_forums)."))";
+        $unapproved_where .= " OR (t.visible = -1 AND t.fid IN(" . implode(',', $deleted_forums) . "))";
     }
     $unapproved_where .= ')';
 } else {
@@ -119,7 +133,7 @@ if ($mybb->usergroup['issupermod'] == 1) {
 }
 
 $permsql = "";
-$onlyusfids = array();
+$onlyusfids = [];
 
 // Check group permissions if we can't view threads not started by us
 $group_permissions = forum_permissions();
@@ -129,10 +143,10 @@ foreach ($group_permissions as $fid => $forum_permissions) {
     }
 }
 if (!empty($onlyusfids)) {
-    $permsql .= "AND ((t.fid IN(".implode(
+    $permsql .= "AND ((t.fid IN(" . implode(
             ',',
             $onlyusfids
-        ).") AND t.uid='{$mybb->user['uid']}') OR t.fid NOT IN(".implode(',', $onlyusfids)."))";
+        ) . ") AND t.uid='{$mybb->user['uid']}') OR t.fid NOT IN(" . implode(',', $onlyusfids) . "))";
 }
 
 $unsearchforums = get_unsearchable_forums();
@@ -148,32 +162,44 @@ if ($inactiveforums) {
 $query = $db->query(
     "
 	SELECT COUNT(t.tid) AS threadcount
-	FROM ".TABLE_PREFIX."threads t
+	FROM " . TABLE_PREFIX . "threads t
 	WHERE t.sticky='1' AND {$unapproved_where} {$permsql} AND t.closed NOT LIKE 'moved|%'
 	ORDER BY t.dateline
 "
 );
+
 $threadcount = $db->fetch_field($query, 'threadcount');
 
-$ougc_pages->build_multipage($threadcount, $url = '', $check = false);
+\ougc\Pages\Core\urlSet(\ougc\Pages\Core\pageGetLink($pageID));
+
+$multipage = \ougc\Pages\Core\multipageBuild(
+    $threadcount,
+    \ougc\Pages\Core\urlBuild(
+        ['viewPage' => '{page}'],
+        false,
+        false
+    ),
+    'viewPage'
+);
 
 $perpage = (int)$mybb->settings['threadsperpage'];
+
+$queryStart = \ougc\Pages\Core\getQueryStart();
 
 // Start Getting Threads
 $query = $db->query(
     "
 	SELECT t.*, t.username AS threadusername, u.username
-	FROM ".TABLE_PREFIX."threads t
-	LEFT JOIN ".TABLE_PREFIX."users u ON (u.uid = t.uid)
+	FROM " . TABLE_PREFIX . "threads t
+	LEFT JOIN " . TABLE_PREFIX . "users u ON (u.uid = t.uid)
 	WHERE t.sticky='1' AND {$unapproved_where} {$permsql} AND t.closed NOT LIKE 'moved|%'
 	ORDER BY t.dateline
-	LIMIT {$ougc_pages->query_start}, {$perpage}
+	LIMIT {$queryStart}, {$perpage}
 "
 );
 
-$templates->cache['ougcpages_sticky_threads_thread'] or $templates->cache['ougcpages_sticky_threads_thread'] = '<tr class="inline_row">
+isset($templates->cache['ougcpages_sticky_threads_thread']) or $templates->cache['ougcpages_sticky_threads_thread'] = '<tr class="inline_row">
 	<td class="{$bgcolor}{$thread_type_class}">
-		{$attachment_count}
 		<div>
           <span>{$prefix}{$thread[\'threadprefix\']}<a href="{$thread[\'threadlink\']}">{$thread[\'subject\']}</a></span>
 			<div class="author smalltext">{$thread[\'profilelink\']}</div>
@@ -186,6 +212,8 @@ $templates->cache['ougcpages_sticky_threads_thread'] or $templates->cache['ougcp
 		<a href="{$thread[\'lastpostlink\']}">{$lang->lastpost}</a>: {$lastposterlink}</span>
 	</td>
 </tr>';
+
+$bgcolor = alt_trow(true);
 
 $threads = '';
 while ($thread = $db->fetch_array($query)) {
@@ -217,7 +245,7 @@ while ($thread = $db->fetch_array($query)) {
     if ($thread['prefix'] != 0) {
         $threadprefix = build_prefixes($thread['prefix']);
         if (!empty($threadprefix)) {
-            $thread['threadprefix'] = $threadprefix['displaystyle'].'&nbsp;';
+            $thread['threadprefix'] = $threadprefix['displaystyle'] . '&nbsp;';
         }
     }
 
@@ -277,16 +305,16 @@ while ($thread = $db->fetch_array($query)) {
 
     $unapproved_posts = '';
 
-    eval("\$threads .= \"".$templates->get("ougcpages_sticky_threads_thread")."\";");
+    eval("\$threads .= \"" . $templates->get("ougcpages_sticky_threads_thread") . "\";");
 }
 
-$templates->cache['ougcpages_sticky_threads_list'] or $templates->cache['ougcpages_sticky_threads_list'] = '<div class="float_left">
+isset($templates->cache['ougcpages_sticky_threads_list']) or $templates->cache['ougcpages_sticky_threads_list'] = '<div class="float_left">
 	{$multipage}
 </div>
 <table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder clear">
 	<tr>
 		<td class="thead" colspan="4">
-				<strong>{$page[\'name\']}</strong>
+				<strong>{$pageData[\'name\']}</strong>
 		</td>
 	</tr>
 	<tr>
@@ -302,7 +330,7 @@ $templates->cache['ougcpages_sticky_threads_list'] or $templates->cache['ougcpag
 </div>
 <br class="clear" />';
 
-$templates->cache['ougcpages_sticky_threads_list_empty'] or $templates->cache['ougcpages_sticky_threads_list_empty'] = '<tr class="inline_row">
+isset($templates->cache['ougcpages_sticky_threads_list_empty']) or $templates->cache['ougcpages_sticky_threads_list_empty'] = '<tr class="inline_row">
 	<td class="{$bgcolor}" colspan="4">
 		{$lang->nothreads}
 	</td>
@@ -312,11 +340,11 @@ if (!$threads) {
     $threads = eval($templates->render("ougcpages_sticky_threads_list_empty"));
 }
 
-eval("\$threadslist = \"".$templates->get("ougcpages_sticky_threads_list")."\";");
+eval("\$threadslist = \"" . $templates->get("ougcpages_sticky_threads_list") . "\";");
 
-$templates->cache['ougcpages_sticky_threads'] or $templates->cache['ougcpages_sticky_threads'] = '<html>
+isset($templates->cache['ougcpages_sticky_threads']) or $templates->cache['ougcpages_sticky_threads'] = '<html>
 <head>
-<title>{$mybb->settings[\'bbname\']} - {$page[\'name\']}</title>
+<title>{$mybb->settings[\'bbname\']} - {$pageData[\'name\']}</title>
 {$headerinclude}
 </head>
 <body>
@@ -327,14 +355,14 @@ $templates->cache['ougcpages_sticky_threads'] or $templates->cache['ougcpages_st
 </html>';
 
 
-eval('$page = "'.$templates->get('ougcpages_sticky_threads').'";');
+eval('$page = "' . $templates->get('ougcpages_sticky_threads') . '";');
 output_page($page);
 
 exit;]]></value>
     </element>
     <element>
         <key>versioncode</key>
-        <value type="INT">1820</value>
+        <value type="INT">1833</value>
     </element>
 </array>
         <!-- End of file. -->

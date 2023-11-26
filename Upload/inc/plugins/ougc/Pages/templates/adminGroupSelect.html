@@ -1,0 +1,37 @@
+<dl style="margin-top: 0; margin-bottom: 0; width: 100%">
+    <dt>
+        <label style="display: block;">
+            <input type="radio" name="{$fieldKey}Select" value="all" {$multiSelectChecked['all']}
+            class="{$fieldKey}Select_forums_groups_check" onclick="checkAction('{$fieldKey}Select');"
+            style="vertical-align: middle;" />
+            <strong>{$lang->all_groups}</strong>
+        </label>
+    </dt>
+    <dt>
+        <label style="display: block;">
+            <input type="radio" name="{$fieldKey}Select" value="custom" {$multiSelectChecked['custom']}
+            class="{$fieldKey}Select_forums_groups_check" onclick="checkAction('{$fieldKey}Select');"
+            style="vertical-align: middle;" />
+            <strong>{$lang->select_groups}</strong>
+        </label>
+    </dt>
+    <dd style="margin-top: 4px;" id="{$fieldKey}Select_forums_groups_custom" class="{$fieldKey}Select_forums_groups">
+        <table>
+            <tr>
+                <td><small>{$lang->groups_colon}</small></td>
+                <td>{$groupSelectField}</td>
+            </tr>
+        </table>
+    </dd>
+    <dt>
+        <label style="display: block;">
+            <input type="radio" name="{$fieldKey}Select" value="none" {$multiSelectChecked['none']}
+            class="{$fieldKey}Select_forums_groups_check" onclick="checkAction('{$fieldKey}Select');"
+            style="vertical-align: middle;" />
+            <strong>{$lang->none}</strong>
+        </label>
+    </dt>
+</dl>
+<script type="text/javascript">
+    checkAction('{$fieldKey}Select');
+</script>

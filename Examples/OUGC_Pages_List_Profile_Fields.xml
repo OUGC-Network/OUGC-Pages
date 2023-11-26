@@ -7,15 +7,15 @@
     </element>
     <element>
         <key>description</key>
-        <value>List users profile fields values.</value>
+        <value>Displays a list of users and their custom profile fields values.</value>
     </element>
     <element>
         <key>url</key>
         <value>list-user-fields</value>
     </element>
     <element>
-        <key>groups</key>
-        <value></value>
+        <key>allowedGroups</key>
+        <value>-1</value>
     </element>
     <element>
         <key>php</key>
@@ -35,7 +35,7 @@
     </element>
     <element>
         <key>init</key>
-        <value>0</value>
+        <value>4</value>
     </element>
     <element>
         <key>template</key>
@@ -51,22 +51,16 @@ $perpage = 10;
 
 /*--END SETTINGS--*/
 
-$category['visible'] or error($lang->ougc_pages_error_invalidçategory);
-
-if ($category['groups'] != '') {
-    $ougc_pages->init_session();
-
-    is_member($category['groups']) or error_no_permission();
-}
+$lang->load('global');
 
 $templates->cache(
     'ougcpages_listuserfields, ougcpages_listuserfields_multipage, ougcpages_listuserfields_thead, ougcpages_listuserfields_user, ougcpages_listuserfields_user_field, ougcpages_listuserfields_empty, ougcpages_listuserfields_filter, ougcpages_listuserfields_filter_field, postbit_profilefield_multiselect_value, postbit_profilefield_multiselect, multipage_page_current, multipage_page, multipage_end, multipage_nextpage, multipage_jump_page, multipage'
 );
 
-$templates->cache['ougcpages_listuserfields'] or $templates->cache['ougcpages_listuserfields'] = <<<EOF
+isset($templates->cache['ougcpages_listuserfields']) or $templates->cache['ougcpages_listuserfields'] = <<<EOF
 <table border="0" cellspacing="{\$theme['borderwidth']}" cellpadding="{\$theme['tablespace']}" class="tborder">
 	<tr>
-		<td class="thead" colspan="{\$colspan}"><strong>{\$page['name']}</strong></td>
+		<td class="thead" colspan="{\$colspan}"><strong>{\$pageData['name']}</strong></td>
 	</tr>
 	<tr>
 		<td class="tcat">User</td>
@@ -79,16 +73,16 @@ $templates->cache['ougcpages_listuserfields'] or $templates->cache['ougcpages_li
 {\$filter}
 EOF;
 
-$templates->cache['ougcpages_listuserfields_multipage'] or $templates->cache['ougcpages_listuserfields_multipage'] = <<<EOF
+isset($templates->cache['ougcpages_listuserfields_multipage']) or $templates->cache['ougcpages_listuserfields_multipage'] = <<<EOF
 {\$multipage}
 <br />
 EOF;
 
-$templates->cache['ougcpages_listuserfields_thead'] or $templates->cache['ougcpages_listuserfields_thead'] = <<<EOF
+isset($templates->cache['ougcpages_listuserfields_thead']) or $templates->cache['ougcpages_listuserfields_thead'] = <<<EOF
 <td class="tcat">{\$name}</td>
 EOF;
 
-$templates->cache['ougcpages_listuserfields_user'] or $templates->cache['ougcpages_listuserfields_user'] = <<<EOF
+isset($templates->cache['ougcpages_listuserfields_user']) or $templates->cache['ougcpages_listuserfields_user'] = <<<EOF
 <tr>
 	<td class="{\$trow}" width="15%">
 		{\$profilelink}
@@ -97,13 +91,13 @@ $templates->cache['ougcpages_listuserfields_user'] or $templates->cache['ougcpag
 </tr>
 EOF;
 
-$templates->cache['ougcpages_listuserfields_user_field'] or $templates->cache['ougcpages_listuserfields_user_field'] = <<<EOF
+isset($templates->cache['ougcpages_listuserfields_user_field']) or $templates->cache['ougcpages_listuserfields_user_field'] = <<<EOF
 <td class="{\$trow}" width="{\$width}">
 	{\$user_value}
 </td>
 EOF;
 
-$templates->cache['ougcpages_listuserfields_empty'] or $templates->cache['ougcpages_listuserfields_empty'] = <<<EOF
+isset($templates->cache['ougcpages_listuserfields_empty']) or $templates->cache['ougcpages_listuserfields_empty'] = <<<EOF
 <tr>
 	<td class="{\$trow}" colspan="{\$colspan}">
 		There are currently no users to display.
@@ -111,7 +105,7 @@ $templates->cache['ougcpages_listuserfields_empty'] or $templates->cache['ougcpa
 </tr>
 EOF;
 
-$templates->cache['ougcpages_listuserfields_filter'] or $templates->cache['ougcpages_listuserfields_filter'] = <<<EOF
+isset($templates->cache['ougcpages_listuserfields_filter']) or $templates->cache['ougcpages_listuserfields_filter'] = <<<EOF
 <form action="{\$page_url}" method="post">
 	<table border="0" cellspacing="{\$theme['borderwidth']}" cellpadding="{\$theme['tablespace']}" class="tborder">
 		<tr>
@@ -148,7 +142,7 @@ $templates->cache['ougcpages_listuserfields_filter'] or $templates->cache['ougcp
 </form>
 EOF;
 
-$templates->cache['ougcpages_listuserfields_filter_field'] or $templates->cache['ougcpages_listuserfields_filter_field'] = <<<EOF
+isset($templates->cache['ougcpages_listuserfields_filter_field']) or $templates->cache['ougcpages_listuserfields_filter_field'] = <<<EOF
 <option value="{\$fid}" {\$_selected}>{\$name}</option>
 EOF;
 
@@ -156,9 +150,9 @@ global $PL;
 
 $PL or require_once PLUGINLIBRARY;
 
-$url_backup = $ougc_pages->build_url();
+$url_backup = \ougc\Pages\Core\urlBuild();
 
-$ougc_pages->set_url($ougc_pages->get_page_link($page['pid']));
+\ougc\Pages\Core\urlSet(\ougc\Pages\Core\pageGetLink($pageID));
 
 $build_url = [];
 
@@ -193,7 +187,7 @@ if (is_array($pfcache) && (int)$profilefields_display != -1) {
             $selected["fid{$fid}"] = '';
         }
 
-        if (!$fid || !is_member($profilefields_display, ['usergroup' => $fid])) {
+        if (!$fid || !is_member($profilefields_display, ['usergroup' => $fid, 'additionalgroups' => ''])) {
             unset($pfcache[$key]);
         } else {
             $query_fields[] = "uf.fid{$fid}";
@@ -219,7 +213,7 @@ if (!$perpage) {
 
 if (is_array($pfcache)) {
     if (!is_object($parser)) {
-        require_once MYBB_ROOT.'inc/class_parser.php';
+        require_once MYBB_ROOT . 'inc/class_parser.php';
 
         $parser = new postParser;
     }
@@ -231,7 +225,7 @@ if (is_array($pfcache)) {
     if ((int)$groups_display != -1) {
         $gids = array_filter(array_unique(array_map('intval', explode(',', $groups_display))));
 
-        $where2 = ["u.usergroup IN ('".implode("','", $gids)."')"];
+        $where2 = ["u.usergroup IN ('" . implode("','", $gids) . "')"];
 
         switch ($db->type) {
             case 'pgsql':
@@ -251,7 +245,7 @@ if (is_array($pfcache)) {
                 break;
         }
 
-        $where[] = '('.implode(' OR ', $where2).')';
+        $where[] = '(' . implode(' OR ', $where2) . ')';
 
         unset($where2);
     }
@@ -298,7 +292,7 @@ if (is_array($pfcache)) {
             str_replace(
                 'PALCEHOLDER',
                 '{page}',
-                $ougc_pages->build_url(
+                \ougc\Pages\Core\urlBuild(
                     array_merge($build_url, ['_page' => 'PALCEHOLDER'])
                 )
             )
@@ -317,6 +311,8 @@ if (is_array($pfcache)) {
         );
 
         $trow = alt_trow(true);
+
+        $user_list = '';
 
         while ($user = $db->fetch_array($query)) {
             $user['username'] = htmlspecialchars_uni($user['username']);
@@ -352,7 +348,7 @@ if (is_array($pfcache)) {
                             $user_value = eval($templates->render('postbit_profilefield_multiselect'));
                         }
                     } else {
-                        $field_parser_options = array(
+                        $field_parser_options = [
                             "allow_html" => $field['allowhtml'],
                             "allow_mycode" => $field['allowmycode'],
                             "allow_smilies" => $field['allowsmilies'],
@@ -360,9 +356,9 @@ if (is_array($pfcache)) {
                             "allow_videocode" => $field['allowvideocode'],
                             #"nofollow_on" => 1,
                             "filter_badwords" => 1,
-                        );
+                        ];
 
-                        if ($customfield['type'] == "textarea") {
+                        if ($field['type'] == "textarea") {
                             $field_parser_options['me_username'] = $user['username'];
                         } else {
                             $field_parser_options['nl2br'] = 0;
@@ -387,7 +383,7 @@ if (is_array($pfcache)) {
 }
 
 if ($mybb->usergroup['cancp']) {
-    $page_url = $ougc_pages->build_url($build_url);
+    $page_url = \ougc\Pages\Core\urlBuild($build_url);
 
     $fields = '';
 
@@ -422,15 +418,97 @@ foreach ($pfcache as $field) {
 
 $message = eval($templates->render('ougcpages_listuserfields'));
 
-$ougc_pages->set_url($url_backup);
+\ougc\Pages\Core\urlSet($url_backup);
 
 // Set-up page
-$page['template'] = $message;
-ougc_pages_show(true);]]></value>
+$pageData['template'] = $message;
+
+/*
+ *  Below code is pretty much a copy of initShow()
+*/
+// Load custom page language file if exists
+$lang->load("ougc_pages_{$categoryID}", false, true);
+
+if (!empty($pageData)) {
+    $lang->load("ougc_pages_{$pageID}", false, true);
+}
+
+$categoryData['name'] = \htmlspecialchars_uni($categoryData['name']);
+
+if ($categoryData['wrapucp']) {
+    $lang->load('usercp');
+
+    if ($mybb->user['uid'] && $mybb->usergroup['canusercp']) {
+        \add_breadcrumb($lang->nav_usercp, "usercp.php");
+    }
+}
+
+if (!$isPage || $categoryData['breadcrumb']) {
+    \add_breadcrumb($categoryData['name'], \ougc\Pages\Core\categoryGetLink($categoryID));
+}
+
+$navigation = ['previousPage' => '', 'nextPage' => ''];
+
+$lastEditedMessage = '';
+
+$title = $pageData['name'] = \htmlspecialchars_uni($pageData['name']);
+
+$description = $pageData['description'] = \htmlspecialchars_uni($pageData['description']);
+
+$canonicalUrl = \ougc\Pages\Core\pageGetLink($pageID);
+
+\add_breadcrumb($pageData['name'], \ougc\Pages\Core\pageGetLink($pageID));
+
+if (!empty($categoryData['navigation'])) {
+    if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['previousPageID'])) {
+        $previousPageLink = \ougc\Pages\Core\pageGetLink($pagesCache[$pageID]['previousPageID']);
+        $previousPageName = \htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['previousPageID']]['name']);
+
+        $navigation['previousPage'] = eval($templates->render('ougcpages_navigation_previous'));
+    }
+    if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['nextPageID'])) {
+        $nextPageLink = \ougc\Pages\Core\pageGetLink($pagesCache[$pageID]['nextPageID']);
+        $nextPageName = \htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['nextPageID']]['name']);
+
+        $navigation['nextPage'] = eval($templates->render('ougcpages_navigation_next'));
+    }
+}
+
+$templates->cache['ougcpages_temporary_tmpl'] = $pageData['template'];
+
+if (!empty($pageData['dateline'])) {
+    $editDateNormal = \my_date('normal', $pageData['dateline']);
+
+    $editDateRelative = \my_date('relative', $pageData['dateline']);
+
+    $lastEditedMessage = eval($templates->render('ougcpages_wrapper_edited'));
+}
+
+$content = eval($templates->render('ougcpages_temporary_tmpl'));
+
+if ($pageData['wrapper']) {
+    $content = eval($templates->render('ougcpages_wrapper'));
+}
+
+if ($categoryData['wrapucp']) {
+    global $usercpnav;
+
+    require_once MYBB_ROOT . 'inc/functions_user.php';
+
+    \usercp_menu();
+
+    $content = eval($templates->render('ougcpages_wrapper_ucp'));
+}
+
+$pageContent = eval($templates->render('ougcpages'));
+
+\output_page($pageContent);
+
+exit;]]></value>
     </element>
     <element>
         <key>versioncode</key>
-        <value type="INT">1820</value>
+        <value type="INT">1833</value>
     </element>
 </array>
         <!-- End of file. -->
