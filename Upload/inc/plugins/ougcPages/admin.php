@@ -276,7 +276,12 @@ function pluginActivate()
         $settingData['description'] = isset($lang->{"setting_ougc_pages_{$settingKey}_desc"}) ? $lang->{"setting_ougc_pages_{$settingKey}_desc"} : '';
     }
 
-    $PL->settings('ougc_pages', $lang->setting_group_ougc_pages, $lang->setting_group_ougc_pages_desc, $settingsData);
+    $PL->settings(
+        'ougc_pages',
+        $lang->setting_group_ougc_pages,
+        $lang->setting_group_ougc_pages_desc,
+        $settingsData
+    );
 
     // Add templates
     $templatesDirIterator = new DirectoryIterator(OUGC_PAGES_ROOT . '/templates');
