@@ -235,7 +235,7 @@ function urlGet(): string
     return url();
 }
 
-function urlBuild(array $urlAppend = [], bool $fetchImportUrl = false): string
+function urlBuild(array $urlAppend = [], bool $fetchImportUrl = false, bool $encode = true): string
 {
     global $PL;
 
@@ -252,7 +252,7 @@ function urlBuild(array $urlAppend = [], bool $fetchImportUrl = false): string
         $urlAppend = $this->fetch_input_url( $fetchImportUrl );
     }*/
 
-    return $PL->url_append(urlGet(), $urlAppend, '&amp;', true);
+    return $PL->url_append(urlGet(), $urlAppend, '&amp;', $encode);
 }
 
 function parseUrl(string $urlString): string
@@ -443,30 +443,34 @@ function logAction(int $objectID)
     }
 }
 
-function multipageBuild(int $itemsCount, string $paginationUrl = ''/*, bool $checkUrl = false*/): string
+function multipageBuild(
+    int $itemsCount,
+    string $paginationUrl = '',
+    string $inputKey = 'page'/*, bool $checkUrl = false*/
+): string
 {
     global $mybb;
 
     /*if ( $checkUrl ) {
         $input = explode( '=', $params );
         if ( isset( $mybb->input[ $input[ 0 ] ] ) && $mybb->input[ $input[ 0 ] ] != $input[ 1 ] ) {
-            $mybb->input[ 'page' ] = 0;
+            $mybb->input[$inputKey] = 0;
         }
     }*/
 
-    if ($mybb->get_input('page', MyBB::INPUT_INT) > 0) {
-        if ($mybb->get_input('page', MyBB::INPUT_INT) > ceil($itemsCount / getQueryLimit())) {
-            $mybb->input['page'] = 1;
+    if ($mybb->get_input($inputKey, MyBB::INPUT_INT) > 0) {
+        if ($mybb->get_input($inputKey, MyBB::INPUT_INT) > ceil($itemsCount / getQueryLimit())) {
+            $mybb->input[$inputKey] = 1;
         } else {
-            setQueryStart(($mybb->get_input('page', MyBB::INPUT_INT) - 1) * getQueryLimit());
+            setQueryStart(($mybb->get_input($inputKey, MyBB::INPUT_INT) - 1) * getQueryLimit());
         }
     } else {
-        $mybb->input['page'] = 1;
+        $mybb->input[$inputKey] = 1;
     }
 
     if (defined('IN_ADMINCP')) {
         return (string)draw_admin_pagination(
-            $mybb->get_input('page', MyBB::INPUT_INT),
+            $mybb->get_input($inputKey, MyBB::INPUT_INT),
             getQueryLimit(),
             $itemsCount,
             $paginationUrl
@@ -476,7 +480,7 @@ function multipageBuild(int $itemsCount, string $paginationUrl = ''/*, bool $che
     return (string)multipage(
         $itemsCount,
         getQueryLimit(),
-        $mybb->get_input('page', MyBB::INPUT_INT),
+        $mybb->get_input($inputKey, MyBB::INPUT_INT),
         $paginationUrl
     );
 }

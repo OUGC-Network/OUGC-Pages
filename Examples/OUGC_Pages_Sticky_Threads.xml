@@ -170,7 +170,17 @@ $query = $db->query(
 
 $threadcount = $db->fetch_field($query, 'threadcount');
 
-$multipage = \OUGCPages\Core\multipageBuild($threadcount, $url = '');
+\ougc\Pages\Core\urlSet(\ougc\Pages\Core\pageGetLink($pageID));
+
+$multipage = \ougc\Pages\Core\multipageBuild(
+    $threadcount,
+    \ougc\Pages\Core\urlBuild(
+        ['viewPage' => '{page}'],
+        false,
+        false
+    ),
+    'viewPage'
+);
 
 $perpage = (int)$mybb->settings['threadsperpage'];
 
