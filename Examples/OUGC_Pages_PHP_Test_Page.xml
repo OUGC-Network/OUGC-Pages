@@ -87,9 +87,9 @@ $title = $pageData['name'] = \htmlspecialchars_uni($pageData['name']);
 
 $description = $pageData['description'] = \htmlspecialchars_uni($pageData['description']);
 
-\add_breadcrumb($pageData['name'], \OUGCPages\Core\pageGetLink($pageData['pid']));
+\add_breadcrumb($pageData['name'], \OUGCPages\Core\pageGetLink($pageID));
 
-if ($categoryData['navigation']) {
+if (!empty($categoryData['navigation'])) {
     if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['previousPageID'])) {
         $previousPageLink = \OUGCPages\Core\pageGetLink($pagesCache[$pageID]['previousPageID']);
         $previousPageName = \htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['previousPageID']]['name']);
@@ -110,10 +110,10 @@ $pageData['template'] = $message;
  *  Below code is pretty much a copy of initShow()
 */
 // Load custom page language file if exists
-$lang->load("ougc_pages_{$categoryData['cid']}", false, true);
+$lang->load("ougc_pages_{$categoryID}", false, true);
 
 if (!empty($pageData)) {
-    $lang->load("ougc_pages_{$pageData['pid']}", false, true);
+    $lang->load("ougc_pages_{$pageID}", false, true);
 }
 
 $categoryData['name'] = \htmlspecialchars_uni($categoryData['name']);
@@ -127,7 +127,7 @@ if ($categoryData['wrapucp']) {
 }
 
 if (!$isPage || $categoryData['breadcrumb']) {
-    \add_breadcrumb($categoryData['name'], \OUGCPages\Core\categoryGetLink($categoryData['cid']));
+    \add_breadcrumb($categoryData['name'], \OUGCPages\Core\categoryGetLink($categoryID));
 }
 
 $navigation = ['previousPage' => '', 'nextPage' => ''];
@@ -140,9 +140,9 @@ $description = $pageData['description'] = \htmlspecialchars_uni($pageData['descr
 
 $canonicalUrl = \OUGCPages\Core\pageGetLink($pageID);
 
-\add_breadcrumb($pageData['name'], \OUGCPages\Core\pageGetLink($pageData['pid']));
+\add_breadcrumb($pageData['name'], \OUGCPages\Core\pageGetLink($pageID));
 
-if ($categoryData['navigation']) {
+if (!empty($categoryData['navigation'])) {
     if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['previousPageID'])) {
         $previousPageLink = \OUGCPages\Core\pageGetLink($pagesCache[$pageID]['previousPageID']);
         $previousPageName = \htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['previousPageID']]['name']);

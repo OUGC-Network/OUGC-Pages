@@ -44,10 +44,10 @@
 define('OUGC_PAGES_PROFILE_FIELDS', '1,2,3'); // -1 for all, comma separated for specifics
 
 // Load custom page language file if exists
-$lang->load("ougc_pages_{$categoryData['cid']}", false, true);
+$lang->load("ougc_pages_{$categoryID}", false, true);
 
 if (!empty($pageData)) {
-    $lang->load("ougc_pages_{$pageData['pid']}", false, true);
+    $lang->load("ougc_pages_{$pageID}", false, true);
 }
 
 $categoryData['name'] = \htmlspecialchars_uni($categoryData['name']);
@@ -61,7 +61,7 @@ if ($categoryData['wrapucp']) {
 }
 
 if (!$isPage || $categoryData['breadcrumb']) {
-    \add_breadcrumb($categoryData['name'], \OUGCPages\Core\categoryGetLink($categoryData['cid']));
+    \add_breadcrumb($categoryData['name'], \OUGCPages\Core\categoryGetLink($categoryID));
 }
 
 $navigation = ['previousPage' => '', 'nextPage' => ''];
@@ -74,7 +74,7 @@ $description = $pageData['description'] = \htmlspecialchars_uni($pageData['descr
 
 $canonicalUrl = \OUGCPages\Core\pageGetLink($pageID);
 
-\add_breadcrumb($pageData['name'], \OUGCPages\Core\pageGetLink($pageData['pid']));
+\add_breadcrumb($pageData['name'], \OUGCPages\Core\pageGetLink($pageID));
 
 $lang->load("forumdisplay");
 
