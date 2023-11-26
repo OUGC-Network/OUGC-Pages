@@ -36,14 +36,16 @@ use function file_get_contents;
 use function json_decode;
 use function my_number_format;
 use function my_strlen;
+use function pathinfo;
+use function print_selection_javascript;
+use function update_theme_stylesheet_list;
+
 use function ougc\Pages\Core\cacheUpdate;
 use function ougc\Pages\Core\loadLanguage;
 use function ougc\Pages\Core\loadPluginLibrary;
 use function ougc\Pages\Core\sanitizeIntegers;
 use function ougc\Pages\Core\templateGetName;
-use function pathinfo;
-use function print_selection_javascript;
-use function update_theme_stylesheet_list;
+use function ougc\Pages\Core\getSetting;
 
 use const MYBB_ADMIN_DIR;
 use const ougc\Pages\Core\EXECUTION_HOOK_GLOBAL_END;
@@ -655,7 +657,7 @@ function pageFormBuildFields(
     global $mybb, $lang;
 
     foreach ($fieldsData as $fieldKey => $fieldData) {
-        if (!isset($fieldData['formType'])) {
+        if (!isset($fieldData['formType']) || $fieldKey === 'php' && getSetting('enableEval') !== true) {
             continue;
         }
 
@@ -714,6 +716,10 @@ function pageFormBuildFields(
                         )
                         );
                     } elseif ($formType == 'basicSelect') {
+                        if ($fieldKey === 'init' && !$mybb->get_input($fieldKey, MyBB::INPUT_INT)) {
+                            $mybb->input[$fieldKey] = EXECUTION_HOOK_GLOBAL_END;
+                        }
+
                         return $formObject->generate_select_box(
                             $fieldKey,
                             $basicSelectItems[$fieldKey],

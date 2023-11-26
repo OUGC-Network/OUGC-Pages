@@ -164,15 +164,13 @@ function templateGetName(string $templateSuffix): string
     return "ougcpages_{$templateSuffix}";
 }
 
-function getSetting(string $settingKey = ''): string
+function getSetting(string $settingKey = '')
 {
     global $mybb;
 
-    $settingConstant = 'OUGC_PAGES_' . strtoupper($settingKey);
-
-    return defined($settingConstant) ? constant(
-        $settingConstant
-    ) : (string)$mybb->settings['ougc_pages_' . $settingKey];
+    return isset(SETTINGS[$settingKey]) ? SETTINGS[$settingKey] : (
+    isset($mybb->settings['ougc_pages_' . $settingKey]) ? $mybb->settings['ougc_pages_' . $settingKey] : false
+    );
 }
 
 function sanitizeIntegers(array $dataObject): array
@@ -494,7 +492,7 @@ function initExecute(int $pageID)
 
     runHooks('ExecutionInit');
 
-    if (!getSetting('disable_eval')) {
+    if (getSetting('enableEval') === true) {
         eval('?>' . pageGetTemplate($pageID));
     }
 

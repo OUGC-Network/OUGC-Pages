@@ -39,7 +39,10 @@ defined('IN_MYBB') or die('Direct initialization of this file is not allowed.');
 
 const OUGC_PAGES_ROOT = MYBB_ROOT . 'inc/plugins/ougcPages';
 
-const OUGC_PAGES_DISABLE_EVAL = false;
+// Plugin Settings
+define('ougc\Pages\Core\SETTINGS', [
+    'enableEval' => false
+]);
 
 require_once OUGC_PAGES_ROOT . '/core.php';
 
