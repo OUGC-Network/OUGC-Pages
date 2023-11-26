@@ -806,7 +806,7 @@ function initShow()
 
         add_breadcrumb($pageData['name'], pageGetLink($pageData['pid']));
 
-        if ($categoryData['navigation']) {
+        if ($categoryData['displayNavigation']) {
             if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['previousPageID'])) {
                 $previousPageLink = pageGetLink($pagesCache[$pageID]['previousPageID']);
                 $previousPageName = htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['previousPageID']]['name']);
