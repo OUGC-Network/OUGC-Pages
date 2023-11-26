@@ -26,24 +26,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-namespace OUGCPages\ForumHooks;
+namespace ougc\Pages\ForumHooks;
 
 use function explode;
 use function html_entity_decode;
 use function htmlspecialchars_uni;
 use function is_member;
 use function my_strpos;
-use function OUGCPages\Core\cacheGetCategories;
-use function OUGCPages\Core\cacheGetPages;
-use function OUGCPages\Core\categoryGetByUrl;
-use function OUGCPages\Core\categoryGetLink;
-use function OUGCPages\Core\getSetting;
-use function OUGCPages\Core\initExecute;
-use function OUGCPages\Core\loadlanguage;
-use function OUGCPages\Core\pageGetByUrl;
-use function OUGCPages\Core\pageGetLink;
-use function OUGCPages\Core\pageGetLinkBase;
-use function OUGCPages\Core\runHooks;
+use function ougc\Pages\Core\cacheGetCategories;
+use function ougc\Pages\Core\cacheGetPages;
+use function ougc\Pages\Core\categoryGetByUrl;
+use function ougc\Pages\Core\categoryGetLink;
+use function ougc\Pages\Core\getSetting;
+use function ougc\Pages\Core\initExecute;
+use function ougc\Pages\Core\loadlanguage;
+use function ougc\Pages\Core\pageGetByUrl;
+use function ougc\Pages\Core\pageGetLink;
+use function ougc\Pages\Core\pageGetLinkBase;
+use function ougc\Pages\Core\runHooks;
 use function parse_url;
 use function str_replace;
 

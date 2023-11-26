@@ -27,13 +27,13 @@
  ****************************************************************************/
 
 // Die if IN_MYBB is not defined, for security reasons.
-use function OUGCPages\Admin\pluginActivate;
-use function OUGCPages\Admin\pluginDeactivate;
-use function OUGCPages\Admin\pluginInfo;
-use function OUGCPages\Admin\pluginIsInstalled;
-use function OUGCPages\Admin\pluginUninstall;
-use function OUGCPages\Core\addHooks;
-use function OUGCPages\Core\cacheUpdate;
+use function ougc\Pages\Admin\pluginActivate;
+use function ougc\Pages\Admin\pluginDeactivate;
+use function ougc\Pages\Admin\pluginInfo;
+use function ougc\Pages\Admin\pluginIsInstalled;
+use function ougc\Pages\Admin\pluginUninstall;
+use function ougc\Pages\Core\addHooks;
+use function ougc\Pages\Core\cacheUpdate;
 
 defined('IN_MYBB') or die('Direct initialization of this file is not allowed.');
 
@@ -51,11 +51,11 @@ if (defined('IN_ADMINCP')) {
     require_once OUGC_PAGES_ROOT . '/admin.php';
     require_once OUGC_PAGES_ROOT . '/adminHooks.php';
 
-    addHooks('OUGCPages\adminHooks');
+    addHooks('ougc\Pages\adminHooks');
 } else {
     require_once OUGC_PAGES_ROOT . '/forumHooks.php';
 
-    addHooks('OUGCPages\ForumHooks');
+    addHooks('ougc\Pages\ForumHooks');
 }
 
 // Plugin API

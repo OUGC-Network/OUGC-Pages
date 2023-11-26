@@ -26,7 +26,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-namespace OUGCPages\Core;
+namespace ougc\Pages\Core;
 
 use MyBB;
 use pluginSystem;
@@ -44,7 +44,7 @@ use function my_date;
 use function my_strpos;
 use function my_strtolower;
 use function ougc_getpreview;
-use function OUGCPages\Admin\pluginInfo;
+use function ougc\Pages\Admin\pluginInfo;
 
 use function output_page;
 
@@ -53,8 +53,8 @@ use function uniqid;
 use function usercp_menu;
 
 use const MYBB_ROOT;
-use const OUGCPages\Admin\FIELDS_DATA_CATEGORIES;
-use const OUGCPages\Admin\FIELDS_DATA_PAGES;
+use const ougc\Pages\Admin\FIELDS_DATA_CATEGORIES;
+use const ougc\Pages\Admin\FIELDS_DATA_PAGES;
 use const TIME_NOW;
 
 const URL = 'index.php?module=config-ougc_pages';

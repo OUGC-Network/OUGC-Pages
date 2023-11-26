@@ -26,14 +26,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-namespace OUGCPages\AdminHooks;
+namespace ougc\Pages\AdminHooks;
 
 use MyBB;
 
 use function admin_redirect;
-use function OUGCPages\Admin\pluginActivate;
-use function OUGCPages\Admin\pluginInfo;
-use function OUGCPages\Core\loadLanguage;
+use function ougc\Pages\Admin\pluginActivate;
+use function ougc\Pages\Admin\pluginInfo;
+use function ougc\Pages\Core\loadLanguage;
 
 function admin_config_plugins_deactivate(): bool
 {

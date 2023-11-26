@@ -61,7 +61,7 @@ if ($categoryData['wrapucp']) {
 }
 
 if (!$isPage || $categoryData['breadcrumb']) {
-    \add_breadcrumb($categoryData['name'], \OUGCPages\Core\categoryGetLink($categoryID));
+    \add_breadcrumb($categoryData['name'], \ougc\Pages\Core\categoryGetLink($categoryID));
 }
 
 $navigation = ['previousPage' => '', 'nextPage' => ''];
@@ -72,9 +72,9 @@ $title = $pageData['name'] = \htmlspecialchars_uni($pageData['name']);
 
 $description = $pageData['description'] = \htmlspecialchars_uni($pageData['description']);
 
-$canonicalUrl = \OUGCPages\Core\pageGetLink($pageID);
+$canonicalUrl = \ougc\Pages\Core\pageGetLink($pageID);
 
-\add_breadcrumb($pageData['name'], \OUGCPages\Core\pageGetLink($pageID));
+\add_breadcrumb($pageData['name'], \ougc\Pages\Core\pageGetLink($pageID));
 
 $lang->load("forumdisplay");
 
@@ -167,13 +167,14 @@ $query = $db->query(
 	ORDER BY t.dateline
 "
 );
+
 $threadcount = $db->fetch_field($query, 'threadcount');
 
 $multipage = \OUGCPages\Core\multipageBuild($threadcount, $url = '');
 
 $perpage = (int)$mybb->settings['threadsperpage'];
 
-$queryStart = \OUGCPages\Core\getQueryStart();
+$queryStart = \ougc\Pages\Core\getQueryStart();
 
 // Start Getting Threads
 $query = $db->query(

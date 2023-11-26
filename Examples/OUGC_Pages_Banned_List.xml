@@ -94,12 +94,12 @@ $bantimes = fetch_ban_times();
 $categoryData['name'] = htmlspecialchars_uni($categoryData['name']);
 
 if ($categoryData['breadcrumb']) {
-    \add_breadcrumb($categoryData['name'], \OUGCPages\Core\categoryGetLink($categoryID));
+    \add_breadcrumb($categoryData['name'], \ougc\Pages\Core\categoryGetLink($categoryID));
 }
 
 $pageData['name'] = htmlspecialchars_uni($pageData['name']);
 
-\add_breadcrumb($pageData['name'], \OUGCPages\Core\pageGetLink($pageID));
+\add_breadcrumb($pageData['name'], \ougc\Pages\Core\pageGetLink($pageID));
 
 if ($mybb->settings['threadsperpage'] < 1) {
     $mybb->settings['threadsperpage'] = 20;
@@ -131,7 +131,7 @@ $upper = $start + $perpage;
 $multipage = multipage($postcount, $perpage, $pagenum, '?PLACE_HOLDER');
 $multipage = str_replace(
     ['page=', '?PLACE_HOLDER'],
-    ['pagination=', \OUGCPages\Core\pageGetLink($pageID)],
+    ['pagination=', \ougc\Pages\Core\pageGetLink($pageID)],
     $multipage
 );
 

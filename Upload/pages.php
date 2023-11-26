@@ -27,10 +27,10 @@
  ****************************************************************************/
 
 // Boring stuff..
-use function OUGCPages\Core\initRun;
-use function OUGCPages\Core\initShow;
-use function OUGCPages\Core\loadLanguage;
-use function OUGCPages\Core\runHooks;
+use function ougc\Pages\Core\initRun;
+use function ougc\Pages\Core\initShow;
+use function ougc\Pages\Core\loadLanguage;
+use function ougc\Pages\Core\runHooks;
 
 define('IN_MYBB', true);
 define('THIS_SCRIPT', 'pages.php');
@@ -45,7 +45,7 @@ $shutdown_queries = $shutdown_functions = [];
 
 require_once $workingDirectory . '/inc/init.php';
 
-if (!function_exists('OUGCPages\\Core\\initRun')) {
+if (!function_exists('ougc\\Pages\\Core\\initRun')) {
     error_no_permission();
 }
 

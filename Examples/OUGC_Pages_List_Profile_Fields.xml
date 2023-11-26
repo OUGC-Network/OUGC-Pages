@@ -150,9 +150,9 @@ global $PL;
 
 $PL or require_once PLUGINLIBRARY;
 
-$url_backup = \OUGCPages\Core\urlBuild();
+$url_backup = \ougc\Pages\Core\urlBuild();
 
-\OUGCPages\Core\urlSet(\OUGCPages\Core\pageGetLink($pageID));
+\ougc\Pages\Core\urlSet(\ougc\Pages\Core\pageGetLink($pageID));
 
 $build_url = [];
 
@@ -292,7 +292,7 @@ if (is_array($pfcache)) {
             str_replace(
                 'PALCEHOLDER',
                 '{page}',
-                \OUGCPages\Core\urlBuild(
+                \ougc\Pages\Core\urlBuild(
                     array_merge($build_url, ['_page' => 'PALCEHOLDER'])
                 )
             )
@@ -383,7 +383,7 @@ if (is_array($pfcache)) {
 }
 
 if ($mybb->usergroup['cancp']) {
-    $page_url = \OUGCPages\Core\urlBuild($build_url);
+    $page_url = \ougc\Pages\Core\urlBuild($build_url);
 
     $fields = '';
 
@@ -418,7 +418,7 @@ foreach ($pfcache as $field) {
 
 $message = eval($templates->render('ougcpages_listuserfields'));
 
-\OUGCPages\Core\urlSet($url_backup);
+\ougc\Pages\Core\urlSet($url_backup);
 
 // Set-up page
 $pageData['template'] = $message;
@@ -444,7 +444,7 @@ if ($categoryData['wrapucp']) {
 }
 
 if (!$isPage || $categoryData['breadcrumb']) {
-    \add_breadcrumb($categoryData['name'], \OUGCPages\Core\categoryGetLink($categoryID));
+    \add_breadcrumb($categoryData['name'], \ougc\Pages\Core\categoryGetLink($categoryID));
 }
 
 $navigation = ['previousPage' => '', 'nextPage' => ''];
@@ -455,19 +455,19 @@ $title = $pageData['name'] = \htmlspecialchars_uni($pageData['name']);
 
 $description = $pageData['description'] = \htmlspecialchars_uni($pageData['description']);
 
-$canonicalUrl = \OUGCPages\Core\pageGetLink($pageID);
+$canonicalUrl = \ougc\Pages\Core\pageGetLink($pageID);
 
-\add_breadcrumb($pageData['name'], \OUGCPages\Core\pageGetLink($pageID));
+\add_breadcrumb($pageData['name'], \ougc\Pages\Core\pageGetLink($pageID));
 
 if (!empty($categoryData['navigation'])) {
     if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['previousPageID'])) {
-        $previousPageLink = \OUGCPages\Core\pageGetLink($pagesCache[$pageID]['previousPageID']);
+        $previousPageLink = \ougc\Pages\Core\pageGetLink($pagesCache[$pageID]['previousPageID']);
         $previousPageName = \htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['previousPageID']]['name']);
 
         $navigation['previousPage'] = eval($templates->render('ougcpages_navigation_previous'));
     }
     if (!empty($pagesCache[$pageID]) && !empty($pagesCache[$pageID]['nextPageID'])) {
-        $nextPageLink = \OUGCPages\Core\pageGetLink($pagesCache[$pageID]['nextPageID']);
+        $nextPageLink = \ougc\Pages\Core\pageGetLink($pagesCache[$pageID]['nextPageID']);
         $nextPageName = \htmlspecialchars_uni($pagesCache[$pagesCache[$pageID]['nextPageID']]['name']);
 
         $navigation['nextPage'] = eval($templates->render('ougcpages_navigation_next'));

@@ -26,7 +26,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-namespace OUGCPages\Admin;
+namespace ougc\Pages\Admin;
 
 use DirectoryIterator;
 use MyBB;
@@ -36,17 +36,17 @@ use function file_get_contents;
 use function json_decode;
 use function my_number_format;
 use function my_strlen;
-use function OUGCPages\Core\cacheUpdate;
-use function OUGCPages\Core\loadLanguage;
-use function OUGCPages\Core\loadPluginLibrary;
-use function OUGCPages\Core\sanitizeIntegers;
-use function OUGCPages\Core\templateGetName;
+use function ougc\Pages\Core\cacheUpdate;
+use function ougc\Pages\Core\loadLanguage;
+use function ougc\Pages\Core\loadPluginLibrary;
+use function ougc\Pages\Core\sanitizeIntegers;
+use function ougc\Pages\Core\templateGetName;
 use function pathinfo;
 use function print_selection_javascript;
 use function update_theme_stylesheet_list;
 
 use const MYBB_ADMIN_DIR;
-use const OUGCPages\Core\EXECUTION_HOOK_GLOBAL_END;
+use const ougc\Pages\Core\EXECUTION_HOOK_GLOBAL_END;
 use const TIME_NOW;
 
 const FIELDS_DATA_CATEGORIES = [
