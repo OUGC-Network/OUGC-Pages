@@ -27,6 +27,14 @@
  ****************************************************************************/
 
 // Die if IN_MYBB is not defined, for security reasons.
+use function OUGCPages\Admin\pluginActivate;
+use function OUGCPages\Admin\pluginDeactivate;
+use function OUGCPages\Admin\pluginInfo;
+use function OUGCPages\Admin\pluginIsInstalled;
+use function OUGCPages\Admin\pluginUninstall;
+use function OUGCPages\Core\addHooks;
+use function OUGCPages\Core\cacheUpdate;
+
 defined('IN_MYBB') or die('Direct initialization of this file is not allowed.');
 
 const OUGC_PAGES_ROOT = MYBB_ROOT . 'inc/plugins/ougcPages';
@@ -43,53 +51,53 @@ if (defined('IN_ADMINCP')) {
     require_once OUGC_PAGES_ROOT . '/admin.php';
     require_once OUGC_PAGES_ROOT . '/adminHooks.php';
 
-    \OUGCPages\Core\addHooks('OUGCPages\adminHooks');
+    addHooks('OUGCPages\adminHooks');
 } else {
     require_once OUGC_PAGES_ROOT . '/forumHooks.php';
 
-    \OUGCPages\Core\addHooks('OUGCPages\ForumHooks');
+    addHooks('OUGCPages\ForumHooks');
 }
 
 // Plugin API
 function ougc_pages_info(): array
 {
-    return \OUGCPages\Admin\pluginInfo();
+    return pluginInfo();
 }
 
 // _activate() routine
-function ougc_pages_activate(): void
+function ougc_pages_activate()
 {
-    \OUGCPages\Admin\pluginActivate();
+    pluginActivate();
 }
 
 // _deactivate() routine
-function ougc_pages_deactivate(): void
+function ougc_pages_deactivate()
 {
-    \OUGCPages\Admin\pluginDeactivate();
+    pluginDeactivate();
 }
 
 // _install() routine
-function ougc_pages_install(): void
+function ougc_pages_install()
 {
-    \OUGCPages\Admin\pluginUninstall();
+    pluginUninstall();
 }
 
 // _is_installed() routine
 function ougc_pages_is_installed(): bool
 {
-    return \OUGCPages\Admin\pluginIsInstalled();
+    return pluginIsInstalled();
 }
 
 // _uninstall() routine
-function ougc_pages_uninstall(): void
+function ougc_pages_uninstall()
 {
-    \OUGCPages\Admin\pluginUninstall();
+    pluginUninstall();
 }
 
 // Tools -> Cache update helper
 function update_ougc_pages()
 {
-    \OUGCPages\Core\cacheUpdate();
+    cacheUpdate();
 }
 
 // control_object by Zinga Burga from MyBBHacks ( mybbhacks.zingaburga.com ), 1.62
@@ -157,7 +165,7 @@ if (!function_exists('ougc_getpreview')) {
             global $parser;
             if (!is_object($parser)) {
                 require_once MYBB_ROOT . 'inc/class_parser.php';
-                $parser = new postParser;
+                $parser = new postParser();
             }
 
             $message = $parser->parse_message($message, [
@@ -179,7 +187,11 @@ if (!function_exists('ougc_getpreview')) {
         }
 
         // convert \xA0 to spaces (reverse &nbsp;)
-        $message = trim(preg_replace(['~ {2,}~', "~\n{2,}~"], [' ', "\n"], strtr($message, ["\xA0" => ' ', "\r" => '', "\t" => ' '])));
+        $message = trim(
+            preg_replace(['~ {2,}~', "~\n{2,}~"],
+                [' ', "\n"],
+                strtr($message, ["\xA0" => ' ', "\r" => '', "\t" => ' ']))
+        );
 
         // newline fix for browsers which don't support them
         $message = preg_replace("~ ?\n ?~", " \n", $message);

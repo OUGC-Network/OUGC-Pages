@@ -28,9 +28,28 @@
 
 namespace OUGCPages\ForumHooks;
 
+use function explode;
+use function html_entity_decode;
+use function htmlspecialchars_uni;
+use function is_member;
+use function my_strpos;
+use function OUGCPages\Core\cacheGetCategories;
+use function OUGCPages\Core\cacheGetPages;
+use function OUGCPages\Core\categoryGetByUrl;
+use function OUGCPages\Core\categoryGetLink;
+use function OUGCPages\Core\getSetting;
+use function OUGCPages\Core\initExecute;
+use function OUGCPages\Core\loadlanguage;
+use function OUGCPages\Core\pageGetByUrl;
+use function OUGCPages\Core\pageGetLink;
+use function OUGCPages\Core\pageGetLinkBase;
+use function OUGCPages\Core\runHooks;
+use function parse_url;
+use function str_replace;
+
 function fetch_wol_activity_end(&$activityObjects): array
 {
-    if ($activityObjects['activity'] !== 'unknown' || \my_strpos($activityObjects['location'], 'pages.php') === false) {
+    if ($activityObjects['activity'] !== 'unknown' || my_strpos($activityObjects['location'], 'pages.php') === false) {
         return $activityObjects;
     }
 
@@ -47,19 +66,19 @@ function build_friendly_wol_location_end(&$locationObjects): array
 
     global $lang;
 
-    $pagesCache = \OUGCPages\Core\cacheGetPages();
+    $pagesCache = cacheGetPages();
 
-    $categoriesCache = \OUGCPages\Core\cacheGetCategories();
+    $categoriesCache = cacheGetCategories();
 
-    $location = \parse_url($locationObjects['user_activity']['location']);
+    $location = parse_url($locationObjects['user_activity']['location']);
 
     if (empty($location['query'])) {
         return $locationObjects;
     }
 
-    $location['query'] = \html_entity_decode($location['query']);
+    $location['query'] = html_entity_decode($location['query']);
 
-    $location['query'] = \explode('&', (string)$location['query']);
+    $location['query'] = explode('&', (string)$location['query']);
 
     if (empty($location['query'])) {
         return $locationObjects;
@@ -72,7 +91,7 @@ function build_friendly_wol_location_end(&$locationObjects): array
 
         if ($param[0] === 'category') {
             $isCategory = true;
-        } else if ($param[0] === 'page') {
+        } elseif ($param[0] === 'page') {
             $isPage = true;
         }
 
@@ -83,22 +102,22 @@ function build_friendly_wol_location_end(&$locationObjects): array
         }
     }
 
-    \OUGCPages\Core\loadlanguage();
+    loadlanguage();
 
     if ($isCategory) {
-        $categoryData = \OUGCPages\Core\categoryGetByUrl($url);
+        $categoryData = categoryGetByUrl($url);
 
         if (!empty($categoryData)) {
             $locationObjects['location_name'] = $lang->sprintf(
                 $lang->ougc_pages_wol_category,
-                \OUGCPages\Core\categoryGetLink($categoryData['cid']),
-                \htmlspecialchars_uni($categoryData['name'])
+                categoryGetLink($categoryData['cid']),
+                htmlspecialchars_uni($categoryData['name'])
             );
         }
     }
 
     if ($isPage) {
-        $pageData = \OUGCPages\Core\pageGetByUrl($url);
+        $pageData = pageGetByUrl($url);
 
         if (!$pageData['wol']) {
             $locationObjects['user_activity']['location'] = '/';
@@ -109,8 +128,8 @@ function build_friendly_wol_location_end(&$locationObjects): array
         if (!empty($pageData)) {
             $locationObjects['location_name'] = $lang->sprintf(
                 $lang->ougc_pages_wol_page,
-                \OUGCPages\Core\pageGetLink($pageData['pid']),
-                \htmlspecialchars_uni($pageData['name'])
+                pageGetLink($pageData['pid']),
+                htmlspecialchars_uni($pageData['name'])
             );
         }
     }
@@ -118,64 +137,64 @@ function build_friendly_wol_location_end(&$locationObjects): array
     return $locationObjects;
 }
 
-function usercp_menu10(): void
+function usercp_menu10()
 {
-    if ((int)\OUGCPages\Core\getSetting('usercp_priority') !== 10) {
+    if ((int)getSetting('usercp_priority') !== 10) {
         return;
     }
 
     usercp_menu40(true);
 }
 
-function usercp_menu20(): void
+function usercp_menu20()
 {
-    if ((int)\OUGCPages\Core\getSetting('usercp_priority') !== 20) {
+    if ((int)getSetting('usercp_priority') !== 20) {
         return;
     }
 
     usercp_menu40(true);
 }
 
-function usercp_menu30(): void
+function usercp_menu30()
 {
-    if ((int)\OUGCPages\Core\getSetting('usercp_priority') !== 30) {
+    if ((int)getSetting('usercp_priority') !== 30) {
         return;
     }
 
     usercp_menu40(true);
 }
 
-function usercp_menu40(bool $forceRun = false): void // maybe later allow custom priorities
+function usercp_menu40(bool $forceRun = false) // maybe later allow custom priorities
 {
-    if (!$forceRun && (int)\OUGCPages\Core\getSetting('usercp_priority') !== 40) {
+    if (!$forceRun && (int)getSetting('usercp_priority') !== 40) {
         return;
     }
 
     global $cache, $db, $templates, $mybb, $usercpmenu, $collapsed, $theme, $collapsedimg, $collapsed, $collapse, $ucp_nav_home;
 
-    $categoriesCache = \OUGCPages\Core\cacheGetCategories();
+    $categoriesCache = cacheGetCategories();
 
     if (empty($categoriesCache)) {
         return;
     }
 
     foreach ($categoriesCache as $cid => $categoryData) {
-        if (!$categoryData['wrapucp'] || !\is_member($categoryData['allowedGroups'])) {
+        if (!$categoryData['wrapucp'] || !is_member($categoryData['allowedGroups'])) {
             continue;
         }
 
-        $pageCache = \OUGCPages\Core\cacheGetPages();
+        $pageCache = cacheGetPages();
 
         $pageList = '';
 
         foreach ($pageCache as $pid => $pageData) {
-            if ($cid !== $pageData['cid'] || !\is_member($pageData['allowedGroups'])) {
+            if ((int)$cid !== (int)$pageData['cid'] || !is_member($pageData['allowedGroups'])) {
                 continue;
             }
 
-            $pageName = \htmlspecialchars_uni($pageData['name']);
+            $pageName = htmlspecialchars_uni($pageData['name']);
 
-            $pageLink = \OUGCPages\Core\pageGetLink($pid);
+            $pageLink = pageGetLink($pid);
 
             $pageList .= eval($templates->render('ougcpages_wrapper_ucp_nav_item'));
         }
@@ -184,7 +203,7 @@ function usercp_menu40(bool $forceRun = false): void // maybe later allow custom
             continue;
         }
 
-        $categoryName = \htmlspecialchars_uni($categoryData['name']);
+        $categoryName = htmlspecialchars_uni($categoryData['name']);
 
         $collapseID = 'usercpougcpages' . $cid;
 
@@ -208,7 +227,7 @@ function usercp_menu40(bool $forceRun = false): void // maybe later allow custom
     }
 }
 
-function global_start(): void
+function global_start()
 {
     global $templatelist;
 
@@ -221,43 +240,45 @@ function global_start(): void
     $templatelist .= 'ougcpages_menu_item, ougcpages_menu, ougcpages_menu_css';
 
     if (defined('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START')) {
+        global $templates;
+
         $templates->cache($templatelist);
 
-        \OUGCPages\Core\runHooks('ExecutionGlobalStart');
+        runHooks('ExecutionGlobalStart');
 
-        \OUGCPages\Core\initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START);
+        initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_START);
     }
 }
 
-function global_intermediate(): void
+function global_intermediate()
 {
     if (defined('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE')) {
-        \OUGCPages\Core\runHooks('ExecutionGlobalIntermediate');
+        runHooks('ExecutionGlobalIntermediate');
 
-        \OUGCPages\Core\initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE);
+        initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_INTERMEDIATE);
     }
 }
 
-function oucPagesStart(): void
+function oucPagesStart()
 {
     if (defined('OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_END')) {
-        \OUGCPages\Core\runHooks('ExecutionGlobalEnd');
+        runHooks('ExecutionGlobalEnd');
 
-        \OUGCPages\Core\initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_END);
+        initExecute(OUGC_PAGES_STATUS_PAGE_INIT_GLOBAL_END);
     }
 }
 
 function pre_output_page(string &$pageContents): string
 {
-    if (\my_strpos($pageContents, '<!--OUGC_PAGES_FOOTER-->') === false) {
+    if (my_strpos($pageContents, '<!--OUGC_PAGES_FOOTER-->') === false) {
         return $pageContents;
     }
 
     global $templates;
 
-    $categoriesCache = \OUGCPages\Core\cacheGetCategories();
+    $categoriesCache = cacheGetCategories();
 
-    $pagesCache = \OUGCPages\Core\cacheGetPages();
+    $pagesCache = cacheGetPages();
 
     $menuList = '';
 
@@ -266,26 +287,28 @@ function pre_output_page(string &$pageContents): string
             continue;
         }
 
-        if ((int)$categoryData['allowedGroups'] !== -1 && !\is_member($categoryData['allowedGroups'])) {
+        if ((int)$categoryData['allowedGroups'] !== -1 && !is_member($categoryData['allowedGroups'])) {
             continue;
         }
 
-        $categoryName = \htmlspecialchars_uni($categoryData['name']);
+        $categoryName = htmlspecialchars_uni($categoryData['name']);
 
         $menuItems = '';
 
         foreach ($pagesCache as $pageID => $pageData) {
-            if ($categoryID !== $pageData['cid']) {
+            if ((int)$categoryID !== (int)$pageData['cid']) {
                 continue;
             }
 
-            if (empty($pageData['menuItem']) || (int)$pageData['allowedGroups'] !== -1 && !\is_member($pageData['allowedGroups'])) {
+            if (empty($pageData['menuItem']) || (int)$pageData['allowedGroups'] !== -1 && !is_member(
+                    $pageData['allowedGroups']
+                )) {
                 continue;
             }
 
-            $pageName = \htmlspecialchars_uni($pageData['name']);
+            $pageName = htmlspecialchars_uni($pageData['name']);
 
-            $pageUrl = \OUGCPages\Core\pageGetLinkBase($pageID);
+            $pageUrl = pageGetLinkBase($pageID);
 
             $menuItems .= eval($templates->render('ougcpages_menu_item'));
         }
@@ -301,7 +324,7 @@ function pre_output_page(string &$pageContents): string
         $menuList .= eval($templates->render('ougcpages_menu_css'));
     }
 
-    $pageContents = \str_replace('<!--OUGC_PAGES_FOOTER-->', $menuList, $pageContents);
+    $pageContents = str_replace('<!--OUGC_PAGES_FOOTER-->', $menuList, $pageContents);
 
     return $pageContents;
 }

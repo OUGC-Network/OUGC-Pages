@@ -28,6 +28,13 @@
 
 namespace OUGCPages\AdminHooks;
 
+use MyBB;
+
+use function admin_redirect;
+use function OUGCPages\Admin\pluginActivate;
+use function OUGCPages\Admin\pluginInfo;
+use function OUGCPages\Core\loadLanguage;
+
 function admin_config_plugins_deactivate(): bool
 {
     global $mybb, $page;
@@ -35,7 +42,7 @@ function admin_config_plugins_deactivate(): bool
     if (
         $mybb->get_input('action') != 'deactivate' ||
         $mybb->get_input('plugin') != 'ougc_pages' ||
-        !$mybb->get_input('uninstall', \MyBB::INPUT_INT)
+        !$mybb->get_input('uninstall', MyBB::INPUT_INT)
     ) {
         return false;
     }
@@ -47,7 +54,7 @@ function admin_config_plugins_deactivate(): bool
     }
 
     if ($mybb->get_input('no')) {
-        \admin_redirect('index.php?module=config-plugins');
+        admin_redirect('index.php?module=config-plugins');
     }
 
     return true;
@@ -57,7 +64,7 @@ function admin_config_menu(&$subMenu): array
 {
     global $lang;
 
-    \OUGCPages\Core\loadLanguage();
+    loadLanguage();
 
     $subMenu[] = [
         'id' => 'ougc_pages',
@@ -72,7 +79,7 @@ function admin_config_action_handler(&$handlerActions): array
 {
     global $lang;
 
-    \OUGCPages\Core\loadLanguage();
+    loadLanguage();
 
     $handlerActions['ougc_pages'] = [
         'active' => 'ougc_pages',
@@ -82,9 +89,9 @@ function admin_config_action_handler(&$handlerActions): array
     return $handlerActions;
 }
 
-function admin_load(): void
+function admin_load()
 {
-    \OUGCPages\Admin\pluginActivate();
+    pluginActivate();
 
     global $modules_dir, $run_module, $action_file, $run_module, $page, $modules_dir_backup, $run_module_backup, $action_file_backup;
 
@@ -109,14 +116,14 @@ function admin_config_permissions(&$permissionActions): array
 {
     global $lang;
 
-    \OUGCPages\Core\loadLanguage();
+    loadLanguage();
 
     $permissionActions['ougc_pages'] = $lang->ougc_pages_config_permissions;
 
     return $permissionActions;
 }
 
-function admin_page_output_header(): void
+function admin_page_output_header()
 {
     global $cache;
 
@@ -127,13 +134,13 @@ function admin_page_output_header(): void
     }
 
     if (!isset($plugins['pages'])) {
-        $plugins['pages'] = \OUGCPages\Admin\pluginInfo()['versioncode'];
+        $plugins['pages'] = pluginInfo()['versioncode'];
     }
 
-    if (\OUGCPages\Admin\pluginInfo()['versioncode'] != $plugins['pages']) {
+    if (pluginInfo()['versioncode'] != $plugins['pages']) {
         global $page, $lang;
 
-        \OUGCPages\Core\loadLanguage();
+        loadLanguage();
 
         $page->extra_messages['ougc_pages'] = [
             'message' => $lang->ougc_pages_error_update,
@@ -142,12 +149,12 @@ function admin_page_output_header(): void
     }
 }
 
-function admin_config_settings_start(): void
+function admin_config_settings_start()
 {
-    \OUGCPages\Core\loadLanguage();
+    loadLanguage();
 }
 
-function admin_config_settings_change(): void
+function admin_config_settings_change()
 {
-    \OUGCPages\Core\loadLanguage();
+    loadLanguage();
 }

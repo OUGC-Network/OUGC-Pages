@@ -28,17 +28,61 @@
 
 // Die if IN_MYBB is not defined, for security reasons.
 
+use function OUGCPages\Admin\categoryFormBuildFields;
+use function OUGCPages\Admin\categoryFormCheckFields;
+use function OUGCPages\Admin\categoryFormParseFields;
+use function OUGCPages\Admin\categoryFormSetFields;
+use function OUGCPages\Admin\pageFormBuildFields;
+use function OUGCPages\Admin\pageFormCheckFields;
+use function OUGCPages\Admin\pageFormParseFields;
+use function OUGCPages\Admin\pageFormSetFields;
+use function OUGCPages\Admin\pluginInfo;
+use function OUGCPages\Core\cacheUpdate;
+use function OUGCPages\Core\categoryBuildLink;
+use function OUGCPages\Core\categoryBuildSelect;
+use function OUGCPages\Core\categoryDelete;
+use function OUGCPages\Core\categoryGet;
+use function OUGCPages\Core\categoryInsert;
+use function OUGCPages\Core\categoryQuery;
+use function OUGCPages\Core\categoryUpdate;
+use function OUGCPages\Core\getQueryLimit;
+use function OUGCPages\Core\getQueryStart;
+use function OUGCPages\Core\importGetUrl;
+use function OUGCPages\Core\loadLanguage;
+use function OUGCPages\Core\logAction;
+use function OUGCPages\Core\multipageBuild;
+use function OUGCPages\Core\pageBuildLink;
+use function OUGCPages\Core\pageDelete;
+use function OUGCPages\Core\pageGet;
+use function OUGCPages\Core\pageInsert;
+use function OUGCPages\Core\pageQuery;
+use function OUGCPages\Core\pageUpdate;
+use function OUGCPages\Core\parseUrl;
+use function OUGCPages\Core\redirect;
+use function OUGCPages\Core\templateGetName;
+use function OUGCPages\Core\urlBuild;
+use function OUGCPages\Core\urlSet;
+
+use const OUGCPages\Admin\FIELDS_DATA_PAGES;
+use const OUGCPages\Core\EXECUTION_HOOK_GLOBAL_END;
+use const OUGCPages\Core\EXECUTION_HOOK_GLOBAL_INTERMEDIATE;
+use const OUGCPages\Core\EXECUTION_HOOK_GLOBAL_START;
+use const OUGCPages\Core\EXECUTION_HOOK_INIT;
+
 defined('IN_MYBB') or die('Direct initialization of this file is not allowed.');
 
 // Set url to use
-\OUGCPages\Core\urlSet('index.php?module=config-ougc_pages');
+urlSet('index.php?module=config-ougc_pages');
 
-\OUGCPages\Core\loadLanguage();
+loadLanguage();
+
+global $mybb, $lang, $templates, $db;
+global $page, $PL;
 
 $moduleTabs = [
     'categoryView' => [
         'title' => $lang->ougc_pages_tab_category,
-        'link' => \OUGCPages\Core\urlBuild(['action' => 'categories']),
+        'link' => urlBuild(['action' => 'categories']),
         'description' => $lang->ougc_pages_tab_category_desc
     ]
 ];
@@ -46,80 +90,84 @@ $moduleTabs = [
 if ($mybb->get_input('manage') != 'pages') {
     $moduleTabs['categoryNew'] = [
         'title' => $lang->ougc_pages_tab_category_add,
-        'link' => \OUGCPages\Core\urlBuild(['action' => 'add']),
+        'link' => urlBuild(['action' => 'add']),
         'description' => $lang->ougc_pages_tab_category_add_desc
     ];
 
     if ($mybb->get_input('action') == 'edit') {
         $moduleTabs['categoryEdit'] = [
             'title' => $lang->ougc_pages_tab_category_edit,
-            'link' => \OUGCPages\Core\urlBuild(['action' => 'edit', 'cid' => $mybb->get_input('cid', \MyBB::INPUT_INT)]),
+            'link' => urlBuild(['action' => 'edit', 'cid' => $mybb->get_input('cid', MyBB::INPUT_INT)]
+            ),
             'description' => $lang->ougc_pages_tab_category_edit_desc,
         ];
     }
 }
 
-$page->add_breadcrumb_item($lang->ougc_pages_manage, \OUGCPages\Core\urlBuild());
+$page->add_breadcrumb_item($lang->ougc_pages_manage, urlBuild());
 
 if ($mybb->get_input('manage') == 'pages') {
-    if (!($categoryData = \OUGCPages\Core\categoryGet($mybb->get_input('cid', \MyBB::INPUT_INT)))) {
-        \OUGCPages\Core\redirect($lang->ougc_pages_error_category_invalid, true);
+    if (!($categoryData = categoryGet($mybb->get_input('cid', MyBB::INPUT_INT)))) {
+        redirect($lang->ougc_pages_error_category_invalid, true);
     }
 
     // Set url to use
-    \OUGCPages\Core\urlSet(
-        \OUGCPages\Core\urlBuild(['manage' => 'pages', 'cid' => $categoryData['cid']])
+    urlSet(
+        urlBuild(['manage' => 'pages', 'cid' => $categoryData['cid']])
     );
 
-    $page->add_breadcrumb_item(\strip_tags($categoryData['name']), \OUGCPages\Core\urlBuild());
+    $page->add_breadcrumb_item(strip_tags($categoryData['name']), urlBuild());
 
     $moduleTabs['pageView'] = [
         'title' => $lang->ougc_pages_manage,
-        'link' => \OUGCPages\Core\urlBuild(),
+        'link' => urlBuild(),
         'description' => $lang->ougc_pages_manage_desc
     ];
 
     $moduleTabs['pageAdd'] = [
         'title' => $lang->ougc_pages_tab_page_add,
-        'link' => \OUGCPages\Core\urlBuild(['action' => 'add']),
+        'link' => urlBuild(['action' => 'add']),
         'description' => $lang->ougc_pages_tab_page_add_desc
     ];
 
     if ($mybb->get_input('action') == 'edit') {
         $moduleTabs['pageEdit'] = [
             'title' => $lang->ougc_pages_tab_page_edit,
-            'link' => \OUGCPages\Core\urlBuild(['action' => 'edit', 'pid' => $mybb->get_input('pid', \MyBB::INPUT_INT)]),
+            'link' => urlBuild(['action' => 'edit', 'pid' => $mybb->get_input('pid', MyBB::INPUT_INT)]
+            ),
             'description' => $lang->ougc_pages_tab_page_edit_desc,
         ];
     }
 
     $moduleTabs['pageImport'] = [
         'title' => $lang->ougc_pages_tab_page_import,
-        'link' => \OUGCPages\Core\urlBuild(['action' => 'import']),
+        'link' => urlBuild(['action' => 'import']),
         'description' => $lang->ougc_pages_tab_page_import_desc
     ];
 
     if ($mybb->get_input('action') == 'add' || $mybb->get_input('action') == 'edit') {
         if (!($newPage = $mybb->get_input('action') === 'add')) {
-            if (!($pageData = \OUGCPages\Core\pageGet($mybb->get_input('pid', \MyBB::INPUT_INT)))) {
-                \OUGCPages\Core\redirect($lang->ougc_pages_error_page_invalid, true);
+            if (!($pageData = pageGet($mybb->get_input('pid', MyBB::INPUT_INT)))) {
+                redirect($lang->ougc_pages_error_page_invalid, true);
             }
 
-            $page->add_breadcrumb_item(\strip_tags($pageData['name']));
+            $page->add_breadcrumb_item(strip_tags($pageData['name']));
 
-            \OUGCPages\Admin\pageFormSetFields($pageData);
+            pageFormSetFields($pageData);
         } else {
             $page->add_breadcrumb_item($lang->ougc_pages_tab_page_add);
 
-            \OUGCPages\Admin\pageFormSetFields();
+            pageFormSetFields();
         }
 
         if (!empty($admin_options['codepress'])) {
-            $page->extra_header .= eval($templates->render(
-                \OUGCPages\Core\templateGetName('adminCodeMirror'),
+            $page->extra_header .= eval(
+            $templates->render(
+                templateGetName('adminCodeMirror'),
                 true,
                 false
-            ));
+            )
+            );
         }
 
         $page->output_header($lang->ougc_pages_manage);
@@ -135,7 +183,7 @@ if ($mybb->get_input('manage') == 'pages') {
         if ($mybb->request_method == 'post') {
             $errors = [];
 
-            $mybb->input['url'] = \OUGCPages\Core\parseUrl($mybb->get_input('url'));
+            $mybb->input['url'] = parseUrl($mybb->get_input('url'));
 
             $whereConditions = ["url='{$db->escape_string($mybb->get_input('url'))}'"];
 
@@ -143,22 +191,22 @@ if ($mybb->get_input('manage') == 'pages') {
                 $whereConditions[] = "pid!='{$pageData['pid']}'";
             }
 
-            if (\OUGCPages\Core\pageQuery(['pid'], $whereConditions, ['limit' => 1])) {
+            if (pageQuery(['pid'], $whereConditions, ['limit' => 1])) {
                 $errors[] = $lang->ougc_pages_error_page_duplicated_url;
             }
 
             // if this is a non-php page then check its contents
-            if (!$mybb->get_input('php', \MyBB::INPUT_INT) && \check_template($mybb->get_input('template'))) {
+            if (!$mybb->get_input('php', MyBB::INPUT_INT) && check_template($mybb->get_input('template'))) {
                 $errors[] = $lang->ougc_pages_error_page_invalid_template;
             }
 
-            \OUGCPages\Admin\pageFormCheckFields($errors);
+            pageFormCheckFields($errors);
 
             if (empty($errors)) {
                 $formData = [];
 
                 if ($newPage) {
-                    $higherOrder = \OUGCPages\Core\pageQuery(
+                    $higherOrder = pageQuery(
                         ['MAX(disporder) as maxOrder'],
                         ["cid='{$categoryData['cid']}'"]
                     );
@@ -170,29 +218,29 @@ if ($mybb->get_input('manage') == 'pages') {
                     }
                 }
 
-                \OUGCPages\Admin\pageFormParseFields($formData);
+                pageFormParseFields($formData);
 
                 if ($newPage) {
-                    $pageID = \OUGCPages\Core\pageInsert($formData);
+                    $pageID = pageInsert($formData);
 
                     $redirectText = 'ougc_pages_success_page_add';
                 } else {
-                    $pageID = \OUGCPages\Core\pageUpdate($formData, $pageData['pid']);
+                    $pageID = pageUpdate($formData, $pageData['pid']);
 
                     $redirectText = 'ougc_pages_success_page_updated';
                 }
 
-                \OUGCPages\Core\cacheUpdate();
+                cacheUpdate();
 
-                \OUGCPages\Core\logAction($pageID);
+                logAction($pageID);
 
                 if ($mybb->get_input('continue')) {
-                    \OUGCPages\Core\urlSet(
-                        \OUGCPages\Core\urlBuild(['action' => 'edit', 'pid' => $pageID])
+                    urlSet(
+                        urlBuild(['action' => 'edit', 'pid' => $pageID])
                     );
                 }
 
-                \OUGCPages\Core\redirect($lang->{$redirectText});
+                redirect($lang->{$redirectText});
             } else {
                 $page->output_inline_error($errors);
             }
@@ -208,26 +256,26 @@ if ($mybb->get_input('manage') == 'pages') {
             $formUrlFields = ['action' => 'edit', 'pid' => $pageData['pid']];
         }
 
-        $formObject = new \Form(
-            \OUGCPages\Core\urlBuild($formUrlFields),
+        $formObject = new Form(
+            urlBuild($formUrlFields),
             'post'
         );
 
-        $formContainer = new \FormContainer(
+        $formContainer = new FormContainer(
             $moduleTabs[$formContainerTitle]['description']
         );
 
         $basicSelectItems = [
-            'cid' => \OUGCPages\Core\categoryBuildSelect(),
+            'cid' => categoryBuildSelect(),
             'init' => [
-                \OUGCPages\Core\EXECUTION_HOOK_INIT => $lang->ougc_pages_form_page_init_init,
-                \OUGCPages\Core\EXECUTION_HOOK_GLOBAL_START => $lang->ougc_pages_form_page_init_start,
-                \OUGCPages\Core\EXECUTION_HOOK_GLOBAL_INTERMEDIATE => $lang->ougc_pages_form_page_init_intermediate,
-                \OUGCPages\Core\EXECUTION_HOOK_GLOBAL_END => $lang->ougc_pages_form_page_init_end,
+                EXECUTION_HOOK_INIT => $lang->ougc_pages_form_page_init_init,
+                EXECUTION_HOOK_GLOBAL_START => $lang->ougc_pages_form_page_init_start,
+                EXECUTION_HOOK_GLOBAL_INTERMEDIATE => $lang->ougc_pages_form_page_init_intermediate,
+                EXECUTION_HOOK_GLOBAL_END => $lang->ougc_pages_form_page_init_end,
             ]
         ];
 
-        \OUGCPages\Admin\pageFormBuildFields($formContainer, $formObject, $basicSelectItems);
+        pageFormBuildFields($formContainer, $formObject, $basicSelectItems);
 
         $formContainer->end();
 
@@ -240,43 +288,45 @@ if ($mybb->get_input('manage') == 'pages') {
         $formObject->end();
 
         if (!empty($admin_options['codepress'])) {
-            echo eval($templates->render(
-                \OUGCPages\Core\templateGetName('adminCodeMirrorFooter'),
+            echo eval(
+            $templates->render(
+                templateGetName('adminCodeMirrorFooter'),
                 true,
                 false
-            ));
+            )
+            );
         }
 
         $page->output_footer();
-    } else if ($mybb->get_input('action') == 'delete') {
-        if (!($pageData = \OUGCPages\Core\pageGet($mybb->get_input('pid', \MyBB::INPUT_INT)))) {
-            \OUGCPages\Core\redirect($lang->ougc_pages_error_page_invalid, true);
+    } elseif ($mybb->get_input('action') == 'delete') {
+        if (!($pageData = pageGet($mybb->get_input('pid', MyBB::INPUT_INT)))) {
+            redirect($lang->ougc_pages_error_page_invalid, true);
         }
 
         if ($mybb->request_method == 'post') {
-            if (!\verify_post_check($mybb->get_input('my_post_key'), true)) {
-                \OUGCPages\Core\redirect($lang->invalid_post_verify_key2, true);
+            if (!verify_post_check($mybb->get_input('my_post_key'), true)) {
+                redirect($lang->invalid_post_verify_key2, true);
             }
 
             if ($mybb->get_input('no')) {
-                \OUGCPages\Core\redirect();
+                redirect();
             }
 
-            \OUGCPages\Core\pageDelete($pageData['pid']);
+            pageDelete($pageData['pid']);
 
-            \OUGCPages\Core\logAction($pageData['pid']);
+            logAction($pageData['pid']);
 
-            \OUGCPages\Core\cacheUpdate();
+            cacheUpdate();
 
-            \OUGCPages\Core\redirect($lang->ougc_pages_success_page_deleted);
+            redirect($lang->ougc_pages_success_page_deleted);
         }
 
         $page->output_confirm_action(
-            \OUGCPages\Core\urlBuild(['action' => 'delete', 'pid' => $pageData['pid']])
+            urlBuild(['action' => 'delete', 'pid' => $pageData['pid']])
         );
-    } else if ($mybb->get_input('action') == 'update') {
-        if (!($pageData = \OUGCPages\Core\pageGet($mybb->get_input('pid', \MyBB::INPUT_INT)))) {
-            \OUGCPages\Core\redirect($lang->ougc_pages_error_page_invalid, true);
+    } elseif ($mybb->get_input('action') == 'update') {
+        if (!($pageData = pageGet($mybb->get_input('pid', MyBB::INPUT_INT)))) {
+            redirect($lang->ougc_pages_error_page_invalid, true);
         }
 
         $statusUpdate = 1;
@@ -289,19 +339,19 @@ if ($mybb->get_input('manage') == 'pages') {
             $updateText = 'ougc_pages_success_page_disabled';
         }
 
-        \OUGCPages\Core\pageUpdate(
+        pageUpdate(
             ['visible' => $statusUpdate],
             $pageData['pid']
         );
 
-        \OUGCPages\Core\logAction($pageData['pid']);
+        logAction($pageData['pid']);
 
-        \OUGCPages\Core\cacheUpdate();
+        cacheUpdate();
 
-        \OUGCPages\Core\redirect($lang->{$updateText});
-    } else if ($mybb->get_input('action') == 'export') {
-        if (!($page = \OUGCPages\Core\pageGet($mybb->get_input('pid', \MyBB::INPUT_INT)))) {
-            \OUGCPages\Core\redirect($lang->ougc_pages_error_invalidpage, true);
+        redirect($lang->{$updateText});
+    } elseif ($mybb->get_input('action') == 'export') {
+        if (!($page = pageGet($mybb->get_input('pid', MyBB::INPUT_INT)))) {
+            redirect($lang->ougc_pages_error_invalidpage, true);
         }
 
         $info = ougc_pages_info();
@@ -319,8 +369,8 @@ if ($mybb->get_input('manage') == 'pages') {
             'template' => $page['template'],
             'versioncode' => $info['versioncode']
         ], 'OUGC_Pages_' . $page['name'] . '_' . $info['versioncode'] . '.xml');
-    } else if ($mybb->get_input('action') == 'import') {
-        $page->add_breadcrumb_item(\htmlspecialchars_uni($categoryData['name']));
+    } elseif ($mybb->get_input('action') == 'import') {
+        $page->add_breadcrumb_item(htmlspecialchars_uni($categoryData['name']));
 
         $page->output_header($lang->ougc_pages_manage);
 
@@ -330,10 +380,10 @@ if ($mybb->get_input('manage') == 'pages') {
             $errors = [];
 
             if ($mybb->get_input('file_url')) {
-                if (!($contents = \fetch_remote_file($mybb->get_input('file_url')))) {
+                if (!($contents = fetch_remote_file($mybb->get_input('file_url')))) {
                     $errors[] = $lang->error_local_file;
                 }
-            } else if ($_FILES['local_file'] && $_FILES['local_file']['error'] != 4) {
+            } elseif ($_FILES['local_file'] && $_FILES['local_file']['error'] != 4) {
                 // Find out if there was an error with the uploaded file
                 if ($_FILES['local_file']['error'] != 0) {
                     $errors[] = $lang->error_uploadfailed . $lang->error_uploadfailed_detail;
@@ -355,7 +405,10 @@ if ($mybb->get_input('manage') == 'pages') {
                             $errors[] = $lang->error_uploadfailed_php7;
                             break;
                         default:
-                            $errors[] = $lang->sprintf($lang->error_uploadfailed_phpx, $_FILES['local_file']['error']);
+                            $errors[] = $lang->sprintf(
+                                $lang->error_uploadfailed_phpx,
+                                $_FILES['local_file']['error']
+                            );
                             break;
                     }
                 }
@@ -385,8 +438,8 @@ if ($mybb->get_input('manage') == 'pages') {
                 $isValidVersion = true;
 
                 if ($xmlImportPL = @$PL->xml_import($contents)) {
-                    if (!$mybb->get_input('ignore_version', \MyBB::INPUT_INT)) {
-                        $isValidVersion = (float)$xmlImportPL['versioncode'] == \OUGCPages\Admin\pluginInfo()['versioncode'];
+                    if (!$mybb->get_input('ignore_version', MyBB::INPUT_INT)) {
+                        $isValidVersion = (float)$xmlImportPL['versioncode'] == pluginInfo()['versioncode'];
                     }
 
                     if ($isValidVersion) {
@@ -407,7 +460,7 @@ if ($mybb->get_input('manage') == 'pages') {
 
                         unset($treeContents);
 
-                        if (!$mybb->get_input('ignore_version', \MyBB::INPUT_INT)) {
+                        if (!$mybb->get_input('ignore_version', MyBB::INPUT_INT)) {
                             $isValidVersion = (float)$pageManagerFile['attributes']['version'] == '1.5.2';
                         }
 
@@ -418,7 +471,9 @@ if ($mybb->get_input('manage') == 'pages') {
                         unset($pageManagerFile);
 
                         if (!empty($pageManagerContents)) {
-                            if (!($template = base64_decode($pageManagerContents['template']['value']))) {
+                            if (!($template = base64_decode(
+                                $pageManagerContents['template']['value']
+                            ))) {
                                 $template = $pageManagerContents['template']['value'];
                             }
 
@@ -449,7 +504,7 @@ if ($mybb->get_input('manage') == 'pages') {
                 if (empty($errors)) {
                     $xmlImport['cid'] = $categoryData['cid'];
 
-                    $higherOrder = \OUGCPages\Core\pageQuery(
+                    $higherOrder = pageQuery(
                         ['MAX(disporder) as maxOrder'],
                         ["cid='{$categoryData['cid']}'"]
                     );
@@ -460,11 +515,14 @@ if ($mybb->get_input('manage') == 'pages') {
                         $xmlImport['disporder'] += $higherOrder[0]['maxOrder'];
                     }
 
-                    $xmlImport['url'] = \OUGCPages\Core\importGetUrl($xmlImport['name'], $xmlImport['url']);
+                    $xmlImport['url'] = importGetUrl(
+                        $xmlImport['name'],
+                        $xmlImport['url']
+                    );
 
                     $pageData = [];
 
-                    foreach (\OUGCPages\Admin\FIELDS_DATA_PAGES as $fieldKey => $fieldData) {
+                    foreach (FIELDS_DATA_PAGES as $fieldKey => $fieldData) {
                         if (!isset($xmlImport[$fieldKey])) {
                             continue;
                         }
@@ -474,13 +532,13 @@ if ($mybb->get_input('manage') == 'pages') {
 
                     unset($fieldKey, $fieldData, $xmlImport);
 
-                    $pageID = \OUGCPages\Core\pageInsert($pageData);
+                    $pageID = pageInsert($pageData);
 
-                    \OUGCPages\Core\cacheUpdate();
+                    cacheUpdate();
 
-                    \OUGCPages\Core\logAction($pageID);
+                    logAction($pageID);
 
-                    \OUGCPages\Core\redirect($lang->ougc_pages_success_imported);
+                    redirect($lang->ougc_pages_success_imported);
                 }
             }
 
@@ -489,9 +547,9 @@ if ($mybb->get_input('manage') == 'pages') {
             }
         }
 
-        $form = new \Form(\OUGCPages\Core\urlBuild(['action' => 'import']), 'post', '', true);
+        $form = new Form(urlBuild(['action' => 'import']), 'post', '', true);
 
-        $formContainer = new \FormContainer($moduleTabs['pageImport']['description']);
+        $formContainer = new FormContainer($moduleTabs['pageImport']['description']);
 
         $formContainer->output_row(
             $lang->ougc_pages_form_import,
@@ -508,7 +566,10 @@ if ($mybb->get_input('manage') == 'pages') {
         $formContainer->output_row(
             $lang->ougc_pages_form_import_ignore_version,
             $lang->ougc_pages_form_import_ignore_version_desc,
-            $form->generate_yes_no_radio('ignore_version', $mybb->get_input('ignore_version', \MyBB::INPUT_INT))
+            $form->generate_yes_no_radio(
+                'ignore_version',
+                $mybb->get_input('ignore_version', MyBB::INPUT_INT)
+            )
         );
 
         $formContainer->end();
@@ -522,74 +583,90 @@ if ($mybb->get_input('manage') == 'pages') {
 
         $page->output_footer();
     } else {
-        $page->add_breadcrumb_item(\htmlspecialchars_uni($categoryData['name']));
+        $page->add_breadcrumb_item(htmlspecialchars_uni($categoryData['name']));
 
         $page->output_header($lang->ougc_pages_manage);
 
         $page->output_nav_tabs($moduleTabs, 'pageView');
 
-        $tableObject = new \Table;
+        $tableObject = new Table();
 
         $tableObject->construct_header($lang->ougc_pages_category_name);
-        $tableObject->construct_header($lang->ougc_pages_category_order, ['width' => '15%', 'class' => 'align_center']);
-        $tableObject->construct_header($lang->ougc_pages_category_status, ['width' => '15%', 'class' => 'align_center']);
+        $tableObject->construct_header(
+            $lang->ougc_pages_category_order,
+            ['width' => '15%', 'class' => 'align_center']
+        );
+        $tableObject->construct_header(
+            $lang->ougc_pages_category_status,
+            ['width' => '15%', 'class' => 'align_center']
+        );
         $tableObject->construct_header($lang->options, ['width' => '15%', 'class' => 'align_center']);
 
-        if (!($totalPages = \OUGCPages\Core\pageQuery(['COUNT(pid) AS pages'], ["cid='{$categoryData['cid']}'"])[0]['pages'])) {
-            $tableObject->construct_cell($lang->ougc_pages_category_empty, ['colspan' => 4, 'class' => 'align_center']);
+        if (!($totalPages = pageQuery(['COUNT(pid) AS pages'],
+            ["cid='{$categoryData['cid']}'"])[0]['pages'])) {
+            $tableObject->construct_cell(
+                $lang->ougc_pages_category_empty,
+                ['colspan' => 4, 'class' => 'align_center']
+            );
 
             $tableObject->construct_row();
 
             $tableObject->output($moduleTabs['pageView']['title']);
         } else {
-            $multiPage = \OUGCPages\Core\multipageBuild($totalPages, \OUGCPages\Core\urlBuild());
+            $multiPage = multipageBuild($totalPages, urlBuild());
 
             if ($mybb->request_method == 'post') {
-                if (!\verify_post_check($mybb->get_input('my_post_key'), true)) {
-                    \OUGCPages\Core\redirect($lang->invalid_post_verify_key2, true);
+                if (!verify_post_check($mybb->get_input('my_post_key'), true)) {
+                    redirect($lang->invalid_post_verify_key2, true);
                 }
 
-                foreach ($mybb->get_input('disporder', \MyBB::INPUT_ARRAY) as $pageID => $newOrder) {
-                    \OUGCPages\Core\pageUpdate(
+                foreach ($mybb->get_input('disporder', MyBB::INPUT_ARRAY) as $pageID => $newOrder) {
+                    pageUpdate(
                         ['disporder' => $newOrder],
                         $pageID
                     );
                 }
 
-                \OUGCPages\Core\cacheUpdate();
+                cacheUpdate();
 
-                \OUGCPages\Core\redirect($lang->ougc_pages_success_page_updated_order);
+                redirect($lang->ougc_pages_success_page_updated_order);
             }
 
             echo $multiPage;
 
-            $pagesList = \OUGCPages\Core\pageQuery(['*'], ["cid='{$categoryData['cid']}'"], [
-                'limit_start' => \OUGCPages\Core\getQueryStart(),
-                'limit' => \OUGCPages\Core\getQueryLimit(),
+            $pagesList = pageQuery(['*'], ["cid='{$categoryData['cid']}'"], [
+                'limit_start' => getQueryStart(),
+                'limit' => getQueryLimit(),
                 'order_by' => 'disporder'
             ]);
 
-            $formObject = new \Form(\OUGCPages\Core\urlBuild(), 'post');
+            $formObject = new Form(urlBuild(), 'post');
 
             foreach ($pagesList as $pageData) {
-                $manageUrl = \OUGCPages\Core\urlBuild(['manage' => 'pages', 'action' => 'edit', 'pid' => $pageData['pid']]);
+                $manageUrl = urlBuild(
+                    ['manage' => 'pages', 'action' => 'edit', 'pid' => $pageData['pid']]
+                );
 
-                $pageName = \htmlspecialchars_uni($pageData['name']);
+                $pageName = htmlspecialchars_uni($pageData['name']);
 
                 $pageLink = '---';
 
                 if ($pageData['visible'] && $pageData['allowedGroups'] !== '') {
-                    $pageLink = \OUGCPages\Core\pageBuildLink(
+                    $pageLink = pageBuildLink(
                         $lang->ougc_pages_page_view,
                         $pageData['pid']
                     );
                 }
 
-                $tableObject->construct_cell(eval($templates->render(
-                    \OUGCPages\Core\templateGetName('adminPageName'),
-                    true,
-                    false
-                )));
+                $tableObject->construct_cell(
+                    eval(
+                    $templates->render(
+                        templateGetName('adminPageName'),
+                        true,
+                        false
+                    )
+                    )
+                );
 
                 $tableObject->construct_cell(
                     $formObject->generate_text_box(
@@ -600,7 +677,7 @@ if ($mybb->get_input('manage') == 'pages') {
                     ['class' => 'align_center']
                 );
 
-                $updateStatusUrl = \OUGCPages\Core\urlBuild([
+                $updateStatusUrl = urlBuild([
                     'action' => 'update',
                     'pid' => $pageData['pid'],
                     'my_post_key' => $mybb->post_code
@@ -616,23 +693,37 @@ if ($mybb->get_input('manage') == 'pages') {
                     $updateStatusText = $lang->ougc_pages_category_enabled;
                 }
 
-                $tableObject->construct_cell(eval($templates->render(
-                    \OUGCPages\Core\templateGetName('adminCategoryStatus'),
-                    true,
-                    false
-                )), ['class' => 'align_center']);
+                $tableObject->construct_cell(
+                    eval(
+                    $templates->render(
+                        templateGetName('adminCategoryStatus'),
+                        true,
+                        false
+                    )
+                    ),
+                    ['class' => 'align_center']
+                );
 
-                $popup = new \PopupMenu('page_' . $pageData['pid'], $lang->options);
+                $popup = new PopupMenu('page_' . $pageData['pid'], $lang->options);
 
-                $popup->add_item($lang->edit, \OUGCPages\Core\urlBuild(['action' => 'edit', 'pid' => $pageData['pid']]));
+                $popup->add_item(
+                    $lang->edit,
+                    urlBuild(['action' => 'edit', 'pid' => $pageData['pid']])
+                );
 
-                $popup->add_item($lang->delete, \OUGCPages\Core\urlBuild(['action' => 'delete', 'pid' => $pageData['pid']]));
+                $popup->add_item(
+                    $lang->delete,
+                    urlBuild(['action' => 'delete', 'pid' => $pageData['pid']])
+                );
 
-                $popup->add_item($lang->ougc_pages_page_export, \OUGCPages\Core\urlBuild([
-                    'action' => 'export',
-                    'pid' => $pageData['pid'],
-                    'my_post_key' => $mybb->post_code
-                ]));
+                $popup->add_item(
+                    $lang->ougc_pages_page_export,
+                    urlBuild([
+                        'action' => 'export',
+                        'pid' => $pageData['pid'],
+                        'my_post_key' => $mybb->post_code
+                    ])
+                );
 
                 $tableObject->construct_cell($popup->fetch(), ['class' => 'align_center']);
 
@@ -651,290 +742,317 @@ if ($mybb->get_input('manage') == 'pages') {
 
         $page->output_footer();
     }
-} else if ($mybb->get_input('action') == 'add' || $mybb->get_input('action') == 'edit') {
-    if (!($newCategory = $mybb->get_input('action') === 'add')) {
-        if (!($categoryData = \OUGCPages\Core\categoryGet($mybb->get_input('cid', \MyBB::INPUT_INT)))) {
-            \OUGCPages\Core\redirect($lang->ougc_pages_error_category_invalid, true);
+} else {
+    if ($mybb->get_input('action') == 'add' || $mybb->get_input('action') == 'edit') {
+        if (!($newCategory = $mybb->get_input('action') === 'add')) {
+            if (!($categoryData = categoryGet($mybb->get_input('cid', MyBB::INPUT_INT)))) {
+                redirect($lang->ougc_pages_error_category_invalid, true);
+            }
+
+            categoryFormSetFields($categoryData);
+
+            $page->add_breadcrumb_item(strip_tags($categoryData['name']));
+        } else {
+            categoryFormSetFields();
         }
 
-        \OUGCPages\Admin\categoryFormSetFields($categoryData);
+        $page->output_header($lang->ougc_pages_manage);
 
-        $page->add_breadcrumb_item(\strip_tags($categoryData['name']));
-    } else {
-        \OUGCPages\Admin\categoryFormSetFields();
-    }
+        $navTabsString = $formContainerTitle = 'categoryNew';
 
-    $page->output_header($lang->ougc_pages_manage);
-
-    $navTabsString = $formContainerTitle = 'categoryNew';
-
-    $formUrlFields = ['action' => 'add'];
-
-    if (!$newCategory) {
-        $navTabsString = $formContainerTitle = 'categoryEdit';
-
-        $formUrlFields = ['action' => 'edit', 'cid' => $categoryData['cid']];
-    }
-
-    $page->output_nav_tabs($moduleTabs, $navTabsString);
-
-    if ($mybb->request_method == 'post') {
-        $errors = [];
-
-        $mybb->input['url'] = \OUGCPages\Core\parseUrl($mybb->get_input('url'));
-
-        $whereConditions = ["url='{$db->escape_string($mybb->get_input('url'))}'"];
+        $formUrlFields = ['action' => 'add'];
 
         if (!$newCategory) {
-            $whereConditions[] = "cid!='{$categoryData['cid']}'";
+            $navTabsString = $formContainerTitle = 'categoryEdit';
+
+            $formUrlFields = ['action' => 'edit', 'cid' => $categoryData['cid']];
         }
 
-        if (\OUGCPages\Core\categoryQuery(['cid'], $whereConditions, ['limit' => 1])) {
-            $errors[] = $lang->ougc_pages_error_category_duplicated_url;
-        }
-
-        \OUGCPages\Admin\categoryFormCheckFields($errors);
-
-        if (empty($errors)) {
-            $formData = [];
-
-            if ($newCategory) {
-                $higherOrder = \OUGCPages\Core\categoryQuery(
-                    ['MAX(disporder) as maxOrder']
-                );
-
-                $formData['disporder'] = 1;
-
-                if (!empty($higherOrder[0]['maxOrder'])) {
-                    $formData['disporder'] += $higherOrder[0]['maxOrder'];
-                }
-            }
-
-            \OUGCPages\Admin\categoryFormParseFields($formData);
-
-            if ($newCategory) {
-                $categoryID = \OUGCPages\Core\categoryInsert($formData);
-            } else {
-                $categoryID = \OUGCPages\Core\categoryUpdate($formData, $categoryData['cid']);
-            }
-
-            \OUGCPages\Core\cacheUpdate();
-
-            \OUGCPages\Core\logAction($categoryID);
-
-            if ($newCategory) {
-                \OUGCPages\Core\redirect($lang->ougc_pages_success_category_add);
-            }
-
-            \OUGCPages\Core\redirect($lang->ougc_pages_success_category_updated);
-        } else {
-            $page->output_inline_error($errors);
-        }
-    }
-
-    $formObject = new \Form(
-        \OUGCPages\Core\urlBuild($formUrlFields),
-        'post'
-    );
-
-    $formContainer = new \FormContainer(
-        $moduleTabs[$formContainerTitle]['description']
-    );
-
-    /*$basicSelectItems = [
-      'buildMenu' => [
-           0 => $lang->ougc_pages_form_category_buildMenu_none,
-           1 => $lang->ougc_pages_form_category_buildMenu_header,
-           2 => $lang->ougc_pages_form_category_buildMenu_footer
-       ]
-   ];*/
-
-    \OUGCPages\Admin\categoryFormBuildFields($formContainer, $formObject/*, $basicSelectItems*/);
-
-    $formContainer->end();
-
-    $formObject->output_submit_wrapper([
-        $formObject->generate_submit_button($lang->ougc_pages_button_submit),
-        $formObject->generate_reset_button($lang->reset)
-    ]);
-
-    $formObject->end();
-
-    $page->output_footer();
-} else if ($mybb->get_input('action') == 'delete') {
-    if (!($categoryData = \OUGCPages\Core\categoryGet($mybb->get_input('cid', \MyBB::INPUT_INT)))) {
-        \OUGCPages\Core\redirect($lang->ougc_pages_error_category_invalid, true);
-    }
-
-    if ($mybb->request_method == 'post') {
-        if (!\verify_post_check($mybb->get_input('my_post_key'), true)) {
-            \OUGCPages\Core\redirect($lang->invalid_post_verify_key2, true);
-        }
-
-        if ($mybb->get_input('no')) {
-            \OUGCPages\Core\redirect();
-        }
-
-        \OUGCPages\Core\categoryDelete($categoryData['cid']);
-
-        \OUGCPages\Core\logAction($categoryData['cid']);
-
-        \OUGCPages\Core\cacheUpdate();
-
-        \OUGCPages\Core\redirect($lang->ougc_pages_success_category_deleted);
-    }
-
-    $page->output_confirm_action(
-        \OUGCPages\Core\urlBuild(['action' => 'delete', 'cid' => $categoryData['cid']])
-    );
-} else if ($mybb->get_input('action') == 'update') {
-    if (!($categoryData = \OUGCPages\Core\categoryGet($mybb->get_input('cid', \MyBB::INPUT_INT)))) {
-        \OUGCPages\Core\redirect($lang->ougc_pages_error_category_invalid, true);
-    }
-
-    if (!\verify_post_check($mybb->get_input('my_post_key'), true)) {
-        \OUGCPages\Core\redirect($lang->invalid_post_verify_key2, true);
-    }
-
-    $statusUpdate = 1;
-
-    $updateText = 'ougc_pages_success_category_enabled';
-
-    if ($categoryData['visible']) {
-        $statusUpdate = 0;
-
-        $updateText = 'ougc_pages_success_category_disabled';
-    }
-
-    \OUGCPages\Core\categoryUpdate(
-        ['visible' => $statusUpdate],
-        $categoryData['cid']
-    );
-
-    \OUGCPages\Core\logAction($categoryData['cid']);
-
-    \OUGCPages\Core\cacheUpdate();
-
-    \OUGCPages\Core\redirect($lang->{$updateText});
-} else {
-    $page->add_breadcrumb_item($moduleTabs['categoryView']['title'], \OUGCPages\Core\urlBuild());
-    $page->output_header($lang->ougc_pages_manage);
-    $page->output_nav_tabs($moduleTabs, 'categoryView');
-
-    $tableObject = new \Table;
-
-    $tableObject->construct_header($lang->ougc_pages_category_name);
-    $tableObject->construct_header($lang->ougc_pages_category_order, ['width' => '15%', 'class' => 'align_center']);
-    $tableObject->construct_header($lang->ougc_pages_category_status, ['width' => '15%', 'class' => 'align_center']);
-    $tableObject->construct_header($lang->options, ['width' => '15%', 'class' => 'align_center']);
-
-    if (!($totalCategories = \OUGCPages\Core\categoryQuery(['COUNT(cid) AS categories'])[0]['categories'])) {
-        $tableObject->construct_cell($lang->ougc_pages_category_empty, ['colspan' => 4, 'class' => 'align_center']);
-
-        $tableObject->construct_row();
-
-        $tableObject->output($moduleTabs['categoryView']['title']);
-    } else {
-        $multiPage = \OUGCPages\Core\multipageBuild($totalCategories, \OUGCPages\Core\urlBuild());
+        $page->output_nav_tabs($moduleTabs, $navTabsString);
 
         if ($mybb->request_method == 'post') {
-            if (!\verify_post_check($mybb->get_input('my_post_key'), true)) {
-                \OUGCPages\Core\redirect($lang->invalid_post_verify_key2, true);
+            $errors = [];
+
+            $mybb->input['url'] = parseUrl($mybb->get_input('url'));
+
+            $whereConditions = ["url='{$db->escape_string($mybb->get_input('url'))}'"];
+
+            if (!$newCategory) {
+                $whereConditions[] = "cid!='{$categoryData['cid']}'";
             }
 
-            foreach ($mybb->get_input('disporder', \MyBB::INPUT_ARRAY) as $categoryID => $newOrder) {
-                \OUGCPages\Core\categoryUpdate(
-                    ['disporder' => $newOrder],
-                    $categoryID
-                );
+            if (categoryQuery(['cid'], $whereConditions, ['limit' => 1])) {
+                $errors[] = $lang->ougc_pages_error_category_duplicated_url;
             }
 
-            \OUGCPages\Core\cacheUpdate();
+            categoryFormCheckFields($errors);
 
-            \OUGCPages\Core\redirect($lang->ougc_pages_success_category_updated_order);
+            if (empty($errors)) {
+                $formData = [];
+
+                if ($newCategory) {
+                    $higherOrder = categoryQuery(
+                        ['MAX(disporder) as maxOrder']
+                    );
+
+                    $formData['disporder'] = 1;
+
+                    if (!empty($higherOrder[0]['maxOrder'])) {
+                        $formData['disporder'] += $higherOrder[0]['maxOrder'];
+                    }
+                }
+
+                categoryFormParseFields($formData);
+
+                if ($newCategory) {
+                    $categoryID = categoryInsert($formData);
+                } else {
+                    $categoryID = categoryUpdate($formData, $categoryData['cid']);
+                }
+
+                cacheUpdate();
+
+                logAction($categoryID);
+
+                if ($newCategory) {
+                    redirect($lang->ougc_pages_success_category_add);
+                }
+
+                redirect($lang->ougc_pages_success_category_updated);
+            } else {
+                $page->output_inline_error($errors);
+            }
         }
 
-        echo $multiPage;
+        $formObject = new Form(
+            urlBuild($formUrlFields),
+            'post'
+        );
 
-        $categoriesList = \OUGCPages\Core\categoryQuery(['*'], ['1=1'], [
-            'limit_start' => \OUGCPages\Core\getQueryStart(),
-            'limit' => \OUGCPages\Core\getQueryLimit(),
-            'order_by' => 'disporder'
-        ]);
+        $formContainer = new FormContainer(
+            $moduleTabs[$formContainerTitle]['description']
+        );
 
-        $formObject = new \Form(\OUGCPages\Core\urlBuild(), 'post');
+        /*$basicSelectItems = [
+          'buildMenu' => [
+               0 => $lang->ougc_pages_form_category_buildMenu_none,
+               1 => $lang->ougc_pages_form_category_buildMenu_header,
+               2 => $lang->ougc_pages_form_category_buildMenu_footer
+           ]
+       ];*/
 
-        foreach ($categoriesList as $categoryData) {
-            $manageUrl = \OUGCPages\Core\urlBuild(['manage' => 'pages', 'cid' => $categoryData['cid']]);
+        categoryFormBuildFields($formContainer, $formObject/*, $basicSelectItems*/);
 
-            $categoryName = \htmlspecialchars_uni($categoryData['name']);
-
-            $categoryLink = '---';
-
-            if ($categoryData['visible'] && $categoryData['allowedGroups'] !== '') {
-                $categoryLink = \OUGCPages\Core\categoryBuildLink(
-                    $lang->ougc_pages_category_view,
-                    $categoryData['cid']
-                );
-            }
-
-            $tableObject->construct_cell(eval($templates->render(
-                \OUGCPages\Core\templateGetName('adminCategoryName'),
-                true,
-                false
-            )));
-
-            $tableObject->construct_cell(
-                $formObject->generate_text_box(
-                    "disporder[{$categoryData['cid']}]",
-                    $categoryData['disporder'],
-                    ['style' => 'text-align: center; width: 30px;']
-                ),
-                ['class' => 'align_center']
-            );
-
-            $updateStatusUrl = \OUGCPages\Core\urlBuild([
-                'action' => 'update',
-                'cid' => $categoryData['cid'],
-                'my_post_key' => $mybb->post_code
-            ]);
-
-            $updateStatusBullet = 'off';
-
-            $updateStatusText = $lang->ougc_pages_category_disabled;
-
-            if ($categoryData['visible']) {
-                $updateStatusBullet = 'on';
-
-                $updateStatusText = $lang->ougc_pages_category_enabled;
-            }
-
-            $tableObject->construct_cell(eval($templates->render(
-                \OUGCPages\Core\templateGetName('adminCategoryStatus'),
-                true,
-                false
-            )), ['class' => 'align_center']);
-
-            $popup = new \PopupMenu('category_' . $categoryData['cid'], $lang->options);
-
-            $popup->add_item($lang->edit, \OUGCPages\Core\urlBuild(['action' => 'edit', 'cid' => $categoryData['cid']]));
-
-            $popup->add_item($lang->delete, \OUGCPages\Core\urlBuild(['action' => 'delete', 'cid' => $categoryData['cid']]));
-
-            $tableObject->construct_cell($popup->fetch(), ['class' => 'align_center']);
-
-            $tableObject->construct_row();
-        }
-
-        $tableObject->output($moduleTabs['categoryView']['title']);
+        $formContainer->end();
 
         $formObject->output_submit_wrapper([
-            $formObject->generate_submit_button($lang->ougc_pages_button_update_order),
+            $formObject->generate_submit_button($lang->ougc_pages_button_submit),
             $formObject->generate_reset_button($lang->reset)
         ]);
 
         $formObject->end();
-    }
 
-    $page->output_footer();
+        $page->output_footer();
+    } elseif ($mybb->get_input('action') == 'delete') {
+        if (!($categoryData = categoryGet($mybb->get_input('cid', MyBB::INPUT_INT)))) {
+            redirect($lang->ougc_pages_error_category_invalid, true);
+        }
+
+        if ($mybb->request_method == 'post') {
+            if (!verify_post_check($mybb->get_input('my_post_key'), true)) {
+                redirect($lang->invalid_post_verify_key2, true);
+            }
+
+            if ($mybb->get_input('no')) {
+                redirect();
+            }
+
+            categoryDelete($categoryData['cid']);
+
+            logAction($categoryData['cid']);
+
+            cacheUpdate();
+
+            redirect($lang->ougc_pages_success_category_deleted);
+        }
+
+        $page->output_confirm_action(
+            urlBuild(['action' => 'delete', 'cid' => $categoryData['cid']])
+        );
+    } elseif ($mybb->get_input('action') == 'update') {
+        if (!($categoryData = categoryGet($mybb->get_input('cid', MyBB::INPUT_INT)))) {
+            redirect($lang->ougc_pages_error_category_invalid, true);
+        }
+
+        if (!verify_post_check($mybb->get_input('my_post_key'), true)) {
+            redirect($lang->invalid_post_verify_key2, true);
+        }
+
+        $statusUpdate = 1;
+
+        $updateText = 'ougc_pages_success_category_enabled';
+
+        if ($categoryData['visible']) {
+            $statusUpdate = 0;
+
+            $updateText = 'ougc_pages_success_category_disabled';
+        }
+
+        categoryUpdate(
+            ['visible' => $statusUpdate],
+            $categoryData['cid']
+        );
+
+        logAction($categoryData['cid']);
+
+        cacheUpdate();
+
+        redirect($lang->{$updateText});
+    } else {
+        $page->add_breadcrumb_item($moduleTabs['categoryView']['title'], urlBuild());
+        $page->output_header($lang->ougc_pages_manage);
+        $page->output_nav_tabs($moduleTabs, 'categoryView');
+
+        $tableObject = new Table();
+
+        $tableObject->construct_header($lang->ougc_pages_category_name);
+        $tableObject->construct_header(
+            $lang->ougc_pages_category_order,
+            ['width' => '15%', 'class' => 'align_center']
+        );
+        $tableObject->construct_header(
+            $lang->ougc_pages_category_status,
+            ['width' => '15%', 'class' => 'align_center']
+        );
+        $tableObject->construct_header($lang->options, ['width' => '15%', 'class' => 'align_center']);
+
+        if (!($totalCategories = categoryQuery(['COUNT(cid) AS categories']
+        )[0]['categories'])) {
+            $tableObject->construct_cell(
+                $lang->ougc_pages_category_empty,
+                ['colspan' => 4, 'class' => 'align_center']
+            );
+
+            $tableObject->construct_row();
+
+            $tableObject->output($moduleTabs['categoryView']['title']);
+        } else {
+            $multiPage = multipageBuild($totalCategories, urlBuild());
+
+            if ($mybb->request_method == 'post') {
+                if (!verify_post_check($mybb->get_input('my_post_key'), true)) {
+                    redirect($lang->invalid_post_verify_key2, true);
+                }
+
+                foreach ($mybb->get_input('disporder', MyBB::INPUT_ARRAY) as $categoryID => $newOrder) {
+                    categoryUpdate(
+                        ['disporder' => $newOrder],
+                        $categoryID
+                    );
+                }
+
+                cacheUpdate();
+
+                redirect($lang->ougc_pages_success_category_updated_order);
+            }
+
+            echo $multiPage;
+
+            $categoriesList = categoryQuery(['*'], ['1=1'], [
+                'limit_start' => getQueryStart(),
+                'limit' => getQueryLimit(),
+                'order_by' => 'disporder'
+            ]);
+
+            $formObject = new Form(urlBuild(), 'post');
+
+            foreach ($categoriesList as $categoryData) {
+                $manageUrl = urlBuild(['manage' => 'pages', 'cid' => $categoryData['cid']]);
+
+                $categoryName = htmlspecialchars_uni($categoryData['name']);
+
+                $categoryLink = '---';
+
+                if ($categoryData['visible'] && $categoryData['allowedGroups'] !== '') {
+                    $categoryLink = categoryBuildLink(
+                        $lang->ougc_pages_category_view,
+                        $categoryData['cid']
+                    );
+                }
+
+                $tableObject->construct_cell(
+                    eval(
+                    $templates->render(
+                        templateGetName('adminCategoryName'),
+                        true,
+                        false
+                    )
+                    )
+                );
+
+                $tableObject->construct_cell(
+                    $formObject->generate_text_box(
+                        "disporder[{$categoryData['cid']}]",
+                        $categoryData['disporder'],
+                        ['style' => 'text-align: center; width: 30px;']
+                    ),
+                    ['class' => 'align_center']
+                );
+
+                $updateStatusUrl = urlBuild([
+                    'action' => 'update',
+                    'cid' => $categoryData['cid'],
+                    'my_post_key' => $mybb->post_code
+                ]);
+
+                $updateStatusBullet = 'off';
+
+                $updateStatusText = $lang->ougc_pages_category_disabled;
+
+                if ($categoryData['visible']) {
+                    $updateStatusBullet = 'on';
+
+                    $updateStatusText = $lang->ougc_pages_category_enabled;
+                }
+
+                $tableObject->construct_cell(
+                    eval(
+                    $templates->render(
+                        templateGetName('adminCategoryStatus'),
+                        true,
+                        false
+                    )
+                    ),
+                    ['class' => 'align_center']
+                );
+
+                $popup = new PopupMenu('category_' . $categoryData['cid'], $lang->options);
+
+                $popup->add_item(
+                    $lang->edit,
+                    urlBuild(['action' => 'edit', 'cid' => $categoryData['cid']])
+                );
+
+                $popup->add_item(
+                    $lang->delete,
+                    urlBuild(['action' => 'delete', 'cid' => $categoryData['cid']])
+                );
+
+                $tableObject->construct_cell($popup->fetch(), ['class' => 'align_center']);
+
+                $tableObject->construct_row();
+            }
+
+            $tableObject->output($moduleTabs['categoryView']['title']);
+
+            $formObject->output_submit_wrapper([
+                $formObject->generate_submit_button($lang->ougc_pages_button_update_order),
+                $formObject->generate_reset_button($lang->reset)
+            ]);
+
+            $formObject->end();
+        }
+
+        $page->output_footer();
+    }
 }

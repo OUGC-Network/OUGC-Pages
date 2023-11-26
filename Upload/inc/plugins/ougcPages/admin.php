@@ -28,6 +28,27 @@
 
 namespace OUGCPages\Admin;
 
+use DirectoryIterator;
+use MyBB;
+
+use function change_admin_permission;
+use function file_get_contents;
+use function json_decode;
+use function my_number_format;
+use function my_strlen;
+use function OUGCPages\Core\cacheUpdate;
+use function OUGCPages\Core\loadLanguage;
+use function OUGCPages\Core\loadPluginLibrary;
+use function OUGCPages\Core\sanitizeIntegers;
+use function OUGCPages\Core\templateGetName;
+use function pathinfo;
+use function print_selection_javascript;
+use function update_theme_stylesheet_list;
+
+use const MYBB_ADMIN_DIR;
+use const OUGCPages\Core\EXECUTION_HOOK_GLOBAL_END;
+use const TIME_NOW;
+
 const FIELDS_DATA_CATEGORIES = [
     'cid' => [
         'type' => 'INT',
@@ -61,7 +82,8 @@ const FIELDS_DATA_CATEGORIES = [
         'type' => 'VARCHAR',
         'formType' => 'groupSelect',
         'size' => 255,
-        'cache' => true
+        'cache' => true,
+        'default' => -1
     ],
     'disporder' => [
         'type' => 'SMALLINT',
@@ -143,7 +165,8 @@ const FIELDS_DATA_PAGES = [
         'type' => 'VARCHAR',
         'formType' => 'groupSelect',
         'size' => 255,
-        'cache' => true
+        'cache' => true,
+        'default' => -1
     ],
     'disporder' => [
         'type' => 'SMALLINT',
@@ -194,7 +217,7 @@ const FIELDS_DATA_PAGES = [
         'type' => 'TINYINT',
         'formType' => 'basicSelect',
         'unsigned' => true,
-        'default' => \OUGCPages\Core\EXECUTION_HOOK_GLOBAL_END,
+        'default' => EXECUTION_HOOK_GLOBAL_END,
         'cache' => true
     ],
     'template' => [
@@ -214,7 +237,7 @@ function pluginInfo(): array
 {
     global $lang;
 
-    \OUGCPages\Core\loadLanguage();
+    loadLanguage();
 
     return [
         'name' => 'OUGC Pages',
@@ -233,30 +256,30 @@ function pluginInfo(): array
     ];
 }
 
-function pluginActivate(): void
+function pluginActivate()
 {
     global $PL, $lang, $cache, $db;
 
-    \OUGCPages\Core\loadPluginLibrary();
+    loadPluginLibrary();
 
     // Add settings
-    $settingsContents = \file_get_contents(OUGC_PAGES_ROOT . '/settings.json');
+    $settingsContents = file_get_contents(OUGC_PAGES_ROOT . '/settings.json');
 
-    $settingsData = \json_decode($settingsContents, true);
+    $settingsData = json_decode($settingsContents, true);
 
     foreach ($settingsData as $settingKey => &$settingData) {
         if (empty($lang->{"setting_ougc_pages_{$settingKey}"})) {
             continue;
         }
 
-        $settingData['title'] = $lang->{"setting_ougc_pages_{$settingKey}"};
-        $settingData['description'] = $lang->{"setting_ougc_pages_{$settingKey}_desc"};
+        $settingData['title'] = isset($lang->{"setting_ougc_pages_{$settingKey}"}) ? $lang->{"setting_ougc_pages_{$settingKey}"} : '';
+        $settingData['description'] = isset($lang->{"setting_ougc_pages_{$settingKey}_desc"}) ? $lang->{"setting_ougc_pages_{$settingKey}_desc"} : '';
     }
 
     $PL->settings('ougc_pages', $lang->setting_group_ougc_pages, $lang->setting_group_ougc_pages_desc, $settingsData);
 
     // Add templates
-    $templatesDirIterator = new \DirectoryIterator(OUGC_PAGES_ROOT . '/templates');
+    $templatesDirIterator = new DirectoryIterator(OUGC_PAGES_ROOT . '/templates');
 
     $templates = [];
 
@@ -267,10 +290,10 @@ function pluginActivate(): void
 
         $pathName = $template->getPathname();
 
-        $pathInfo = \pathinfo($pathName);
+        $pathInfo = pathinfo($pathName);
 
         if ($pathInfo['extension'] === 'html') {
-            $templates[$pathInfo['filename']] = \file_get_contents($pathName);
+            $templates[$pathInfo['filename']] = file_get_contents($pathName);
         }
     }
 
@@ -338,17 +361,17 @@ function pluginActivate(): void
     $cache->update('ougc_plugins', $plugins);
 
     // Update administrator permissions
-    \change_admin_permission('config', 'ougc_pages');
+    change_admin_permission('config', 'ougc_pages');
 
-    \OUGCPages\Core\cacheUpdate();
+    cacheUpdate();
 }
 
-function pluginDeactivate(): void
+function pluginDeactivate()
 {
-    \OUGCPages\Core\loadPluginLibrary();
+    loadPluginLibrary();
 
     // Update administrator permissions
-    \change_admin_permission('config', 'ougc_pages', 0);
+    change_admin_permission('config', 'ougc_pages', 0);
 }
 
 function pluginIsInstalled(): bool
@@ -368,11 +391,11 @@ function pluginIsInstalled(): bool
     return $pluginIsInstalled;
 }
 
-function pluginUninstall(): void
+function pluginUninstall()
 {
     global $db, $PL, $cache;
 
-    \OUGCPages\Core\loadPluginLibrary();
+    loadPluginLibrary();
 
     // Drop DB entries
     foreach (dbTables() as $name => $table) {
@@ -399,11 +422,11 @@ function pluginUninstall(): void
     }
 
     // Remove administrator permissions
-    \change_admin_permission('config', 'ougc_pages', -1);
+    change_admin_permission('config', 'ougc_pages', -1);
 }
 
 
-function dbVerifyTables(): void
+function dbVerifyTables()
 {
     global $db;
 
@@ -428,7 +451,7 @@ function dbVerifyTables(): void
             foreach ($fields as $field => $definition) {
                 if ($field == 'primary_key') {
                     $query .= "PRIMARY KEY (`{$definition}`)";
-                } else if ($field != 'unique_key') {
+                } elseif ($field != 'unique_key') {
                     $query .= "`{$field}` {$definition},";
                 }
             }
@@ -442,7 +465,7 @@ function dbVerifyTables(): void
     dbVerifyIndexes();
 }
 
-function dbVerifyIndexes(): void
+function dbVerifyIndexes()
 {
     global $db;
 
@@ -468,10 +491,12 @@ function dbTables(): array
 {
     $tablesData = [];
 
-    foreach ([
-                 'ougc_pages_categories' => FIELDS_DATA_CATEGORIES,
-                 'ougc_pages' => FIELDS_DATA_PAGES,
-             ] as $tableName => $fieldsData) {
+    foreach (
+        [
+            'ougc_pages_categories' => FIELDS_DATA_CATEGORIES,
+            'ougc_pages' => FIELDS_DATA_PAGES,
+        ] as $tableName => $fieldsData
+    ) {
         foreach ($fieldsData as $fieldName => $fieldData) {
             $fieldDefinition = '';
 
@@ -516,7 +541,7 @@ function dbTables(): array
     return $tablesData;
 }
 
-function verifyStylesheet($removeStylesheet = false): void
+function verifyStylesheet($removeStylesheet = false)
 {
     global $db;
 
@@ -554,18 +579,24 @@ function verifyStylesheet($removeStylesheet = false): void
         require_once MYBB_ADMIN_DIR . 'inc/functions_themes.php';
 
         while ($tid = $db->fetch_field($dbQuery, 'tid')) {
-            \update_theme_stylesheet_list($tid);
+            update_theme_stylesheet_list($tid);
         }
     }
 }
 
-function categoryFormCheckFields(array &$errors, string $errorIdentifier = 'category', array $fieldsData = FIELDS_DATA_CATEGORIES): void
-{
+function categoryFormCheckFields(
+    array &$errors,
+    string $errorIdentifier = 'category',
+    array $fieldsData = FIELDS_DATA_CATEGORIES
+) {
     pageFormCheckFields($errors, $errorIdentifier, $fieldsData);
 }
 
-function pageFormCheckFields(array &$errors, string $errorIdentifier = 'page', array $fieldsData = FIELDS_DATA_PAGES): void
-{
+function pageFormCheckFields(
+    array &$errors,
+    string $errorIdentifier = 'page',
+    array $fieldsData = FIELDS_DATA_PAGES
+) {
     global $mybb, $lang;
 
     foreach ($fieldsData as $fieldKey => $fieldData) {
@@ -574,21 +605,24 @@ function pageFormCheckFields(array &$errors, string $errorIdentifier = 'page', a
         }
 
         if ($fieldData['formType'] == 'textBox') {
-            $inputLength = \my_strlen($mybb->get_input($fieldKey));
+            $inputLength = my_strlen($mybb->get_input($fieldKey));
 
             if ($inputLength < 1 || $inputLength > $fieldData['size']) {
                 $errors[] = $lang->sprintf(
                     $lang->{"ougc_pages_error_{$errorIdentifier}_invalid_{$fieldKey}"},
-                    \my_number_format($fieldData['size'])
+                    my_number_format($fieldData['size'])
                 );
             }
         } elseif ($fieldData['formType'] == 'groupSelect') {
             if ($mybb->get_input("{$fieldKey}Select") === 'all') {
                 $mybb->input[$fieldKey] = -1;
             } elseif ($mybb->get_input("{$fieldKey}Select") === 'custom') {
-                $mybb->input[$fieldKey] = implode(',', \OUGCPages\Core\sanitizeIntegers(
-                    $mybb->get_input($fieldKey, \MyBB::INPUT_ARRAY)
-                ));
+                $mybb->input[$fieldKey] = implode(
+                    ',',
+                    sanitizeIntegers(
+                        $mybb->get_input($fieldKey, MyBB::INPUT_ARRAY)
+                    )
+                );
             }
         }
 
@@ -596,13 +630,23 @@ function pageFormCheckFields(array &$errors, string $errorIdentifier = 'page', a
     }
 }
 
-function categoryFormBuildFields(object &$formContainer, object &$formObject, array $basicSelectItems = [], string $errorIdentifier = 'category', array $fieldsData = FIELDS_DATA_CATEGORIES): void
-{
+function categoryFormBuildFields(
+    object &$formContainer,
+    object &$formObject,
+    array $basicSelectItems = [],
+    string $errorIdentifier = 'category',
+    array $fieldsData = FIELDS_DATA_CATEGORIES
+) {
     pageFormBuildFields($formContainer, $formObject, $basicSelectItems, $errorIdentifier, $fieldsData);
 }
 
-function pageFormBuildFields(object &$formContainer, object &$formObject, array $basicSelectItems = [], string $errorIdentifier = 'page', array $fieldsData = FIELDS_DATA_PAGES): void
-{
+function pageFormBuildFields(
+    object &$formContainer,
+    object &$formObject,
+    array $basicSelectItems = [],
+    string $errorIdentifier = 'page',
+    array $fieldsData = FIELDS_DATA_PAGES
+) {
     global $mybb, $lang;
 
     foreach ($fieldsData as $fieldKey => $fieldData) {
@@ -619,67 +663,74 @@ function pageFormBuildFields(object &$formContainer, object &$formObject, array 
         $formContainer->output_row(
             $lang->{"ougc_pages_form_{$errorIdentifier}_{$fieldKey}"} . $requiredMark,
             $lang->{"ougc_pages_form_{$errorIdentifier}_{$fieldKey}_desc"},
-            call_user_func_array(function (string $fieldKey, string $formType, array $basicSelectItems = []) use (&$formObject): string {
-                global $mybb, $lang, $templates;
+            call_user_func_array(
+                function (string $fieldKey, string $formType, array $basicSelectItems = []) use (&$formObject): string {
+                    global $mybb, $lang, $templates;
 
-                if ($formType == 'yesNo') {
-                    return $formObject->generate_yes_no_radio(
-                        $fieldKey,
-                        $mybb->get_input($fieldKey, \MyBB::INPUT_INT),
-                        true
-                    );
-                } else if ($formType == 'groupSelect') {
-                    $selectedItems = [];
+                    if ($formType == 'yesNo') {
+                        return $formObject->generate_yes_no_radio(
+                            $fieldKey,
+                            $mybb->get_input($fieldKey, MyBB::INPUT_INT),
+                            true
+                        );
+                    } elseif ($formType == 'groupSelect') {
+                        $selectedItems = [];
 
-                    $multiSelectChecked = ['all' => '', 'custom' => '', 'none' => ''];
+                        $multiSelectChecked = ['all' => '', 'custom' => '', 'none' => ''];
 
-                    if ($mybb->get_input($fieldKey, \MyBB::INPUT_INT) === -1) {
-                        $multiSelectChecked['all'] = 'checked="checked"';
-                    } elseif (!empty($mybb->get_input($fieldKey))) {
-                        $multiSelectChecked['custom'] = 'checked="checked"';
+                        if ($mybb->get_input($fieldKey, MyBB::INPUT_INT) === -1) {
+                            $multiSelectChecked['all'] = 'checked="checked"';
+                        } elseif (!empty($mybb->get_input($fieldKey))) {
+                            $multiSelectChecked['custom'] = 'checked="checked"';
 
-                        $selectedItems = \OUGCPages\Core\sanitizeIntegers(explode(
-                            ',',
-                            $mybb->get_input($fieldKey)
-                        ));
+                            $selectedItems = sanitizeIntegers(
+                                explode(
+                                    ',',
+                                    $mybb->get_input($fieldKey)
+                                )
+                            );
+                        } else {
+                            $multiSelectChecked['none'] = 'checked="checked"';
+                        }
+
+                        print_selection_javascript();
+
+                        $groupSelectField = $formObject->generate_group_select(
+                            "{$fieldKey}[]",
+                            $selectedItems,
+                            ['id' => $fieldKey, 'multiple' => true, 'size' => 5]
+                        );
+
+                        return eval(
+                        $templates->render(
+                            templateGetName('adminGroupSelect'),
+                            true,
+                            false
+                        )
+                        );
+                    } elseif ($formType == 'basicSelect') {
+                        return $formObject->generate_select_box(
+                            $fieldKey,
+                            $basicSelectItems[$fieldKey],
+                            $mybb->get_input($fieldKey, MyBB::INPUT_INT),
+                            ['id' => $fieldKey]
+                        );
+                    } elseif ($formType == 'textArea') {
+                        return $formObject->generate_text_area(
+                            $fieldKey,
+                            $mybb->get_input($fieldKey),
+                            ['id' => 'template', 'class' => '', 'style' => 'width: 100%; height: 500px;']
+                        );
                     } else {
-                        $multiSelectChecked['none'] = 'checked="checked"';
+                        return $formObject->generate_text_box(
+                            $fieldKey,
+                            $mybb->get_input($fieldKey),
+                            ['id' => $fieldKey]
+                        );
                     }
-
-                    \print_selection_javascript();
-
-                    $groupSelectField = $formObject->generate_group_select(
-                        "{$fieldKey}[]",
-                        $selectedItems,
-                        ['id' => $fieldKey, 'multiple' => true, 'size' => 5]
-                    );
-
-                    return eval($templates->render(
-                        \OUGCPages\Core\templateGetName('adminGroupSelect'),
-                        true,
-                        false
-                    ));
-                } else if ($formType == 'basicSelect') {
-                    return $formObject->generate_select_box(
-                        $fieldKey,
-                        $basicSelectItems[$fieldKey],
-                        $mybb->get_input($fieldKey, \MyBB::INPUT_INT),
-                        ['id' => $fieldKey]
-                    );
-                } else if ($formType == 'textArea') {
-                    return $formObject->generate_text_area(
-                        $fieldKey,
-                        $mybb->get_input($fieldKey),
-                        ['id' => 'template', 'class' => '', 'style' => 'width: 100%; height: 500px;']
-                    );
-                } else {
-                    return $formObject->generate_text_box(
-                        $fieldKey,
-                        $mybb->get_input($fieldKey),
-                        ['id' => $fieldKey]
-                    );
-                }
-            }, [$fieldKey, $fieldData['formType'], $basicSelectItems]),
+                },
+                [$fieldKey, $fieldData['formType'], $basicSelectItems]
+            ),
             '',
             [],
             ['id' => "row_{$fieldKey}"]
@@ -689,12 +740,12 @@ function pageFormBuildFields(object &$formContainer, object &$formObject, array 
     }
 }
 
-function categoryFormParseFields(array &$formData, array $fieldsData = FIELDS_DATA_CATEGORIES): void
+function categoryFormParseFields(array &$formData, array $fieldsData = FIELDS_DATA_CATEGORIES)
 {
     pageFormParseFields($formData, $fieldsData);
 }
 
-function pageFormParseFields(array &$formData, array $fieldsData = FIELDS_DATA_PAGES): void
+function pageFormParseFields(array &$formData, array $fieldsData = FIELDS_DATA_PAGES)
 {
     global $mybb;
 
@@ -704,7 +755,7 @@ function pageFormParseFields(array &$formData, array $fieldsData = FIELDS_DATA_P
         }
 
         if ($fieldData['formType'] == 'yesNo') {
-            $formData[$fieldKey] = $mybb->get_input($fieldKey, \MyBB::INPUT_INT);
+            $formData[$fieldKey] = $mybb->get_input($fieldKey, MyBB::INPUT_INT);
         } else {
             $formData[$fieldKey] = $mybb->get_input($fieldKey);
         }
@@ -713,12 +764,12 @@ function pageFormParseFields(array &$formData, array $fieldsData = FIELDS_DATA_P
     }
 }
 
-function categoryFormSetFields(array &$objectData = [], array $fieldsData = FIELDS_DATA_CATEGORIES): void
+function categoryFormSetFields(array &$objectData = [], array $fieldsData = FIELDS_DATA_CATEGORIES)
 {
     pageFormSetFields($objectData, $fieldsData);
 }
 
-function pageFormSetFields(array &$objectData = [], array $fieldsData = FIELDS_DATA_PAGES): void
+function pageFormSetFields(array &$objectData = [], array $fieldsData = FIELDS_DATA_PAGES)
 {
     global $mybb;
 
