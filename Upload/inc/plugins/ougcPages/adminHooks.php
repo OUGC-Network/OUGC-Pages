@@ -2,9 +2,9 @@
 
 /***************************************************************************
  *
- *    OUGC Hide Administrator Location (/inc/plugins/ougcPages/adminHooks.php)
+ *    OUGC Pages plugin (/inc/plugins/ougc/Pages/adminHooks.php)
  *    Author: Omar Gonzalez
- *    Copyright: © 2014 - 2023 Omar Gonzalez
+ *    Copyright: © 2014 Omar Gonzalez
  *
  *    Website: https://ougc.network
  *

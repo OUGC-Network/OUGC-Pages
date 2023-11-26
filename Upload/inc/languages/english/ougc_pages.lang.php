@@ -4,7 +4,7 @@
  *
  *    OUGC Pages plugin (/inc/languages/english/ougc_pages.lang.php)
  *    Author: Omar Gonzalez
- *    Copyright: © 2014 - 2020 Omar Gonzalez
+ *    Copyright: © 2014 Omar Gonzalez
  *
  *    Website: https://ougc.network
  *

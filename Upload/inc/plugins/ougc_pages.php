@@ -4,7 +4,7 @@
  *
  *    OUGC Pages plugin (/inc/plugins/ougc_pages.php)
  *    Author: Omar Gonzalez
- *    Copyright: © 2014 - 2023 Omar Gonzalez
+ *    Copyright: © 2014 Omar Gonzalez
  *
  *    Website: https://ougc.network
  *
@@ -37,7 +37,7 @@ use function ougc\Pages\Core\cacheUpdate;
 
 defined('IN_MYBB') or die('Direct initialization of this file is not allowed.');
 
-const OUGC_PAGES_ROOT = MYBB_ROOT . 'inc/plugins/ougcPages';
+const OUGC_PAGES_ROOT = MYBB_ROOT . 'inc/plugins/ougc/Pages';
 
 // Plugin Settings
 define('ougc\Pages\Core\SETTINGS', [

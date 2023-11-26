@@ -2,9 +2,9 @@
 
 /***************************************************************************
  *
- *    OUGC Pages (/inc/plugins/ougcPages/admin/module.php)
+ *    OUGC Pages plugin (/inc/plugins/ougc/Pages/admin/module.php)
  *    Author: Omar Gonzalez
- *    Copyright: © 2014 - 2023 Omar Gonzalez
+ *    Copyright: © 2014 Omar Gonzalez
  *
  *    Website: https://ougc.network
  *
