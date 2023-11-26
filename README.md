@@ -17,7 +17,7 @@
 
 ---
 
-<p align="center"> Create additional HTML or PHP pages directly from the _Administrator Control Panel_.
+<p align="center"> Create additional HTML or PHP pages directly from the Administrator Control Panel.
     <br> 
 </p>
 

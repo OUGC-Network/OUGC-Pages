@@ -28,7 +28,7 @@
 
 // Plugin API
 $l['setting_group_ougc_pages'] = 'OUGC Pages';
-$l['setting_group_ougc_pages_desc'] = 'Create additional pages directly from the ACP.';
+$l['setting_group_ougc_pages_desc'] = 'Create additional HTML or PHP pages directly from the Administrator Control Panel.';
 
 // Settings
 $l['setting_ougc_pages_seo'] = 'Use SEO friendly URLs';

@@ -8,7 +8,7 @@
  *
  *    Website: https://ougc.network
  *
- *    Create additional pages directly from the ACP.
+ *    Create additional HTML or PHP pages directly from the Administrator Control Panel.
  *
  ***************************************************************************
  ****************************************************************************
@@ -41,7 +41,7 @@ const OUGC_PAGES_ROOT = MYBB_ROOT . 'inc/plugins/ougc/Pages';
 
 // Plugin Settings
 define('ougc\Pages\Core\SETTINGS', [
-    'enableEval' => false
+    'enableEval' => true
 ]);
 
 require_once OUGC_PAGES_ROOT . '/core.php';

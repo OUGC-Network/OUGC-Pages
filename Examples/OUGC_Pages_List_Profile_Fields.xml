@@ -14,8 +14,8 @@
         <value>list-user-fields</value>
     </element>
     <element>
-        <key>groups</key>
-        <value></value>
+        <key>allowedGroups</key>
+        <value>-1</value>
     </element>
     <element>
         <key>php</key>
@@ -35,7 +35,7 @@
     </element>
     <element>
         <key>init</key>
-        <value>0</value>
+        <value>4</value>
     </element>
     <element>
         <key>template</key>
@@ -508,7 +508,7 @@ exit;]]></value>
     </element>
     <element>
         <key>versioncode</key>
-        <value type="INT">183</value>
+        <value type="INT">1833</value>
     </element>
 </array>
         <!-- End of file. -->
