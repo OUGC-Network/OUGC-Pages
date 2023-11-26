@@ -41,7 +41,7 @@ const OUGC_PAGES_ROOT = MYBB_ROOT . 'inc/plugins/ougc/Pages';
 
 // Plugin Settings
 define('ougc\Pages\Core\SETTINGS', [
-    'enableEval' => true
+    'enableEval' => false
 ]);
 
 require_once OUGC_PAGES_ROOT . '/core.php';

@@ -55,7 +55,7 @@ if (isset($templatelist)) {
     $templatelist = '';
 }
 
-$templatelist .= 'ougcpages_category_list_item, ougcpages_category_list, ougcpages_wrapper, usercp_nav_messenger, usercp_nav_messenger_tracking, usercp_nav_messenger_compose, usercp_nav_messenger_folder, usercp_nav_changename, usercp_nav_editsignature, usercp_nav_profile, usercp_nav_attachments, usercp_nav_misc, ougcpages_wrapper_ucp_nav_item, ougcpages_wrapper_ucp_nav, usercp_nav_home, usercp_nav, ougcpages_wrapper_ucp, ougcpages, ougcpages_category_list_empty';
+$templatelist .= 'ougcpages_category_list_item, ougcpages_category_list, ougcpages_wrapper, usercp_nav_messenger, usercp_nav_messenger_tracking, usercp_nav_messenger_compose, usercp_nav_messenger_folder, usercp_nav_changename, usercp_nav_editsignature, usercp_nav_profile, usercp_nav_attachments, usercp_nav_misc, ougcpages_wrapper_ucp_nav_item, ougcpages_wrapper_ucp_nav, usercp_nav_home, usercp_nav, ougcpages_wrapper_ucp, ougcpages, ougcpages_category_list_empty, ougcpages_navigation_previous, ougcpages_navigation_next, ougcpages_wrapper_edited';
 
 initRun();
 
