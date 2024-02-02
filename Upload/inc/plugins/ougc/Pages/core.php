@@ -189,6 +189,7 @@ function getQueryLimit(int $newLimit = 0): int
     if ($newLimit > 0) {
         $setLimit = $newLimit;
     }
+
     return $setLimit;
 }
 
