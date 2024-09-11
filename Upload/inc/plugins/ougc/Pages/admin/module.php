@@ -457,9 +457,17 @@ if ($mybb->get_input('manage') == 'pages') {
                     }
                 } else {
                     // try to get this as a "Page Manager" page
-                    require_once MYBB_ROOT . 'inc/class_xml.php';
+                    if (file_exists(MYBB_ROOT . 'inc/class_xmlparser.php')) {
+                        require_once MYBB_ROOT . 'inc/class_xmlparser.php';
 
-                    $xmlParser = new XMLParser($contents);
+                        $xmlParser = new MyBBXMLParser($contents);
+                    }
+
+                    if (!($xmlParser instanceof \MyBBXMLParser)) {
+                        require_once MYBB_ROOT . 'inc/class_xml.php';
+
+                        $xmlParser = new XMLParser($contents);
+                    }
 
                     $treeContents = $xmlParser->get_tree();
 
