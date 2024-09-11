@@ -200,6 +200,10 @@ if ($mybb->get_input('manage') == 'pages') {
                 $errors[] = $lang->ougc_pages_error_page_invalid_template;
             }
 
+            if ($mybb->get_input('allowedGroupsSelect') === 'none') {
+                $mybb->input['allowedGroups'] = '';
+            }
+
             pageFormCheckFields($errors);
 
             if (empty($errors)) {
@@ -786,6 +790,10 @@ if ($mybb->get_input('manage') == 'pages') {
             }
 
             categoryFormCheckFields($errors);
+
+            if ($mybb->get_input('allowedGroupsSelect') === 'none') {
+                $mybb->input['allowedGroups'] = '';
+            }
 
             if (empty($errors)) {
                 $formData = [];
