@@ -445,7 +445,7 @@ if ($mybb->get_input('manage') == 'pages') {
 
                 $isValidVersion = true;
 
-                if ($xmlImportPL = @$PL->xml_import($contents)) {
+                if ($xmlImportPL = $PL->xml_import($contents)) {
                     if (!$mybb->get_input('ignore_version', MyBB::INPUT_INT)) {
                         $isValidVersion = (float)$xmlImportPL['versioncode'] == pluginInfo()['versioncode'];
                     }
