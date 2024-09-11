@@ -626,17 +626,21 @@ function initRun(): bool
 
         $pageInput = my_strtolower($mybb->get_input('page'));
 
-        foreach ($pagesCache as $pid => $pageData) {
-            if ($pageData['url'] === $pageInput) {
-                $pageID = $pid;
+        foreach ($pagesCache as $_pageID => $_pageData) {
+            if ($_pageData['url'] === $pageInput) {
+                $pageID = $_pageID;
 
-                $categoryID = $pageData['cid'];
+                $pageData = $_pageData;
+
+                $categoryID = $_pageData['cid'];
 
                 $categoryData = $categoriesCache[$categoryID];
 
                 break;
             }
         }
+
+        unset($_pageID, $_pageData);
     }
 
     //$categoryData = categoryGet($categoryID);
