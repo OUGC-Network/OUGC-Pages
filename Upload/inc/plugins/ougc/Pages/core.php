@@ -32,30 +32,10 @@ use MyBB;
 use pluginSystem;
 use session;
 
-use function add_breadcrumb;
-use function admin_redirect;
-use function draw_admin_pagination;
-use function flash_message;
-use function htmlspecialchars_uni;
-use function is_member;
-use function log_admin_action;
-use function multipage;
-use function my_date;
-use function my_strpos;
-use function my_strtolower;
-use function ougc_getpreview;
 use function ougc\Pages\Admin\pluginInfo;
 
-use function output_page;
-
-use function preg_replace;
-use function uniqid;
-use function usercp_menu;
-
-use const MYBB_ROOT;
 use const ougc\Pages\Admin\FIELDS_DATA_CATEGORIES;
 use const ougc\Pages\Admin\FIELDS_DATA_PAGES;
-use const TIME_NOW;
 
 const URL = 'index.php?module=config-ougc_pages';
 
@@ -441,7 +421,7 @@ function redirectBaseNative(string $url)
 
     $url = htmlspecialchars_decode($url);
 
-    $url = str_replace(array("\n", "\r", ";"), "", $url);
+    $url = str_replace(array("\n", "\r", ';'), '', $url);
 
     run_shutdown();
 
@@ -644,17 +624,17 @@ function initRun(): bool
     }
 
     //$categoryData = categoryGet($categoryID);
-    $categoryData = isset($categoriesCache[$categoryID]) ? $categoriesCache[$categoryID] : [];
+    $categoryData = $categoriesCache[$categoryID] ?? [];
 
     //$pageData = pageGet($pageID);
-    $pageData = isset($pagesCache[$pageID]) ? $pagesCache[$pageID] : [];
+    $pageData = $pagesCache[$pageID] ?? [];
 
     // maybe do some case-sensitive comparison and redirect to one unique case url
 
     if ($isPage && $pageID) {
         $template = pageQuery(['template'], ["pid='{$pageID}'"], ['limit' => 1]);
 
-        if (isset($template[0]) && isset($template[0]['template'])) {
+        if (isset($template[0]['template'])) {
             $pageData['template'] = $template[0]['template'];
 
             unset($template);
