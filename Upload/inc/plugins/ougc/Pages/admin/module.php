@@ -224,6 +224,10 @@ if ($mybb->get_input('manage') == 'pages') {
 
                 pageFormParseFields($formData);
 
+                if (!empty($formData['allowedGroups'])) {
+                    $formData['visible'] = 1;
+                }
+
                 if ($newPage) {
                     $pageID = pageInsert($formData);
 
