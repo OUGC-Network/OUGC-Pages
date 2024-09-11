@@ -463,7 +463,7 @@ if ($mybb->get_input('manage') == 'pages') {
                         $xmlParser = new MyBBXMLParser($contents);
                     }
 
-                    if (!($xmlParser instanceof \MyBBXMLParser)) {
+                    if (!($xmlParser instanceof MyBBXMLParser)) {
                         require_once MYBB_ROOT . 'inc/class_xml.php';
 
                         $xmlParser = new XMLParser($contents);

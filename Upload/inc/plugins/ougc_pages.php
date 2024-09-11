@@ -26,7 +26,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-// Die if IN_MYBB is not defined, for security reasons.
 use function ougc\Pages\Admin\pluginActivate;
 use function ougc\Pages\Admin\pluginDeactivate;
 use function ougc\Pages\Admin\pluginInfo;
