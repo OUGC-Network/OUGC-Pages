@@ -435,6 +435,23 @@ function redirectBase(string $url, string $message = '', string $title = '', boo
     \redirect($url, $message, $title, $forceRedirect);
 }
 
+function redirectBaseNative(string $url)
+{
+    global $mybb;
+
+    $url = htmlspecialchars_decode($url);
+
+    $url = str_replace(array("\n", "\r", ";"), "", $url);
+
+    run_shutdown();
+
+    if (!my_validate_url($url, true, true)) {
+        header("Location: {$mybb->settings['bburl']}/{$url}");
+    } else {
+        header("Location: {$url}");
+    }
+}
+
 function logAction(int $objectID)
 {
     if ($objectID) {
@@ -676,11 +693,11 @@ function initRun(): bool
     if ($isCategory && my_strpos($locationPath, $categoryUrl) === false) {
         $mybb->settings['redirects'] = 0;
 
-        @redirectBase(categoryGetLink($categoryID));
+        redirectBaseNative(categoryGetLink($categoryID));
     } elseif ($isPage && my_strpos($locationPath, $pageUrl) === false) {
         $mybb->settings['redirects'] = 0;
 
-        @redirectBase(pageGetLink($pageID));
+        redirectBaseNative(pageGetLink($pageID),);
     }
 
     $templatelist .= "ougcpages_category{$categoryID}, ougcpages_page{$pageID}";
