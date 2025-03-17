@@ -274,7 +274,7 @@ function pre_output_page(string &$pageContents): string
         return $pageContents;
     }
 
-    global $templates;
+    global $mybb, $templates;
 
     $categoriesCache = cacheGetCategories();
 

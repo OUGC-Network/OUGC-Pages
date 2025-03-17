@@ -26,7 +26,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-// Die if IN_MYBB is not defined, for security reasons.
 use function ougc\Pages\Admin\pluginActivate;
 use function ougc\Pages\Admin\pluginDeactivate;
 use function ougc\Pages\Admin\pluginInfo;
@@ -41,7 +40,7 @@ const OUGC_PAGES_ROOT = MYBB_ROOT . 'inc/plugins/ougc/Pages';
 
 // Plugin Settings
 define('ougc\Pages\Core\SETTINGS', [
-    'enableEval' => false
+    'enableEval' => true
 ]);
 
 require_once OUGC_PAGES_ROOT . '/core.php';
@@ -61,37 +60,31 @@ if (defined('IN_ADMINCP')) {
     addHooks('ougc\Pages\ForumHooks');
 }
 
-// Plugin API
 function ougc_pages_info(): array
 {
     return pluginInfo();
 }
 
-// _activate() routine
 function ougc_pages_activate()
 {
     pluginActivate();
 }
 
-// _deactivate() routine
 function ougc_pages_deactivate()
 {
     pluginDeactivate();
 }
 
-// _install() routine
 function ougc_pages_install()
 {
     pluginUninstall();
 }
 
-// _is_installed() routine
 function ougc_pages_is_installed(): bool
 {
     return pluginIsInstalled();
 }
 
-// _uninstall() routine
 function ougc_pages_uninstall()
 {
     pluginUninstall();
@@ -101,43 +94,6 @@ function ougc_pages_uninstall()
 function update_ougc_pages()
 {
     cacheUpdate();
-}
-
-// control_object by Zinga Burga from MyBBHacks ( mybbhacks.zingaburga.com ), 1.62
-if (!function_exists('control_object')) {
-    function control_object(&$obj, $code)
-    {
-        static $cnt = 0;
-        $newname = '_objcont_' . (++$cnt);
-        $objserial = serialize($obj);
-        $classname = get_class($obj);
-        $checkstr = 'O:' . strlen($classname) . ':"' . $classname . '":';
-        $checkstr_len = strlen($checkstr);
-        if (substr($objserial, 0, $checkstr_len) == $checkstr) {
-            $vars = [];
-            // grab resources/object etc, stripping scope info from keys
-            foreach ((array)$obj as $k => $v) {
-                if ($p = strrpos($k, "\0")) {
-                    $k = substr($k, $p + 1);
-                }
-                $vars[$k] = $v;
-            }
-            if (!empty($vars)) {
-                $code .= '
-					function ___setvars(&$a) {
-						foreach($a as $k => &$v)
-							$this->$k = $v;
-					}
-				';
-            }
-            eval('class ' . $newname . ' extends ' . $classname . ' {' . $code . '}');
-            $obj = unserialize('O:' . strlen($newname) . ':"' . $newname . '":' . substr($objserial, $checkstr_len));
-            if (!empty($vars)) {
-                $obj->___setvars($vars);
-            }
-        }
-        // else not a valid object or PHP serialize has changed
-    }
 }
 
 if (!function_exists('ougc_getpreview')) {

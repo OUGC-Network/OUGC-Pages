@@ -93,23 +93,13 @@ function admin_load()
 {
     pluginActivate();
 
-    global $modules_dir, $run_module, $action_file, $run_module, $page, $modules_dir_backup, $run_module_backup, $action_file_backup;
+    global $run_module, $page;
 
     if ($run_module != 'config' || $page->active_action != 'ougc_pages') {
         return;
     }
 
-    $modules_dir_backup = $modules_dir;
-
-    $run_module_backup = $run_module;
-
-    $action_file_backup = $action_file;
-
-    $modules_dir = OUGC_PAGES_ROOT;
-
-    $run_module = 'admin';
-
-    $action_file = 'module.php';
+    require OUGC_PAGES_ROOT . "/admin/module.php";
 }
 
 function admin_config_permissions(&$permissionActions): array
